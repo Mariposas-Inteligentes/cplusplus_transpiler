@@ -58,6 +58,24 @@ class analyzer:
     'STRING'
   )
 
+  RESERVED = {
+    "if": "IF",
+    "else": "ELSE",
+    "elif": "ELIF",
+    "while": "WHILE",
+    "for": "FOR",
+    "break": "BREAK",
+    "continue": "pass",
+    "def": "DEF",
+    "return": "RETURN",
+    "class": "CLASS",
+    "True": "TRUE",
+    "False": "FALSE",
+    "and": "AND",
+    "or": "OR",
+    "not": "NOT"
+  }
+
   t_STRING = r'(\'(\w| |\\\'|\t|\.|,|\!|\?|@|#|\$|%|\^|&|\*|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")*\')|(\"(\w| |\\\'|\t|\.|,|\!|\?|@|#|\$|%|\^|&|\|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")\")'
 
   t_EQUALS = r'=='
@@ -96,12 +114,21 @@ class analyzer:
 
   t_COMMENT = r'#.*'
 
-  #t_INDENT
-  #t_DEDENT
-  #t_NEWLINE
-
-  t_VAR_FUNC_NAME = r'[a-z|A-Z|_][a-z|A-Z|_|0-9]*'
+  t_VAR_FUNC_NAME = r'_*[a-zA-Z][a-z|A-Z|_|0-9]*'
   t_FLOAT = r'[0-9]+\.[0-9]+'
   t_INT = r'[0-9]+'
+
+  #t_INDENT
+  #t_DEDENT
   
+  def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+ 
+  def t_error(t):
+    print("Illegal character '%s'" % t.value[0], end = '')
+    print(" at line %d" % t.lineno)
+    errors += 1
+    t.lexer.skip(1)
+ 
 
