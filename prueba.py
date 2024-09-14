@@ -1,3 +1,9 @@
+@
+_
+
+def funcion():
+  return a
+
 1
 2
 3
