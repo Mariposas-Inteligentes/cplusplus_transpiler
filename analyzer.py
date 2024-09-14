@@ -149,7 +149,6 @@ class analyzer(object):
     print(f"Illegal character '{t.value[0]}' at line {t.lineno}")
     t.lexer.skip(1)
 
-
   def t_VAR_FUNC_NAME(self, t):
     r'_*[a-zA-Z][a-z|A-Z|_|0-9]*'
     t.type = RESERVED.get(t.value, "VAR_FUNC_NAME")
