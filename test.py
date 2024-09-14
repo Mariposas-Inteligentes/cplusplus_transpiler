@@ -1,7 +1,6 @@
 import ply.lex as lex
 
 class MyLexer(object):
-    # List of token names.   This is always required
     tokens = (
         'IF',
         'ELSE',
@@ -60,7 +59,7 @@ class MyLexer(object):
         'INT',
         'FLOAT',
         'STRING',
-        'WS'
+        'WHITESPACE'
     )
 
     RESERVED = {
@@ -123,13 +122,29 @@ class MyLexer(object):
 
     t_COMMENT = r'\#.*'
 
-    t_FLOAT = r'[0-9]+\.[0-9]+'
-    t_INT = r'[0-9]+'
+    NO_INDENT = 0
+    MAY_INDENT = 1
+    MUST_INDENT = 2
+
+    def t_FLOAT(self, t):
+        r'[0-9]+\.[0-9]+'
+        t.value = float(t.value)
+        return t
+
+    def t_INT(self, t):
+        r'[0-9]+'
+        t.value = int(t.value)
+        return t
 
     def t_VAR_FUNC_NAME(self, t):
-      r'_*[a-zA-Z][a-z|A-Z|_|0-9]*'
-      t.type = self.RESERVED.get(t.value, "VAR_FUNC_NAME")
-      return t
+        r'_*[a-zA-Z][a-z|A-Z|_|0-9]*'
+        t.type = self.RESERVED.get(t.value, "VAR_FUNC_NAME")
+        return t
+    
+    def t_WHITESPACE(self, t):
+        r'[ ]+'
+        #if t.lexer.at_line_start and t.lexer.paren_count == 0:
+        return t
 
     # Define a rule so we can track line numbers
     def t_newline(self,t):
@@ -137,7 +152,7 @@ class MyLexer(object):
         t.lexer.lineno += len(t.value)
 
     # A string containing ignored characters (spaces and tabs)
-    t_ignore  = ' \t'
+    t_ignore  = '\t'
 
     # Error handling rule
     def t_error(self,t):
@@ -149,7 +164,7 @@ class MyLexer(object):
         self.lexer = lex.lex(module=self, **kwargs)
 
     # Test it output
-    def test(self,data):
+    def tokenize(self,data):
         self.lexer.input(data)
         while True:
              tok = self.lexer.token()
@@ -164,4 +179,4 @@ data = file.read()
 file.close()
 m = MyLexer()
 m.build()           # Build the lexer
-m.test(data) 
+m.tokenize(data) 
