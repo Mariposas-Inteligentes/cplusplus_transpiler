@@ -1,4 +1,5 @@
 import ply.lex as lex
+from common import IndentationError
 
 class MyLexer(object):
     tokens = (
@@ -270,7 +271,7 @@ class MyLexer(object):
             previous_was_ws = False
             if token.must_indent:
                 if not (depth > indentation_levels[-1]):
-                    raise IndentationError("Expected an indented block ")
+                    raise IndentationError("Expected an indented block", token.lineno)
                 indentation_levels.append(depth)
                 new_tokens.append(self.INDENT(token.lineno))
 
@@ -278,12 +279,12 @@ class MyLexer(object):
                 if depth == indentation_levels[-1]:
                     pass
                 elif depth > indentation_levels[-1]:
-                    raise IndentationError("Invalid indentation increase")
+                    raise IndentationError("Invalid indentation increase", token.lineno)
                 else:  # Check if previous level matches
                     try:
                         i = indentation_levels.index(depth)
                     except ValueError:
-                        raise IndentationError("Inconsistent indentation")
+                        raise IndentationError("Inconsistent indentation", token.lineno)
                     for _ in range(i+1, len(indentation_levels)):
                         new_tokens.append(self.DEDENT(token.lineno))
                         indentation_levels.pop()
@@ -308,11 +309,15 @@ class MyLexer(object):
 
 
     def input(self, source_code):
-        self.count_parenthesis = 0
-        self.count_brackets = 0
-        self.count_curly_brackets = 0
-        self.lexer.input(source_code)
-        self.token_stream = self.filter()
+        try:
+            self.count_parenthesis = 0
+            self.count_brackets = 0
+            self.count_curly_brackets = 0
+            self.lexer.input(source_code)
+            self.token_stream = self.filter()
+        except IndentationError as e:
+            print(f"Error in input: {e.message} at line {e.lineno}")
+            self.token_stream = []
 
     # Test it output
     def tokenize(self,data):
@@ -332,5 +337,6 @@ m = MyLexer()
 m.build()
 m.input(data)
 
-for i in m.token_stream:
-    print(i)
+if(m.token_stream):
+    for i in m.token_stream:
+        print(i)
