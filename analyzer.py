@@ -184,9 +184,8 @@ class MyLexer(object):
         t.lexer.lineno += len(t.value)
         t.type = "NEWLINE"
         if self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
+            print(t.type)
             return t
-
-        return None
 
     # A string containing ignored characters (spaces and tabs)
     t_ignore  = '\t'
@@ -265,18 +264,24 @@ class MyLexer(object):
 
         for token in tokens:
             if token.type == "WHITESPACE":
-                assert depth == 0
-                depth = len(token.value)
-                previous_was_ws = True
+
+                # TODO(nosotros): borrar
+                # print("Depth: " + str(depth))
+
+                # TODO(nosotros): assert depth == 0
+                if depth == 0:
+                    depth = len(token.value)
+                    previous_was_ws = True
                 continue
-            elif token.type == "NEWLINE":
+            
+            if token.type == "NEWLINE":
                 depth = 0
                 if previous_was_ws or token.line_start:  # Ignore blank lines
                     continue
                 yield token
                 continue
+
             previous_was_ws = False
-            
             if token.must_indent:
                 if not (depth > indentation_levels[-1]):
                     # TODO(nosotros): borrar
