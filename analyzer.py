@@ -211,6 +211,7 @@ class MyLexer(object):
         self.line_start = True
         line_start = True
         indentation = self.NO_INDENT
+        new_tokens = []
         # colon = False
 
         for current_token in tokens:
@@ -238,8 +239,11 @@ class MyLexer(object):
                 line_start = False
                 indentation = self.NO_INDENT
         
-            yield current_token
+            print("Processing " + str(current_token))
+            new_tokens.append(current_token)
+            print("Added " + str(new_tokens[len(new_tokens)-1]))
             self.at_line_start = line_start
+        return new_tokens
 
     def new_token(self, type, lineno):
         tok = lex.LexToken()
@@ -268,10 +272,11 @@ class MyLexer(object):
                 # TODO(nosotros): borrar
                 # print("Depth: " + str(depth))
 
-                # TODO(nosotros): assert depth == 0
-                if depth == 0:
-                    depth = len(token.value)
-                    previous_was_ws = True
+                # TODO(nosotros): 
+                assert depth == 0
+                #if depth == 0:
+                depth = len(token.value)
+                previous_was_ws = True
                 continue
             
             if token.type == "NEWLINE":
@@ -316,12 +321,13 @@ class MyLexer(object):
         current_token = None
         tokens = iter(self.lexer.token, None)
         tokens = self.track_tokens_filter(tokens)
-        for currrent_token in self.indentation_filter(tokens):
-            yield currrent_token
+        # for currrent_token in self.indentation_filter(tokens):
         lineno = 1
         if current_token is not None:
             lineno = current_token.lineno
-        yield self.new_token("ENDMARKER", lineno)
+        tokens.append(self.new_token("ENDMARKER", lineno))
+        return tokens
+
 
     def input(self, source_code):
         self.count_parenthesis = 0
@@ -349,5 +355,5 @@ m.build()
 m.input(data)
 print(type(m.token_stream))
 
-for _ in m.token_stream:
-    print(next(m.token_stream))
+for i in m.token_stream:
+    print(i)
