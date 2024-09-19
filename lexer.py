@@ -1,7 +1,7 @@
 import ply.lex as lex
 from common import IndentationError
 
-class MyLexer(object):
+class Lexer(object):
     tokens = (
         'IF',
         'ELSE',
@@ -333,10 +333,10 @@ file_name = "prueba.py"
 file = open(file_name, 'r', encoding='utf-8')
 data = file.read()
 file.close()
-m = MyLexer()
-m.build()
-m.input(data)
+py_lexer = Lexer()
+py_lexer.build()
+py_lexer.input(data)
 
-if(m.token_stream):
-    for i in m.token_stream:
+if(py_lexer.token_stream):
+    for i in py_lexer.token_stream:
         print(i)
