@@ -113,14 +113,8 @@ class MyLexer(object):
     t_COMMA = r'\,'
     t_PERIOD = r'\.'
     t_COLON = r'\:'
-    t_OPEN_PARENTHESIS = r'\('
-    t_CLOSED_PARENTHESIS = r'\)'
-    t_OPEN_BRACKET = r'\['
-    t_CLOSED_BRACKET = r'\]'
-    t_OPEN_CURLY_BRACKET = r'\{'
-    t_CLOSED_CURLY_BRACKET = r'\}'
 
-    t_COMMENT = r'\#.*'
+    t_ignore_COMMENT = r'\#.*'
 
     NO_INDENT = 0
     MAY_INDENT = 1
@@ -128,6 +122,39 @@ class MyLexer(object):
 
     def __init__(self):
         self.line_start = True
+        self.count_parenthesis = 0
+        self.count_brackets = 0
+        self.count_curly_brackets = 0
+
+    def t_OPEN_PARENTHESIS(self, t):
+        r'\('
+        self.count_parenthesis += 1
+        return t
+    
+    def t_CLOSED_PARENTHESIS(self, t):
+        r'\)'
+        self.count_parenthesis -= 1
+        return t
+    
+    def t_OPEN_BRACKET(self, t):
+        r'\['
+        self.count_brackets += 1
+        return t
+    
+    def t_CLOSED_BRACKET(self, t):
+        r'\]'
+        self.count_brackets -= 1
+        return t
+ 
+    def t_OPEN_CURLY_BRACKET(self, t):
+        r'\{'
+        self.count_curly_brackets += 1
+        return t
+    
+    def t_CLOSED_CURLY_BRACKET(self, t):
+        r'\}'
+        self.count_curly_brackets -= 1
+        return t
 
     def t_FLOAT(self, t):
         r'[0-9]+\.[0-9]+'
@@ -146,15 +173,22 @@ class MyLexer(object):
     
     def t_WHITESPACE(self, t):
         r'[ ]+'
-        #if t.lexer.at_line_start and t.lexer.paren_count == 0:
-        # if self.line_start:
-        return t
+
+        # if self.line_start: TODO(Nosotros): Hacer line start?
+        if self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
+            return t
+        
+        return None
 
     # Define a rule so we can track line numbers
-    def t_NEWLINE(self,t):
+    def t_NEWLINE(self, t):
         r'\n+'
         t.lexer.lineno += len(t.value)
-        return t
+        t.type = "NEWLINE"
+        if self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
+            return t
+
+        return None
 
     # A string containing ignored characters (spaces and tabs)
     t_ignore  = '\t'
@@ -183,5 +217,5 @@ file = open(file_name, 'r', encoding='utf-8')
 data = file.read()
 file.close()
 m = MyLexer()
-m.build()           # Build the lexer
+m.build()
 m.tokenize(data) 

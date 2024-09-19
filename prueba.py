@@ -1,7 +1,8 @@
-@
-_
 
-def funcion():
+
+def funcion(x,
+            y,
+            z):
   return a
 
 1
