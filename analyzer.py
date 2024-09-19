@@ -167,15 +167,7 @@ class MyLexer(object):
     
     def t_WHITESPACE(self, t):
         r'[ ]+'
-
-        # TODO(nosotros): borrar
-        # print("Condiciones: line start: " + str(self.line_start) + " curly: " + str(self.count_curly_brackets) + " brackets: " + str(self.count_brackets) + " paren: " + str(self.count_parenthesis))
-
         if self.line_start == True and self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
-
-            # TODO(nosotros): borrar
-            # print("Aqui toy")
-
             return t
 
     # Define a rule so we can track line numbers
@@ -211,8 +203,6 @@ class MyLexer(object):
         line_start = True
         indentation = self.NO_INDENT
         new_tokens = []
-        # colon = False
-
         for current_token in tokens:
             current_token.line_start = line_start
             if current_token.type == "COLON":
@@ -250,11 +240,9 @@ class MyLexer(object):
         tok.lexpos = lexpos
         return tok
 
-    # Synthesize a DEDENT tag
     def DEDENT(self, lineno):
         return self.new_token("DEDENT", lineno)
 
-    # Synthesize an INDENT tag
     def INDENT(self, lineno):
         return self.new_token("INDENT", lineno)
         
@@ -266,14 +254,10 @@ class MyLexer(object):
         new_tokens = []
 
         for token in tokens:
-            print("Processing " + str(token) + " must_indent: " + str(token.must_indent))
             if token.type == "WHITESPACE":
-                # TODO(nosotros): 
-                # assert depth == 0
                 if depth == 0:
                     depth = len(token.value)
                     previous_was_ws = True
-                # continue
             
             if token.type == "NEWLINE":
                 depth = 0
@@ -281,7 +265,6 @@ class MyLexer(object):
                     continue
 
                 new_tokens.append(token)
-                print("Appended 0: " + str(new_tokens[len(new_tokens)-1]))
                 continue
 
             previous_was_ws = False
@@ -290,7 +273,6 @@ class MyLexer(object):
                     raise IndentationError("Expected an indented block ")
                 indentation_levels.append(depth)
                 new_tokens.append(self.INDENT(token.lineno))
-                print("Appended 1: " + str(new_tokens[len(new_tokens)-1]))
 
             elif token.line_start:
                 if depth == indentation_levels[-1]:
@@ -304,17 +286,14 @@ class MyLexer(object):
                         raise IndentationError("Inconsistent indentation")
                     for _ in range(i+1, len(indentation_levels)):
                         new_tokens.append(self.DEDENT(token.lineno))
-                        print("Appended 2: " + str(new_tokens[len(new_tokens)-1]))
                         indentation_levels.pop()
                         
             if(token.type != "WHITESPACE"):
                 new_tokens.append(token)
-                print("Appended 3: " + str(new_tokens[len(new_tokens)-1]))
         if len(indentation_levels) > 1:  # Dedent remaining levels
             assert token is not None
             for _ in range(1, len(indentation_levels)):
                 new_tokens.append(self.DEDENT(token.lineno))
-                print("Appended 4: " + str(new_tokens[len(new_tokens)-1]))
         return new_tokens
              
     def filter(self):
@@ -352,7 +331,6 @@ file.close()
 m = MyLexer()
 m.build()
 m.input(data)
-print(type(m.token_stream))
 
 for i in m.token_stream:
     print(i)
