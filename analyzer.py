@@ -184,7 +184,6 @@ class MyLexer(object):
         t.lexer.lineno += len(t.value)
         t.type = "NEWLINE"
         if self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
-            print(t.type)
             return t
 
     # A string containing ignored characters (spaces and tabs)
@@ -239,17 +238,16 @@ class MyLexer(object):
                 line_start = False
                 indentation = self.NO_INDENT
         
-            print("Processing " + str(current_token))
             new_tokens.append(current_token)
-            print("Added " + str(new_tokens[len(new_tokens)-1]))
             self.at_line_start = line_start
         return new_tokens
 
-    def new_token(self, type, lineno):
+    def new_token(self, type, lineno, lexpos = -1):
         tok = lex.LexToken()
         tok.type = type
         tok.value = None
         tok.lineno = lineno
+        tok.lexpos = lexpos
         return tok
 
     # Synthesize a DEDENT tag
@@ -265,37 +263,34 @@ class MyLexer(object):
         token = None
         depth = 0
         previous_was_ws = False
+        new_tokens = []
 
         for token in tokens:
+            print("Processing " + str(token) + " must_indent: " + str(token.must_indent))
             if token.type == "WHITESPACE":
-
-                # TODO(nosotros): borrar
-                # print("Depth: " + str(depth))
-
                 # TODO(nosotros): 
-                assert depth == 0
-                #if depth == 0:
-                depth = len(token.value)
-                previous_was_ws = True
-                continue
+                # assert depth == 0
+                if depth == 0:
+                    depth = len(token.value)
+                    previous_was_ws = True
+                # continue
             
             if token.type == "NEWLINE":
                 depth = 0
                 if previous_was_ws or token.line_start:  # Ignore blank lines
                     continue
-                yield token
+
+                new_tokens.append(token)
+                print("Appended 0: " + str(new_tokens[len(new_tokens)-1]))
                 continue
 
             previous_was_ws = False
             if token.must_indent:
                 if not (depth > indentation_levels[-1]):
-                    # TODO(nosotros): borrar
-                    print("Depth: " + str(depth))
-                    print("Indentation: " + str(indentation_levels[-1]))
-
                     raise IndentationError("Expected an indented block ")
                 indentation_levels.append(depth)
-                yield self.INDENT(token.lineno)
+                new_tokens.append(self.INDENT(token.lineno))
+                print("Appended 1: " + str(new_tokens[len(new_tokens)-1]))
 
             elif token.line_start:
                 if depth == indentation_levels[-1]:
@@ -308,23 +303,27 @@ class MyLexer(object):
                     except ValueError:
                         raise IndentationError("Inconsistent indentation")
                     for _ in range(i+1, len(indentation_levels)):
-                        yield self.DEDENT(token.lineno)
+                        new_tokens.append(self.DEDENT(token.lineno))
+                        print("Appended 2: " + str(new_tokens[len(new_tokens)-1]))
                         indentation_levels.pop()
                         
-            yield token
+            if(token.type != "WHITESPACE"):
+                new_tokens.append(token)
+                print("Appended 3: " + str(new_tokens[len(new_tokens)-1]))
         if len(indentation_levels) > 1:  # Dedent remaining levels
             assert token is not None
             for _ in range(1, len(indentation_levels)):
-                yield self.DEDENT(token.lineno)
+                new_tokens.append(self.DEDENT(token.lineno))
+                print("Appended 4: " + str(new_tokens[len(new_tokens)-1]))
+        return new_tokens
              
     def filter(self):
-        current_token = None
         tokens = iter(self.lexer.token, None)
         tokens = self.track_tokens_filter(tokens)
-        # for currrent_token in self.indentation_filter(tokens):
+        tokens = self.indentation_filter(tokens)
         lineno = 1
-        if current_token is not None:
-            lineno = current_token.lineno
+        if tokens[len(tokens)-1] is not None:
+            lineno = tokens[len(tokens)-1].lineno
         tokens.append(self.new_token("ENDMARKER", lineno))
         return tokens
 
