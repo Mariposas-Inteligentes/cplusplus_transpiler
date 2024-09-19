@@ -117,6 +117,23 @@ class MyLexer(object):
 
     t_ignore_COMMENT = r'\#.*'
 
+    
+    def t_FLOAT(self, t):
+        r'[0-9]+\.[0-9]+'
+        t.value = float(t.value)
+        return t
+
+    def t_INT(self, t):
+        r'[0-9]+'
+        t.value = int(t.value)
+        return t
+
+    def t_VAR_FUNC_NAME(self, t):
+        r'_*[a-zA-Z][a-z|A-Z|_|0-9]*'
+        # print(t.value)
+        t.type = self.RESERVED.get(t.value, "VAR_FUNC_NAME")
+        return t
+
     def t_OPEN_PARENTHESIS(self, t):
         r'\('
         self.count_parenthesis += 1
@@ -147,28 +164,19 @@ class MyLexer(object):
         self.count_curly_brackets -= 1
         return t
 
-    def t_FLOAT(self, t):
-        r'[0-9]+\.[0-9]+'
-        t.value = float(t.value)
-        return t
-
-    def t_INT(self, t):
-        r'[0-9]+'
-        t.value = int(t.value)
-        return t
-
-    def t_VAR_FUNC_NAME(self, t):
-        r'_*[a-zA-Z][a-z|A-Z|_|0-9]*'
-        t.type = self.RESERVED.get(t.value, "VAR_FUNC_NAME")
-        return t
     
     def t_WHITESPACE(self, t):
         r'[ ]+'
 
+        # TODO(nosotros): borrar
+        # print("Condiciones: line start: " + str(self.line_start) + " curly: " + str(self.count_curly_brackets) + " brackets: " + str(self.count_brackets) + " paren: " + str(self.count_parenthesis))
+
         if self.line_start == True and self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
+
+            # TODO(nosotros): borrar
+            # print("Aqui toy")
+
             return t
-        
-        return None
 
     # Define a rule so we can track line numbers
     def t_NEWLINE(self, t):
@@ -204,7 +212,7 @@ class MyLexer(object):
         self.line_start = True
         line_start = True
         indentation = self.NO_INDENT
-        colon = False
+        # colon = False
 
         for current_token in tokens:
             current_token.line_start = line_start
@@ -216,7 +224,7 @@ class MyLexer(object):
             elif current_token.type == "NEWLINE":
                 line_start = True
                 if indentation == self.MAY_INDENT:
-                    indentaton = self.MUST_INDENT
+                    indentation = self.MUST_INDENT
                 current_token.must_indent = False
 
             elif current_token == "WHITESPACE":
@@ -228,7 +236,7 @@ class MyLexer(object):
                     current_token.must_indent = True
                 else:
                     current_token.must_indent = False
-                self.line_start = False
+                line_start = False
                 indentation = self.NO_INDENT
         
             yield current_token
@@ -250,7 +258,7 @@ class MyLexer(object):
         return self.new_token("INDENT", lineno)
         
     def indentation_filter(self, tokens):
-        indentation_levels = [0]  # TODO(nosotros): [0]
+        indentation_levels = [0]
         token = None
         depth = 0
         previous_was_ws = False
@@ -271,18 +279,24 @@ class MyLexer(object):
             
             if token.must_indent:
                 if not (depth > indentation_levels[-1]):
-                    raise IndentationError("Expected an indented block")
+                    # TODO(nosotros): borrar
+                    print("Depth: " + str(depth))
+                    print("Indentation: " + str(indentation_levels[-1]))
+
+                    raise IndentationError("Expected an indented block ")
                 indentation_levels.append(depth)
                 yield self.INDENT(token.lineno)
 
             elif token.line_start:
-                if depth > indentation_levels[-1]:
+                if depth == indentation_levels[-1]:
+                    pass
+                elif depth > indentation_levels[-1]:
                     raise IndentationError("Invalid indentation increase")
-                elif depth < indentation_levels[-1]:  # Check if previous level matches
+                else:  # Check if previous level matches
                     try:
                         i = indentation_levels.index(depth)
                     except ValueError:
-                        raise IndentationError("inconsistent indentation")
+                        raise IndentationError("Inconsistent indentation")
                     for _ in range(i+1, len(indentation_levels)):
                         yield self.DEDENT(token.lineno)
                         indentation_levels.pop()
@@ -327,7 +341,7 @@ data = file.read()
 file.close()
 m = MyLexer()
 m.build()
-m.input(data) 
+m.input(data)
 print(type(m.token_stream))
 
 for _ in m.token_stream:
