@@ -333,16 +333,3 @@ class Lexer(object):
             if not tok:
                 break
             print(tok)
-
-# Build the lexer and try it out
-file_name = "prueba.py"
-file = open(file_name, 'r', encoding='utf-8')
-data = file.read()
-file.close()
-py_lexer = Lexer()
-py_lexer.build()
-py_lexer.input(data)
-
-if(py_lexer.token_stream):
-    for i in py_lexer.token_stream:
-        print(i)
