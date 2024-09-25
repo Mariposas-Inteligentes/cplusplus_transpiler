@@ -190,3 +190,37 @@ n1 %= n2
 
     assert token_types == expected
 
+
+def test_invalid_character(lexer):
+    code = '''
+@
+def test():
+    pass
+'''
+    lexer.input(code)
+    assert lexer.error_count == 1
+
+def test_invalid_string(lexer):
+    code = '''
+string = "\\""
+string = """
+'''
+    lexer.input(code)
+    assert lexer.error_count == 1
+
+def test_invalid_string(lexer):
+    code = '''
+string = '\\''
+string = \'\'\'
+'''
+    lexer.input(code)
+    assert lexer.error_count == 1
+
+def test_valid_float(lexer):
+    code = '''
+float = .9
+float = 9.
+float = 0.9
+'''
+    lexer.input(code)
+    assert lexer.error_count == 0
