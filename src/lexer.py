@@ -86,7 +86,8 @@ class Lexer(object):
         "None": "NONE",
     }
 
-    t_STRING = r'(\'(\w| |\\\'|\t|\.|,|\!|\?|@|\#|\$|%|\^|&|\*|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")*\')|(\"(\w| |\\\'|\t|\.|,|\!|\?|@|\#|\$|%|\^|&|\|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")\")'
+    # t_STRING = r'(\'(\w| |\\\'|\t|\.|,|\!|\?|@|\#|\$|%|\^|&|\*|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")*\')|(\"(\w| |\\\'|\t|\.|,|\!|\?|@|\#|\$|%|\^|&|\|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")\")'
+    t_STRING = r'\"([^\\\n]|(\\.))*?\"'  # TODO: cambiar e incluir comillas
 
     t_EQUALS = r'=='
     t_DIFFERENT = r'!='
@@ -117,7 +118,6 @@ class Lexer(object):
     t_COLON = r'\:'
 
     t_ignore_COMMENT = r'\#.*'
-
     
     def t_FLOAT(self, t):
         r'[0-9]+\.[0-9]+'
@@ -131,7 +131,6 @@ class Lexer(object):
 
     def t_VAR_FUNC_NAME(self, t):
         r'_*[a-zA-Z][a-z|A-Z|_|0-9]*'
-        # print(t.value)
         t.type = self.RESERVED.get(t.value, "VAR_FUNC_NAME")
         return t
 
@@ -184,8 +183,9 @@ class Lexer(object):
 
     # Error handling rule
     def t_error(self,t):
-        print("Illegal character '%s'" % t.value[0])
+        print(f"Illegal character '{t.value[0]}' at line {t.lineno}")        
         t.lexer.skip(1)
+        self.line_start = False # do not process indentation in the faulty line
 
     def __init__(self):
         self.line_start = True
@@ -328,15 +328,20 @@ class Lexer(object):
                 break
             print(tok)
 
-# Build the lexer and try it out
-file_name = "prueba.py"
-file = open(file_name, 'r', encoding='utf-8')
-data = file.read()
-file.close()
-py_lexer = Lexer()
-py_lexer.build()
-py_lexer.input(data)
+# # Build the lexer and try it out
+# file_name = "prueba.py"
+# file = open(file_name, 'r', encoding='utf-8')
+# data = file.read()
+# data = '''
+# if True:
+# print("Hello")
+# print("Incorrect indent")
+# '''
+# file.close()
+# py_lexer = Lexer()
+# py_lexer.build()
+# py_lexer.input(data)
 
-if(py_lexer.token_stream):
-    for i in py_lexer.token_stream:
-        print(i)
+# if(py_lexer.token_stream):
+#     for i in py_lexer.token_stream:
+#         print(i)
