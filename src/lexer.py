@@ -173,7 +173,6 @@ class Lexer(object):
         if self.line_start == True and self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
             return t
 
-    # Define a rule so we can track line numbers
     def t_NEWLINE(self, t):
         r'\n+'
         t.lexer.lineno += len(t.value)
@@ -181,15 +180,14 @@ class Lexer(object):
         if self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
             return t
 
-    # A string containing ignored characters (spaces and tabs)
     t_ignore  = '\t'
 
-    # Error handling rule
     def t_error(self,t):
         t.lexer.skip(1)
         self.error_count += 1
         print(f"ERROR {self.error_count}. Illegal character '{t.value[0]}' at line {t.lineno}")        
-        self.line_start = False # do not process indentation in the faulty line
+        # Do not process indentation in the faulty line
+        self.line_start = False 
 
     def __init__(self):
         self.line_start = True
@@ -198,6 +196,7 @@ class Lexer(object):
         self.count_curly_brackets = 0
         self.error_count = 0
 
+        # Consts used to track indentation
         self.NO_INDENT = 0
         self.MAY_INDENT = 1
         self.MUST_INDENT = 2
@@ -206,12 +205,14 @@ class Lexer(object):
         self.lexer = lex.lex(module=self, **kwargs)
 
     def track_tokens_filter(self, tokens):
+        # Track when to indent
         self.line_start = True
         line_start = True
         indentation = self.NO_INDENT
         new_tokens = []
         for current_token in tokens:
             current_token.line_start = line_start
+
             if current_token.type == "COLON":
                 line_start = False
                 indentation = self.MAY_INDENT
@@ -219,11 +220,13 @@ class Lexer(object):
                 
             elif current_token.type == "NEWLINE":
                 line_start = True
+                # If there was a colon beforehand, we must indent
                 if indentation == self.MAY_INDENT:
                     indentation = self.MUST_INDENT
                 current_token.must_indent = False
 
             elif current_token == "WHITESPACE":
+                # If there was a whitspace elswhere, there is an error
                 assert current_token.line_start == True
                 line_start = True
 
@@ -237,9 +240,11 @@ class Lexer(object):
         
             new_tokens.append(current_token)
             self.at_line_start = line_start
+
         return new_tokens
 
-    def new_token(self, type, lineno, lexpos = -1):
+    def new_token(self, type, lineno, lexpos=-1):
+        # Generate a synthetic token
         tok = lex.LexToken()
         tok.type = type
         tok.value = None
@@ -254,6 +259,7 @@ class Lexer(object):
         return self.new_token("INDENT", lineno)
         
     def indentation_filter(self, tokens):
+        # Generate indent and dedent tokens
         indentation_levels = [0]
         token = None
         depth = 0
@@ -268,7 +274,8 @@ class Lexer(object):
             
             if token.type == "NEWLINE":
                 depth = 0
-                if previous_was_ws or token.line_start:  # Ignore blank lines
+                # Ignore blank lines
+                if previous_was_ws or token.line_start:
                     continue
 
                 new_tokens.append(token)
@@ -286,7 +293,8 @@ class Lexer(object):
                     pass
                 elif depth > indentation_levels[-1]:
                     raise IndentationError("Invalid indentation increase", token.lineno)
-                else:  # Check if previous level matches
+                else:
+                    # Check if previous level matches
                     try:
                         i = indentation_levels.index(depth)
                     except ValueError:
@@ -297,13 +305,17 @@ class Lexer(object):
                         
             if(token.type != "WHITESPACE"):
                 new_tokens.append(token)
-        if len(indentation_levels) > 1:  # Dedent remaining levels
+
+        if len(indentation_levels) > 1:
+            # Dedent remaining levels
             assert token is not None
             for _ in range(1, len(indentation_levels)):
                 new_tokens.append(self.DEDENT(token.lineno))
+
         return new_tokens
              
     def filter(self):
+        # Filter through the original tokens to create the new ones
         tokens = iter(self.lexer.token, None)
         tokens = self.track_tokens_filter(tokens)
         tokens = self.indentation_filter(tokens)
@@ -315,6 +327,7 @@ class Lexer(object):
 
 
     def input(self, source_code):
+        # Attempt to lex the data with PLY to add INDENT and DEDENT tokens
         try:
             self.count_parenthesis = 0
             self.count_brackets = 0
@@ -325,7 +338,6 @@ class Lexer(object):
             print(f"Error in input: {e.message} at line {e.lineno}")
             self.token_stream = []
 
-    # Test it output
     def tokenize(self,data):
         self.lexer.input(data)
         while True:
