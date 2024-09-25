@@ -5,6 +5,7 @@ def pi_approximation(decimals):
     return pi
 
 a = 10
+print("holi")
 value = pi_approximation(a)
 print(value)
 
