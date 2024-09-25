@@ -131,3 +131,62 @@ except ValueError as e:
     'STRING', 'COMMA', 'VAR_FUNC_NAME', 'CLOSED_PARENTHESIS', 'NEWLINE', 'DEDENT', 'ENDMARKER']
 
     assert token_types == expected
+
+def test_correct_pass_token(lexer):
+    code = "pass"
+    lexer.input(code)
+    token_types = [token.type for token in lexer.token_stream]
+
+    expected = ['PASS', 'ENDMARKER']
+
+    assert token_types == expected
+
+def test_correct_tokens_1(lexer):
+    code = '''
+def test_none(test):
+    if test is None:
+        val /= 1
+        val *= 1
+'''
+
+    lexer.input(code)
+    token_types = [token.type for token in lexer.token_stream]
+
+    expected = ['DEF', 'VAR_FUNC_NAME', 'OPEN_PARENTHESIS', 'VAR_FUNC_NAME', 'CLOSED_PARENTHESIS', 
+    'COLON', 'NEWLINE', 'INDENT', 'IF', 'VAR_FUNC_NAME', 'IS', 'NONE', 'COLON', 'NEWLINE', 'INDENT', 
+    'VAR_FUNC_NAME', 'DIV_EQUALS', 'INT', 'NEWLINE', 'VAR_FUNC_NAME', 'MUL_EQUALS', 'INT', 'NEWLINE', 
+    'DEDENT', 'DEDENT', 'ENDMARKER']
+
+    assert token_types == expected
+
+def test_correct_tokens_2(lexer):
+    code = '''
+while True:
+    if value < 10 and value > 20:
+        continue
+    else:
+        break
+    counter -= 2
+n *= -1.0
+n1 - n2
+n1 // n2
+n1 //= n2
+n1 % n2
+n1 %= n2
+'''
+
+    lexer.input(code)
+    token_types = [token.type for token in lexer.token_stream]
+
+    expected = ['WHILE', 'TRUE', 'COLON', 'NEWLINE', 'INDENT', 'IF', 'VAR_FUNC_NAME', 
+    'LESS', 'INT', 'AND', 'VAR_FUNC_NAME', 'MORE', 'INT', 'COLON', 'NEWLINE', 'INDENT', 
+    'CONTINUE', 'NEWLINE', 'DEDENT', 'ELSE', 'COLON', 'NEWLINE', 'INDENT', 'BREAK', 
+    'NEWLINE', 'DEDENT', 'VAR_FUNC_NAME', 'MINUS', 'ASSIGN', 'INT', 'NEWLINE', 'DEDENT', 
+    'VAR_FUNC_NAME', 'MUL_EQUALS', 'MINUS', 'FLOAT', 'NEWLINE', 'VAR_FUNC_NAME', 'MINUS', 
+    'VAR_FUNC_NAME', 'NEWLINE', 'VAR_FUNC_NAME', 'FLOOR_DIV', 'VAR_FUNC_NAME', 'NEWLINE', 
+    'VAR_FUNC_NAME', 'FLOOR_DIV_EQUALS', 'VAR_FUNC_NAME', 'NEWLINE', 'VAR_FUNC_NAME', 'MODULO', 
+    'VAR_FUNC_NAME', 'NEWLINE', 'VAR_FUNC_NAME', 'MODULO_EQUALS', 'VAR_FUNC_NAME', 'NEWLINE',
+    'ENDMARKER']
+
+    assert token_types == expected
+
