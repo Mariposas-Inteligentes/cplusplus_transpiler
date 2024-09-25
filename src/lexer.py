@@ -62,6 +62,8 @@ class Lexer(object):
         'STRING',
         'WHITESPACE',
         'ENDMARKER',
+        'TRY',
+        'EXCEPT'
     )
 
     RESERVED = {
@@ -84,10 +86,11 @@ class Lexer(object):
         "print": "PRINT",
         "is": "IS",
         "None": "NONE",
+        "try" : "TRY",
+        "except" : "EXCEPT"
     }
 
-    # t_STRING = r'(\'(\w| |\\\'|\t|\.|,|\!|\?|@|\#|\$|%|\^|&|\*|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")*\')|(\"(\w| |\\\'|\t|\.|,|\!|\?|@|\#|\$|%|\^|&|\|\(|\)|\[|\]|\{|\}|-|=|\+|;|:|~|`|<|>|/|\\|\\n|\\t|\\\")\")'
-    t_STRING = r'\"([^\\\n]|(\\.))*?\"'  # TODO: cambiar e incluir comillas
+    t_STRING = r'(\"(\\.|[^\"\n]|(\\\n))*\")|(\'(\\.|[^\'\n]|(\\\n))*\')'
 
     t_EQUALS = r'=='
     t_DIFFERENT = r'!='
@@ -120,7 +123,7 @@ class Lexer(object):
     t_ignore_COMMENT = r'\#.*'
     
     def t_FLOAT(self, t):
-        r'[0-9]+\.[0-9]+'
+        r'([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*)'
         t.value = float(t.value)
         return t
 
@@ -183,8 +186,9 @@ class Lexer(object):
 
     # Error handling rule
     def t_error(self,t):
-        print(f"Illegal character '{t.value[0]}' at line {t.lineno}")        
         t.lexer.skip(1)
+        self.error_count += 1
+        print(f"ERROR {self.error_count}. Illegal character '{t.value[0]}' at line {t.lineno}")        
         self.line_start = False # do not process indentation in the faulty line
 
     def __init__(self):
@@ -192,6 +196,8 @@ class Lexer(object):
         self.count_parenthesis = 0
         self.count_brackets = 0
         self.count_curly_brackets = 0
+        self.error_count = 0
+
         self.NO_INDENT = 0
         self.MAY_INDENT = 1
         self.MUST_INDENT = 2
@@ -328,20 +334,15 @@ class Lexer(object):
                 break
             print(tok)
 
-# # Build the lexer and try it out
-# file_name = "prueba.py"
-# file = open(file_name, 'r', encoding='utf-8')
-# data = file.read()
-# data = '''
-# if True:
-# print("Hello")
-# print("Incorrect indent")
-# '''
-# file.close()
-# py_lexer = Lexer()
-# py_lexer.build()
-# py_lexer.input(data)
+# Build the lexer and try it out
+file_name = "prueba.py"
+file = open(file_name, 'r', encoding='utf-8')
+data = file.read()
+file.close()
+py_lexer = Lexer()
+py_lexer.build()
+py_lexer.input(data)
 
-# if(py_lexer.token_stream):
-#     for i in py_lexer.token_stream:
-#         print(i)
+if(py_lexer.token_stream):
+    for i in py_lexer.token_stream:
+        print(i)

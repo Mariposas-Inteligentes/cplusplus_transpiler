@@ -9,4 +9,13 @@ print("holi")
 value = pi_approximation(a)
 print(value)
 
-()
+try:
+    print()
+except:
+    print()
+
+
+string = '\''
+string = '\n'
+string = 'asdasdasd\"'
+string = 'asdasdasd''
