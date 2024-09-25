@@ -1,6 +1,6 @@
 import pytest
+from context import lexer
 from lexer import Lexer
-from common import IndentationError
 
 @pytest.fixture
 def lexer():

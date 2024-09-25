@@ -1,5 +1,7 @@
 import pytest
+from context import lexer
 from lexer import Lexer
+
 
 @pytest.fixture
 def lexer():
