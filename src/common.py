@@ -3,3 +3,4 @@ class IndentationError(Exception):
         self.message = message
         self.lineno = lineno
         super().__init__(f"{message} at line {lineno}")
+
