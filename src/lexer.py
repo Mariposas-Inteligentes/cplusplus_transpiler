@@ -21,7 +21,6 @@ class Lexer(object):
         'NOT',
         'PRINT',
         'NONE',
-        'IS',
         'PLUS',
         'MINUS',
         'MUL',
@@ -63,7 +62,8 @@ class Lexer(object):
         'WHITESPACE',
         'ENDMARKER',
         'TRY',
-        'EXCEPT'
+        'EXCEPT',
+        'IN'
     )
 
     RESERVED = {
@@ -84,10 +84,10 @@ class Lexer(object):
         "or": "OR",
         "not": "NOT",
         "print": "PRINT",
-        "is": "IS",
         "None": "NONE",
         "try" : "TRY",
-        "except" : "EXCEPT"
+        "except" : "EXCEPT",
+        "in" : "IN"
     }
 
     t_STRING = r'(\"(\\.|[^\"\n]|(\\\n))*\")|(\'(\\.|[^\'\n]|(\\\n))*\')'
