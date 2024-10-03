@@ -117,13 +117,13 @@ def p_def_variable_values(p):
 
 def p_def_variable_str(p):
     '''def_variable_str : VAR_FUNC_NAME ASSIGN STRING
-                        | VAR_FUNC_NAME ASSIGN VAR_FUNC_NAME def_variable_str
+                        | VAR_FUNC_NAME ASSIGN str_sum
                         | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME ASSIGN STRING
-                        | VAR_FUNC_NAME ASSIGN VAR_FUNC_NAME PERIOD VAR_FUNC_NAME def_variable_str'''
+                        | VAR_FUNC_NAME ASSIGN VAR_FUNC_NAME PERIOD str_sum'''
 
 def p_str_sum(p):
-    '''def_variable_str : def_variable_str PLUS STRING
-                        | STRING PLUS STRING'''
+    '''str_sum : str_sum PLUS STRING
+                | STRING PLUS STRING'''
 
 
 def p_math_expression(p):
@@ -180,10 +180,10 @@ def p_str_expression(p):
                         | OPEN_PARENTHESIS str_expression CLOSED_PARENTHESIS
                         | str_expression str_expression_symbols STRING MUL INT
                         | str_expression str_expression_symbols INT MUL STRING
-                        | STRING MUL INT
-                        | INT MUL STRING
-                        | STRING MUL bool_values
-                        | bool_values MUL STRING'''
+                        | str_expression str_expression_symbols STRING MUL bool_values
+                        | str_expression str_expression_symbols bool_values MUL STRING
+                        | STRING str_expression_symbols STRING
+                        | STRING str_expression_symbols INT'''
 
 def p_str_expression_symbols(p):
     '''str_expression_symbols : cmp_symbols
