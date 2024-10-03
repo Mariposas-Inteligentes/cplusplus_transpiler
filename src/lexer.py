@@ -3,6 +3,7 @@ from common import IndentationError
 
 class Lexer(object):
     tokens = (
+        'START_MARKER',
         'IF',
         'ELSE',
         'ELIF',
@@ -59,11 +60,11 @@ class Lexer(object):
         'INT',
         'FLOAT',
         'STRING',
-        'WHITESPACE',
-        'ENDMARKER',
+        'WHITESPACE',        
         'TRY',
         'EXCEPT',
-        'IN'
+        'IN',
+        'END_MARKER'
     )
 
     RESERVED = {
@@ -323,7 +324,8 @@ class Lexer(object):
         lineno = 1
         if tokens[len(tokens)-1] is not None:
             lineno = tokens[len(tokens)-1].lineno
-        tokens.append(self.new_token("ENDMARKER", lineno))
+        tokens.insert(0, self.new_token("START_MARKER", 0))
+        tokens.append(self.new_token("END_MARKER", lineno))
         return tokens
 
 

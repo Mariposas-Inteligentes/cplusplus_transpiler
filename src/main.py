@@ -9,6 +9,7 @@ def main():
     file_name = sys.argv[1]
     if (file_name[len(file_name) - 3:] != ".py"):
         print('Please insert a file with a .py extension')
+        return
 
     transpiler = Transpiler(file_name=file_name, debug=True)
     transpiler.input()

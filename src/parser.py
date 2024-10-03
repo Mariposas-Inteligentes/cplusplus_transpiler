@@ -1,3 +1,4 @@
+import ply.yacc as yacc
 from lexer import Lexer
 
 def p_start(p):
@@ -580,13 +581,15 @@ def p_error(p):
     else:
         print("Syntax error at EOF")
 
+tokens = Lexer.tokens
 
 class Parser:
-    tokens = Lexer.tokens  
-
-    def __init__(self, lexer):
+    def __init__(self, lexer=None):
         self.lexer = lexer
         self.parser = yacc.yacc(module=self)
 
+    def set_lexer(self, lexer):
+        self.lexer = lexer
+
     def parse(self, input_text):
-        return self.parser.parse(input_text, lexer=self.lexer.lexer)
+        return self.parser.parse(input_text, lexer=self.lexer)
