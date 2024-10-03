@@ -13,10 +13,9 @@ def p_statement_values(p):
     '''statement_values : def_function
                         | if_rule
                         | def_class
-                        | call_function
-                        | values
+                        | STRING
+                        | NONE
                         | variable
-                        | def_variable
                         | tuple
                         | list
                         | set
@@ -41,7 +40,6 @@ def p_func_statement_values(p):
                                 | call_function
                                 | values
                                 | variable
-                                | def_variable
                                 | tuple
                                 | list
                                 | set
@@ -111,30 +109,35 @@ def p_bool_values(p):
 def p_variable(p):
     '''variable : VAR_FUNC_NAME
                 | def_variable 
-                | def_variable_str 
-                | call_function 
+                | def_variable_str
                 | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME
                 | VAR_FUNC_NAME PERIOD call_function'''
 
 def p_def_variable(p):
     '''def_variable : VAR_FUNC_NAME math_assign def_variable_values
-                    | VAR_FUNC_NAME PERIOD math_assign def_variable_values'''
+                    | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME math_assign def_variable_values'''
 
 def p_def_variable_values(p):
     '''def_variable_values : variable
                             | math_expression
-                            | str_expression
-                            | def_variable_str'''
+                            | str_expression'''
 
 def p_def_variable_str(p):
-    '''def_variable_str : STRING
-                        | call_function
-                        | def_variable_str PLUS STRING'''
+    '''def_variable_str : VAR_FUNC_NAME ASSIGN STRING
+                        | VAR_FUNC_NAME ASSIGN VAR_FUNC_NAME def_variable_str
+                        | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME ASSIGN STRING
+                        | VAR_FUNC_NAME ASSIGN VAR_FUNC_NAME PERIOD VAR_FUNC_NAME def_variable_str'''
+
+def p_str_sum(p):
+    '''def_variable_str : def_variable_str PLUS STRING
+                        | STRING PLUS STRING'''
+
 
 def p_math_expression(p):
     '''math_expression : math_expression math_symbols expr_math_values
                         | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
-                        | expr_math_values
+                        | math_values
+                        | call_function
                         | NOT expr_math_values'''
 
 def p_math_symbols(p):
@@ -270,9 +273,9 @@ def p_limited_statement(p):
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
                                 | call_function
-                                | values
+                                | STRING
+                                | NONE
                                 | variable
-                                | def_variable
                                 | tuple
                                 | list
                                 | set
@@ -305,7 +308,8 @@ def p_loop_statement(p):
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
                                 | call_function
-                                | values
+                                | STRING
+                                | NONE
                                 | variable
                                 | def_variable
                                 | tuple
@@ -354,9 +358,9 @@ def p_limited_statement_loop(p):
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
                                         | call_function
-                                        | values
+                                        | STRING
+                                        | NONE
                                         | variable
-                                        | def_variable
                                         | tuple
                                         | list
                                         | set
@@ -399,9 +403,9 @@ def p_limited_statement_func(p):
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
                                         | call_function
-                                        | values
+                                        | STRING
+                                        | NONE
                                         | variable
-                                        | def_variable
                                         | tuple
                                         | list
                                         | set
@@ -443,9 +447,9 @@ def p_limited_statement_func_loop(p):
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
                                             | call_function
-                                            | values
+                                            | STRING
+                                            | NONE
                                             | variable
-                                            | def_variable
                                             | tuple
                                             | list
                                             | set
