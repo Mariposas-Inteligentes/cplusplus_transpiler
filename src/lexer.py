@@ -195,6 +195,7 @@ class Lexer(object):
         self.count_brackets = 0
         self.count_curly_brackets = 0
         self.error_count = 0
+        self.count_token = 0
 
         # Consts used to track indentation
         self.NO_INDENT = 0
@@ -334,14 +335,22 @@ class Lexer(object):
             self.count_curly_brackets = 0
             self.lexer.input(source_code)
             self.token_stream = self.filter()
+            self.count_token = 0
         except IndentationError as e:
             print(f"Error in input: {e.message} at line {e.lineno}")
             self.token_stream = []
 
-    def tokenize(self,data):
+    def tokenize(self, data):
         self.lexer.input(data)
         while True:
             tok = self.lexer.token()
             if not tok:
                 break
             print(tok)
+
+    def token(self):
+        if self.count_token < len(self.token_stream):
+            self.count_token += 1
+            return self.token_stream[self.count_token-1]
+        return None
+        
