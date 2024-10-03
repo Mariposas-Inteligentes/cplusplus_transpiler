@@ -37,7 +37,6 @@ def p_func_statement(p):
 
 def p_func_statement_values(p):
     '''func_statement_values : if_rule_func
-                                | call_function
                                 | values
                                 | variable
                                 | tuple
@@ -85,11 +84,10 @@ def p_call_function_parameter(p):
 
 def p_values_and_call_function(p):
     '''values_and_call_function : values
-                                | call_function
                                 | VAR_FUNC_NAME'''
 
 def p_values(p):
-    '''values : math_values
+    '''values : math_expression
                 | STRING
                 | NONE'''
 
@@ -272,7 +270,6 @@ def p_limited_statement(p):
 
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
-                                | call_function
                                 | STRING
                                 | NONE
                                 | variable
@@ -307,7 +304,6 @@ def p_loop_statement(p):
 
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
-                                | call_function
                                 | STRING
                                 | NONE
                                 | variable
@@ -357,7 +353,6 @@ def p_limited_statement_loop(p):
 
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
-                                        | call_function
                                         | STRING
                                         | NONE
                                         | variable
@@ -402,7 +397,6 @@ def p_limited_statement_func(p):
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
-                                        | call_function
                                         | STRING
                                         | NONE
                                         | variable
@@ -446,7 +440,6 @@ def p_limited_statement_func_loop(p):
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
-                                            | call_function
                                             | STRING
                                             | NONE
                                             | variable
