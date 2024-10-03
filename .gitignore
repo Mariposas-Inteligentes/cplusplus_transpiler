@@ -1,3 +1,4 @@
+src/test_parser.py
 src/testing_parser.py
 src/parser.out
 src/parsetab.py

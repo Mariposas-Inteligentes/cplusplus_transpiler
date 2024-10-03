@@ -192,11 +192,16 @@ def p_str_expression_symbols(p):
 
 def p_tuple(p):
     '''tuple : OPEN_PARENTHESIS list_tuple_recursion CLOSED_PARENTHESIS
-                | OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
+             | dictionary_tuple'''
 
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
-            | OPEN_BRACKET CLOSED_BRACKET'''
+            | OPEN_BRACKET CLOSED_BRACKET
+            | OPEN_BRACKET list_recursion CLOSED_BRACKET'''
+
+def p_list_recursion(p):
+    '''list_recursion : list_recursion COMMA values
+                      | values'''
 
 def p_list_tuple_recursion(p):
     '''list_tuple_recursion : list_tuple_recursion COMMA list_tuple_values
@@ -204,7 +209,6 @@ def p_list_tuple_recursion(p):
 
 def p_list_tuple_values(p):
     '''list_tuple_values : tuple
-                            | values
                             | list
                             | set
                             | dictionary'''
