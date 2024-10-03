@@ -1,3 +1,7 @@
+src/testing_parser.py
+src/parser.out
+src/parsetab.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc

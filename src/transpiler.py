@@ -7,7 +7,7 @@ class Transpiler():
         self.file_name = file_name
         self.lexer = Lexer()
         self.lexer.build()
-        # self.parser = Parser()
+        self.parser = Parser()
 
     def input(self):
         if self.file_name is None:
@@ -27,6 +27,7 @@ class Transpiler():
             for i in self.lexer.token_stream:
                 print(i)
 
-        # self.parser.set_lexer(self.lexer)
+        self.parser.set_lexer(self.lexer)
+        self.parser.parse(data)
 
         
