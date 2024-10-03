@@ -43,7 +43,6 @@ def p_func_statement_values(p):
                                 | list
                                 | set
                                 | dictionary
-                                | bool_expression
                                 | PASS
                                 | printing
                                 | while_rule_func
@@ -52,11 +51,7 @@ def p_func_statement_values(p):
                                 | try_rule_func'''
 
 def p_return_statement(p):
-    '''return_statement : RETURN return_values'''
-
-def p_return_values(p):
-    '''return_values : values_and_call_function
-                        | bool_expression'''
+    '''return_statement : RETURN values_and_call_function'''
 
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
@@ -87,7 +82,7 @@ def p_values_and_call_function(p):
                                 | VAR_FUNC_NAME'''
 
 def p_values(p):
-    '''values : math_expression
+    '''values : bool_expression
                 | STRING
                 | NONE'''
 
@@ -307,7 +302,6 @@ def p_loop_statement_values(p):
                                 | STRING
                                 | NONE
                                 | variable
-                                | def_variable
                                 | tuple
                                 | list
                                 | set
