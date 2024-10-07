@@ -15,6 +15,7 @@ def p_statement_values(p):
                         | def_class
                         | STRING
                         | NONE
+                        | variable_assign
                         | variable
                         | tuple
                         | list
@@ -99,32 +100,33 @@ def p_bool_values(p):
     '''bool_values : TRUE
                     | FALSE'''
 
+def p_period_operator(p):
+    '''period_operator : period_operator PERIOD VAR_FUNC_NAME
+                       | period_operator PERIOD call_function
+                       | PERIOD VAR_FUNC_NAME
+                       | PERIOD call_function'''
+
+def p_access_content(p):
+    '''access_content : values
+                      | variable
+                      | tuple'''
+
+def p_variable_assign(p):
+    '''variable_assign : variable_assign_var
+                       | variable_assign_expr'''
+
+def p_variable_assign_expr(p):
+    '''variable_assign_expr : variable_assign_var math_assign math_expression
+                            | variable_assign_var math_assign str_expression'''
+
+def p_variable_assign_var(p):
+    '''variable_assign_var : variable math_assign variable
+                           | variable_assign_var math_assign variable'''
+
 def p_variable(p):
     '''variable : VAR_FUNC_NAME
-                | def_variable 
-                | def_variable_str
-                | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME
-                | VAR_FUNC_NAME PERIOD call_function'''
-
-def p_def_variable(p):
-    '''def_variable : VAR_FUNC_NAME math_assign def_variable_values
-                    | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME math_assign def_variable_values'''
-
-def p_def_variable_values(p):
-    '''def_variable_values : variable
-                            | math_expression
-                            | str_expression'''
-
-def p_def_variable_str(p):
-    '''def_variable_str : VAR_FUNC_NAME ASSIGN STRING
-                        | VAR_FUNC_NAME ASSIGN str_sum
-                        | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME ASSIGN STRING
-                        | VAR_FUNC_NAME ASSIGN VAR_FUNC_NAME PERIOD str_sum'''
-
-def p_str_sum(p):
-    '''str_sum : str_sum PLUS STRING
-                | STRING PLUS STRING'''
-
+                | VAR_FUNC_NAME period_operator
+                | variable OPEN_BRACKET access_content CLOSED_BRACKET'''
 
 def p_math_expression(p):
     '''math_expression : math_expression math_symbols expr_math_values
@@ -272,6 +274,7 @@ def p_limited_statement_values(p):
                                 | STRING
                                 | NONE
                                 | variable
+                                | variable_assign
                                 | tuple
                                 | list
                                 | set
@@ -306,6 +309,7 @@ def p_loop_statement_values(p):
                                 | STRING
                                 | NONE
                                 | variable
+                                | variable_assign
                                 | tuple
                                 | list
                                 | set
@@ -354,6 +358,7 @@ def p_limited_statement_values_loop(p):
                                         | STRING
                                         | NONE
                                         | variable
+                                        | variable_assign
                                         | tuple
                                         | list
                                         | set
@@ -398,6 +403,7 @@ def p_limited_statement_values_func(p):
                                         | STRING
                                         | NONE
                                         | variable
+                                        | variable_assign
                                         | tuple
                                         | list
                                         | set
@@ -441,6 +447,7 @@ def p_limited_statement_values_func_loop(p):
                                             | STRING
                                             | NONE
                                             | variable
+                                            | variable_assign
                                             | tuple
                                             | list
                                             | set
@@ -507,4 +514,4 @@ class Parser:
         self.lexer = lexer
 
     def parse(self, input_text):
-        self.parser.parse(input_text, lexer=self.lexer)
+        self.parser.parse(input_text, lexer=self.lexer, debug=True)

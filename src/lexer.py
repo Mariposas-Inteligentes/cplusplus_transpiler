@@ -52,7 +52,6 @@ class Lexer(object):
         'CLOSED_BRACKET',
         'OPEN_CURLY_BRACKET',
         'CLOSED_CURLY_BRACKET',
-        'COMMENT',
         'INDENT',
         'DEDENT',
         'NEWLINE',
