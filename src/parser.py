@@ -119,11 +119,9 @@ def p_variable_assign(p):
 
 def p_variable_assign_expr(p):
     '''variable_assign_expr : variable math_assign math_expression
-                            | variable ASSIGN str_expression
-                            | variable PLUS_EQUALS str_expression
+                            | variable math_assign str_expression
                             | variable_assign_var math_assign math_expression
-                            | variable_assign_var ASSIGN str_expression
-                            | variable_assign_var PLUS_EQUALS str_expression'''
+                            | variable_assign_var math_assign str_expression'''
 
 def p_variable_assign_var(p):
     '''variable_assign_var : variable math_assign variable
@@ -135,11 +133,21 @@ def p_variable(p):
                 | variable OPEN_BRACKET access_content CLOSED_BRACKET'''
 
 def p_math_expression(p):
-    '''math_expression : math_expression math_symbols expr_math_values
-                        | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
-                        | math_values
-                        | call_function
-                        | NOT expr_math_values'''
+    '''math_expression : expr_math_values
+                       | NOT expr_math_values_recv
+                       | MINUS expr_math_values_recv
+                       | math_expression math_symbols expr_math_values_recv'''
+
+def p_expr_math_values(p):
+    '''expr_math_values : math_values
+                        | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
+
+def p_expr_math_values_recv(p):
+    '''expr_math_values_recv : math_values
+                            | variable
+                            | call_function
+                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
+
 
 def p_math_symbols(p):
     '''math_symbols : PLUS
@@ -168,7 +176,7 @@ def p_bool_expression(p):
 
 def p_logic_symbols(p):
     '''logic_symbols : OR
-                        | AND'''
+                    | AND'''
 
 def p_cmp_symbols(p):
     '''cmp_symbols : EQUALS
@@ -177,11 +185,6 @@ def p_cmp_symbols(p):
                     | MORE
                     | LESS_EQUALS
                     | MORE_EQUALS'''
-
-def p_expr_math_values(p):
-    '''expr_math_values : math_values
-                        | VAR_FUNC_NAME
-                        | call_function'''
 
 def p_str_expression(p):
     '''str_expression : str_expression str_expression_symbols STRING
@@ -481,7 +484,6 @@ def p_if_rule_func_loop(p):
     '''if_rule_func_loop : IF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | IF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
                         | IF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
-pass
 
 def p_elif_rule_func_loop(p):
     '''elif_rule_func_loop : ELIF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
