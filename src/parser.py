@@ -153,7 +153,6 @@ def p_expr_math_values_recv2(p):
                             | call_function
                             | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
 
-
 def p_math_symbols(p):
     '''math_symbols : PLUS
                     | MINUS
@@ -192,19 +191,29 @@ def p_cmp_symbols(p):
                     | MORE_EQUALS'''
 
 def p_str_expression(p):
-    '''str_expression : str_expression str_expression_symbols STRING
-                        | OPEN_PARENTHESIS str_expression CLOSED_PARENTHESIS
-                        | str_expression str_expression_symbols STRING MUL INT
-                        | str_expression str_expression_symbols INT MUL STRING
-                        | str_expression str_expression_symbols STRING MUL bool_values
-                        | str_expression str_expression_symbols bool_values MUL STRING
-                        | STRING str_expression_symbols STRING
-                        | STRING str_expression_symbols INT'''
+    '''str_expression : str_terminal str_expression_symbols str_terminal
+                      | str_expression str_expression_symbols str_terminal
+                      | STRING str_expression_symbols str_terminal
+                      | str_terminal str_expression_symbols STRING
+                      | STRING str_expression_symbols STRING
+                      | str_expression str_expression_symbols STRING'''
+
+def p_str_terminal(p):
+    '''str_terminal : str_multiplicators MUL STRING
+                    | STRING MUL str_multiplicators
+                    | INT MUL STRING
+                    | STRING MUL INT
+                    | bool_values MUL STRING
+                    | STRING MUL bool_values '''
+
+def p_str_multiplicators(p):
+    '''str_multiplicators : variable
+                          | call_function'''
 
 def p_str_expression_symbols(p):
     '''str_expression_symbols : cmp_symbols
-                                | logic_symbols
-                                | PLUS'''
+                              | logic_symbols
+                              | PLUS'''
 
 def p_tuple(p):
     '''tuple : OPEN_PARENTHESIS list_tuple_recursion CLOSED_PARENTHESIS
