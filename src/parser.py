@@ -9,6 +9,8 @@ def p_start(p):
 def p_statement(p):
     '''statement : statement_values
                     | statement NEWLINE statement_values
+                    | statement statement_values
+                    | statement NEWLINE
                     | statement NEWLINE statement_values NEWLINE'''
 
 def p_statement_values(p):
@@ -19,39 +21,45 @@ def p_statement_values(p):
                         | NONE
                         | variable_assign
                         | variable
+                        | bool_expression
                         | tuple
                         | list
                         | set
                         | dictionary
                         | PASS
-                        | bool_expression
                         | printing
                         | while_rule
                         | for_rule
                         | try_rule'''
 
 def p_def_function(p):
-    '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT'''
+    '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
+                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement NEWLINE DEDENT'''
 
 def p_func_statement(p):
     '''func_statement : func_statement_values
                         | func_statement NEWLINE func_statement_values
+                        | func_statement func_statement_values
+                        | func_statement NEWLINE
                         | func_statement NEWLINE func_statement_values NEWLINE'''
 
 def p_func_statement_values(p):
     '''func_statement_values : if_rule_func
-                                | values
-                                | variable
-                                | tuple
-                                | list
-                                | set
-                                | dictionary
-                                | PASS
-                                | printing
-                                | while_rule_func
-                                | for_rule_func
-                                | return_statement
-                                | try_rule_func'''
+                               | STRING 
+                               | NONE
+                               | variable_assign
+                               | variable
+                               | tuple
+                               | list
+                               | set
+                               | dictionary
+                               | PASS
+                               | bool_expression
+                               | printing
+                               | while_rule_func
+                               | for_rule_func
+                               | return_statement
+                               | try_rule_func'''
 
 def p_return_statement(p):
     '''return_statement : RETURN values_and_call_function'''
@@ -136,22 +144,29 @@ def p_math_expression(p):
     '''math_expression : expr_math_values
                        | NOT expr_math_values_recv
                        | MINUS expr_math_values_recv2
-                       | math_expression math_symbols expr_math_values_recv'''
+                       | math_expression math_symbols expr_math_values_recv
+                       | variable math_symbols expr_math_values_recv
+                       | call_function math_symbols expr_math_values_recv
+                       | math_expression math_symbols variable math_symbols expr_math_values_recv
+                       | math_expression math_symbols call_function math_symbols expr_math_values_recv'''
 
 def p_expr_math_values(p):
     '''expr_math_values : math_values
-                        | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
+                        | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+                        | OPEN_PARENTHESIS expr_math_values_recv CLOSED_PARENTHESIS'''
 
 def p_expr_math_values_recv(p):
     '''expr_math_values_recv : math_values
                             | variable
                             | call_function
-                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
+                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+                            | OPEN_PARENTHESIS expr_math_values_recv CLOSED_PARENTHESIS'''
     
 def p_expr_math_values_recv2(p):
     '''expr_math_values_recv2 : variable
                             | call_function
-                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
+                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+                            | OPEN_PARENTHESIS expr_math_values_recv CLOSED_PARENTHESIS'''
 
 def p_math_symbols(p):
     '''math_symbols : PLUS
@@ -290,6 +305,8 @@ def p_print_content_value(p):
 def p_limited_statement(p):
     '''limited_statement : limited_statement_values
                             | limited_statement NEWLINE limited_statement_values
+                            | limited_statement limited_statement_values
+                            | limited_statement NEWLINE
                             | limited_statement NEWLINE limited_statement_values NEWLINE'''
 
 def p_limited_statement_values(p):
@@ -325,6 +342,8 @@ def p_else_rule(p):
 def p_loop_statement(p):
     '''loop_statement : loop_statement_values
                         | loop_statement NEWLINE loop_statement_values
+                        | loop_statement loop_statement_values
+                        | loop_statement NEWLINE
                         | loop_statement NEWLINE loop_statement_values NEWLINE'''
 
 def p_loop_statement_values(p):
@@ -374,6 +393,8 @@ def p_except_rule(p):
 def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop
                                 | limited_statement_loop NEWLINE limited_statement_values_loop
+                                | limited_statement_loop limited_statement_values_loop
+                                | limited_statement_loop NEWLINE
                                 | limited_statement_loop NEWLINE limited_statement_values_loop NEWLINE'''
 
 def p_limited_statement_values_loop(p):
@@ -419,14 +440,16 @@ def p_except_rule_loop(p):
 def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_values_func
                                 | limited_statement_func NEWLINE limited_statement_values_func
+                                | limited_statement_func limited_statement_values_func
+                                | limited_statement_func NEWLINE
                                 | limited_statement_func NEWLINE limited_statement_values_func NEWLINE'''
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
                                         | STRING
                                         | NONE
-                                        | variable
                                         | variable_assign
+                                        | variable
                                         | tuple
                                         | list
                                         | set
@@ -463,6 +486,8 @@ def p_except_rule_func(p):
 def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_values_func_loop
                                     | limited_statement_func_loop NEWLINE limited_statement_values_func_loop
+                                    | limited_statement_func_loop NEWLINE
+                                    | limited_statement_func_loop limited_statement_values_func_loop
                                     | limited_statement_func_loop NEWLINE limited_statement_values_func_loop NEWLINE'''
 
 def p_limited_statement_values_func_loop(p):
