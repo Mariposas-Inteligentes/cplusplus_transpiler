@@ -1,6 +1,8 @@
 import ply.yacc as yacc
 from lexer import Lexer
 
+error_count = 0
+
 def p_start(p):
     '''start : START_MARKER statement END_MARKER'''
 
@@ -116,8 +118,12 @@ def p_variable_assign(p):
                        | variable_assign_expr'''
 
 def p_variable_assign_expr(p):
-    '''variable_assign_expr : variable_assign_var math_assign math_expression
-                            | variable_assign_var math_assign str_expression'''
+    '''variable_assign_expr : variable math_assign math_expression
+                            | variable ASSIGN str_expression
+                            | variable PLUS_EQUALS str_expression
+                            | variable_assign_var math_assign math_expression
+                            | variable_assign_var ASSIGN str_expression
+                            | variable_assign_var PLUS_EQUALS str_expression'''
 
 def p_variable_assign_var(p):
     '''variable_assign_var : variable math_assign variable
@@ -498,20 +504,26 @@ def p_def_class(p):
                     | CLASS VAR_FUNC_NAME OPEN_PARENTHESIS VAR_FUNC_NAME CLOSED_PARENTHESIS COLON NEWLINE INDENT statement DEDENT'''
 
 def p_error(p):
+    global error_count
     if p:
         print(f"Syntax error at '{p.value}'")
     else:
         print("Syntax error at EOF")
+    error_count += 1
 
 tokens = Lexer.tokens
 
 class Parser:
-    def __init__(self, lexer=None):
+    def __init__(self, lexer=None, debug=False):
         self.lexer = lexer
         self.parser = yacc.yacc()
+        self.debug = debug
 
     def set_lexer(self, lexer):
         self.lexer = lexer
 
     def parse(self, input_text):
-        self.parser.parse(input_text, lexer=self.lexer, debug=True)
+        self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
+        if self.debug:
+            global error_count
+            print(f"Error count for parsing: {error_count}")

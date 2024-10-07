@@ -7,7 +7,7 @@ class Transpiler():
         self.file_name = file_name
         self.lexer = Lexer()
         self.lexer.build()
-        self.parser = Parser()
+        self.parser = Parser(debug=self.debug)
 
     def input(self):
         if self.file_name is None:
