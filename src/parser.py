@@ -135,7 +135,7 @@ def p_variable(p):
 def p_math_expression(p):
     '''math_expression : expr_math_values
                        | NOT expr_math_values_recv
-                       | MINUS expr_math_values_recv
+                       | MINUS expr_math_values_recv2
                        | math_expression math_symbols expr_math_values_recv'''
 
 def p_expr_math_values(p):
@@ -145,6 +145,11 @@ def p_expr_math_values(p):
 def p_expr_math_values_recv(p):
     '''expr_math_values_recv : math_values
                             | variable
+                            | call_function
+                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
+    
+def p_expr_math_values_recv2(p):
+    '''expr_math_values_recv2 : variable
                             | call_function
                             | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
 
