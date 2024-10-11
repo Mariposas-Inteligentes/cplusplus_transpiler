@@ -36,142 +36,52 @@ def test_function_calls():
     transpiler.input()
     assert transpiler.parser.error_count == 0, "Parser should not report errors for valid function calls."
 
-# def test_variable_assignments(test_file_name):
-#     variable_assign_code = """
-# def my_function():
-#     x = 10
-#     y = "Hello"
-#     z = True
-#     """
-#     create_test_file(test_file_name, variable_assign_code)
+def test_variable_assignments():
+    transpiler = Transpiler("tests/parser_test_files/test_variable_assignments.py")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should not report errors for valid variable assignments."
 
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
+def test_math_operations():
+    transpiler = Transpiler("tests/parser_test_files/test_math_operations.py")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should not report errors for valid math operations."
 
-#     assert transpiler.parser.error_count == 0, "Parser should not report errors for valid variable assignments."
+def test_conditional_statements():
+    transpiler = Transpiler("tests/parser_test_files/test_conditional_statements.py")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should not report errors for valid conditional statements."
 
-# def test_math_operations(test_file_name):
-#     math_operations_code = """
-# def my_function():
-#     x = 10 + 5
-#     y = 2 * (3 + 4)
-#     z = 10 // 3
-#     """
-#     create_test_file(test_file_name, math_operations_code)
+def test_loops():
+    transpiler = Transpiler("tests/parser_test_files/test_loops.py")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should not report errors for valid loops."
 
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
+def test_nested_functions():
+    transpiler = Transpiler("tests/parser_test_files/test_nested_functions.py")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should not report errors for valid nested functions."
 
-#     assert transpiler.parser.error_count == 0, "Parser should not report errors for valid math operations."
+def test_complex_structure():
+    transpiler = Transpiler("tests/parser_test_files/test_complex_structure")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should not report errors for valid complex structures."
 
-# def test_conditional_statements(test_file_name):
-#     conditional_code = """
-# def check_value(x):
-#     if x > 10:
-#         return "Greater"
-#     elif x == 10:
-#         return "Equal"
-#     else:
-#         return "Smaller"
-#     """
-#     create_test_file(test_file_name, conditional_code)
+def test_unexpected_token_error():
+    transpiler = Transpiler("tests/parser_test_files/test_unexpected_token_error.py")
+    transpiler.input()
+    assert transpiler.parser.error_count > 0, "Parser should detect unexpected tokens and report an error."
 
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
+def test_empty_file():
+    transpiler = Transpiler("tests/parser_test_files/test_empty_file.py")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should handle an empty file without errors."
 
-#     assert transpiler.parser.error_count == 0, "Parser should not report errors for valid conditional statements."
+def test_invalid_characters():
+    transpiler = Transpiler("tests/parser_test_files/test_invalid_characters.py")
+    transpiler.input()
+    assert transpiler.parser.error_count > 0, "Parser should detect invalid characters and report an error."
 
-# def test_loops(test_file_name):
-#     loop_code = """
-# def loop_example():
-#     for i in range(5):
-#         print(i)
-#     while i < 10:
-#         i += 1
-#     """
-#     create_test_file(test_file_name, loop_code)
-
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
-
-#     assert transpiler.parser.error_count == 0, "Parser should not report errors for valid loops."
-
-# def test_nested_functions(test_file_name):
-#     nested_function_code = """
-# def outer_function():
-#     def inner_function():
-#         print("Inside inner")
-#     inner_function()
-#     """
-#     create_test_file(test_file_name, nested_function_code)
-
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
-
-#     assert transpiler.parser.error_count == 0, "Parser should not report errors for valid nested functions."
-
-# def test_complex_structure(test_file_name):
-#     complex_code = """
-# def outer_function(x):
-#     if x > 5:
-#         for i in range(x):
-#             def inner_function(y):
-#                 if y < 3:
-#                     return y * 2
-#             print(inner_function(i))
-#     """
-#     create_test_file(test_file_name, complex_code)
-
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
-
-#     assert transpiler.parser.error_count == 0, "Parser should not report errors for valid complex structures."
-
-# def test_unexpected_token_error(test_file_name):
-#     unexpected_token_code = """
-# def test_unexpected():
-#     print("This is correct.")
-# @unexpected_symbol  # Unexpected token
-#     """
-#     create_test_file(test_file_name, unexpected_token_code)
-
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
-
-#     assert transpiler.parser.error_count > 0, "Parser should detect unexpected tokens and report an error."
-
-# def test_empty_file(test_file_name):
-#     empty_code = ""  # Empty file
-#     create_test_file(test_file_name, empty_code)
-
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
-
-#     assert transpiler.parser.error_count == 0, "Parser should handle an empty file without errors."
-
-# def test_invalid_characters(test_file_name):
-#     invalid_code = """
-# def test_invalid():
-#     print("Hello!")
-# $$InvalidCharacters##
-#     """
-#     create_test_file(test_file_name, invalid_code)
-
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
-
-#     assert transpiler.parser.error_count > 0, "Parser should detect invalid characters and report an error."
-
-# def test_code_with_comments(test_file_name):
-#     comment_code = """
-# def test_comments():
-#     # This is a comment
-#     x = 5  # This is another comment
-#     print(x)
-#     """
-#     create_test_file(test_file_name, comment_code)
-
-#     transpiler = Transpiler(test_file_name)
-#     transpiler.input()
-
-#     assert transpiler.parser.error_count == 0, "Parser should correctly ignore comments and not report errors."
+def test_code_with_comments():
+    transpiler = Transpiler("tests/parser_test_files/test_code_with_comments.py")
+    transpiler.input()
+    assert transpiler.parser.error_count == 0, "Parser should correctly ignore comments and not report errors."
