@@ -3,6 +3,11 @@ from lexer import Lexer
 
 error_count = 0
 
+precedence = (
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'MUL', 'DIV'),
+)
+
 def p_start(p):
     '''start : START_MARKER statement END_MARKER'''
 
@@ -34,7 +39,9 @@ def p_statement_values(p):
 
 def p_def_function(p):
     '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
-                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement NEWLINE DEDENT'''
+                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement NEWLINE DEDENT
+                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
+                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement NEWLINE DEDENT'''
 
 def p_func_statement(p):
     '''func_statement : func_statement_values
@@ -66,11 +73,12 @@ def p_return_statement(p):
 
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
-                        | VAR_FUNC_NAME PERIOD OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS'''
+                        | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
+                        | VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS
+                        | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
 
 def p_def_parameter(p):
-    '''def_parameter : 
-                        | def_function_parameter'''
+    '''def_parameter : def_function_parameter'''
 
 def p_def_function_parameter(p):
     '''def_function_parameter : VAR_FUNC_NAME
@@ -79,8 +87,7 @@ def p_def_function_parameter(p):
                                 | VAR_FUNC_NAME ASSIGN values'''
 
 def p_call_parameter(p):
-    '''call_parameter : 
-                        | call_function_parameter'''
+    '''call_parameter : call_function_parameter'''
 
 def p_call_function_parameter(p):
     '''call_function_parameter : call_function_parameter COMMA VAR_FUNC_NAME ASSIGN values_and_call_function
@@ -90,6 +97,7 @@ def p_call_function_parameter(p):
 
 def p_values_and_call_function(p):
     '''values_and_call_function : values
+                                | call_function
                                 | VAR_FUNC_NAME'''
 
 def p_values(p):
@@ -127,9 +135,21 @@ def p_variable_assign(p):
 
 def p_variable_assign_expr(p):
     '''variable_assign_expr : variable math_assign math_expression
+                            | variable math_assign STRING
                             | variable math_assign str_expression
                             | variable_assign_var math_assign math_expression
-                            | variable_assign_var math_assign str_expression'''
+                            | variable_assign_var math_assign str_expression
+                            | variable_assign_var math_assign STRING
+                            | variable math_assign call_function
+                            | variable_assign_var math_assign call_function
+                            | variable ASSIGN data_structures
+                            | variable_assign_var ASSIGN data_structures'''
+
+def p_data_structures(p):
+    '''data_structures : list
+                        | set
+                        | tuple
+                        | dictionary'''
 
 def p_variable_assign_var(p):
     '''variable_assign_var : variable math_assign variable
@@ -231,8 +251,7 @@ def p_str_expression_symbols(p):
                               | PLUS'''
 
 def p_tuple(p):
-    '''tuple : OPEN_PARENTHESIS list_tuple_recursion CLOSED_PARENTHESIS
-             | dictionary_tuple'''
+    '''tuple : OPEN_PARENTHESIS list_tuple_recursion CLOSED_PARENTHESIS'''
 
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
@@ -248,10 +267,13 @@ def p_list_tuple_recursion(p):
                             | list_tuple_values'''
 
 def p_list_tuple_values(p):
-    '''list_tuple_values : tuple
+    '''list_tuple_values :   tuple
                             | list
                             | set
-                            | dictionary'''
+                            | dictionary
+                            | values
+                            | variable
+                            | call_function'''
 
 def p_set(p):
     '''set : OPEN_CURLY_BRACKET set_recursion CLOSED_CURLY_BRACKET'''
@@ -266,15 +288,15 @@ def p_set_values(p):
 
 def p_dictionary(p):
     '''dictionary : OPEN_CURLY_BRACKET dictionary_content CLOSED_CURLY_BRACKET
-                    | OPEN_CURLY_BRACKET CLOSED_CURLY_BRACKET'''
+                   | OPEN_CURLY_BRACKET CLOSED_CURLY_BRACKET'''
 
 def p_dictionary_content(p):
-    '''dictionary_content : dictionary_content COMMA dictionary_values COLON list_tuple_recursion
-                            | dictionary_values COLON list_tuple_recursion'''
+    '''dictionary_content : dictionary_content COMMA dictionary_values COLON list_tuple_values
+                          | dictionary_values COLON list_tuple_values'''
 
 def p_dictionary_values(p):
     '''dictionary_values : dictionary_tuple
-                            | values'''
+                         | values'''
 
 def p_dictionary_tuple(p):
     '''dictionary_tuple : OPEN_PARENTHESIS dictionary_tuple_recursion CLOSED_PARENTHESIS
@@ -291,12 +313,13 @@ def p_printing(p):
 
 def p_print_content(p):
     '''print_content : print_content PLUS print_content_value
-                        | print_content_value'''
+                    | print_content_value'''
 
 def p_print_content_value(p):
     '''print_content_value : math_values
                             | STRING
                             | call_function
+                            | variable
                             | list
                             | tuple
                             | set
