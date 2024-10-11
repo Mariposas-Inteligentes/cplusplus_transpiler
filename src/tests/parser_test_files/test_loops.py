@@ -1,5 +1,3 @@
-def loop_example():
-    for i in range(5):
-        print(i)
-    while i < 10:
-        i += 1
+for i in range(2, 4):
+  while i < 3:
+    print("hello")

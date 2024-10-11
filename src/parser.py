@@ -8,11 +8,14 @@ precedence = (
     ('left', 'MUL', 'FLOOR_DIV', 'DIV',  'MODULO'),
     ('left', 'POWER'),
     ('left', 'PLUS_EQUALS', 'MINUS_EQUALS', 'MODULO_EQUALS', 'MUL_EQUALS', 'DIV_EQUALS'),
-    ('left', 'FLOOR_DIV_EQUALS', 'POWER_EQUALS')
+    ('left', 'FLOOR_DIV_EQUALS', 'POWER_EQUALS'),
+    ('left', 'STRING'),
+    ('left', 'INT', 'FLOAT')
 )
 
 def p_start(p):
-    '''start : START_MARKER statement END_MARKER'''
+    '''start : START_MARKER statement END_MARKER
+            | START_MARKER END_MARKER'''
 
 def p_statement(p):
     '''statement : statement_values
@@ -39,7 +42,8 @@ def p_statement_values(p):
                         | printing
                         | while_rule
                         | for_rule
-                        | try_rule'''
+                        | try_rule
+                        | NEWLINE'''
 
 def p_def_function(p):
     '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
@@ -71,7 +75,8 @@ def p_func_statement_values(p):
                                | while_rule_func
                                | for_rule_func
                                | return_statement
-                               | try_rule_func'''
+                               | try_rule_func
+                               | NEWLINE'''
 
 def p_return_statement(p):
     '''return_statement : RETURN values_and_call_function'''
@@ -353,7 +358,8 @@ def p_limited_statement_values(p):
                                 | printing
                                 | while_rule
                                 | for_rule
-                                | try_rule'''
+                                | try_rule
+                                | NEWLINE'''
 
 def p_if_rule(p):
     '''if_rule : IF bool_expression COLON NEWLINE INDENT limited_statement DEDENT
@@ -399,7 +405,8 @@ def p_loop_statement_values(p):
                                 | try_rule_loop
                                 | call_function
                                 | CONTINUE
-                                | BREAK'''
+                                | BREAK
+                                | NEWLINE'''
 
 def p_while_rule(p):
     '''while_rule : WHILE bool_expression COLON NEWLINE INDENT loop_statement DEDENT
@@ -452,7 +459,8 @@ def p_limited_statement_values_loop(p):
                                         | for_rule
                                         | try_rule_loop
                                         | BREAK
-                                        | CONTINUE'''
+                                        | CONTINUE
+                                        | NEWLINE'''
 
 def p_if_rule_loop(p):
     '''if_rule_loop : IF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
@@ -505,7 +513,8 @@ def p_limited_statement_values_func(p):
                                         | while_rule_func
                                         | for_rule_func
                                         | try_rule_func
-                                        | return_statement'''
+                                        | return_statement
+                                        | NEWLINE'''
 
 def p_if_rule_func(p):
     '''if_rule_func : IF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT
@@ -560,7 +569,8 @@ def p_limited_statement_values_func_loop(p):
                                             | call_function
                                             | return_statement
                                             | BREAK
-                                            | CONTINUE'''
+                                            | CONTINUE
+                                            | NEWLINE'''
 
 def p_while_rule_func(p):
     '''while_rule_func : WHILE bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT

@@ -121,7 +121,7 @@ class Lexer(object):
     t_PERIOD = r'\.'
     t_COLON = r'\:'
 
-    t_ignore_COMMENT = r'\#.*'
+    t_ignore_COMMENT = r'\#[^\n]*'
     
     def t_FLOAT(self, t):
         r'([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*)'
