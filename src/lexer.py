@@ -63,7 +63,8 @@ class Lexer(object):
         'TRY',
         'EXCEPT',
         'IN',
-        'END_MARKER'
+        'END_MARKER',
+        'FAKE_NEWLINE'
     )
 
     RESERVED = {
@@ -174,10 +175,15 @@ class Lexer(object):
             return t
 
     def t_NEWLINE(self, t):
-        r'\n+'
-        t.lexer.lineno += len(t.value)
+        r'\n'
+        self.actual_line_no += 1
+        t.lexer.lineno = self.actual_line_no
+        t.lineno = self.actual_line_no
         t.type = "NEWLINE"
         if self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
+            return t
+        else:
+            t.type = "FAKE_NEWLINE"
             return t
 
     t_ignore  = '\t'
@@ -196,6 +202,7 @@ class Lexer(object):
         self.count_curly_brackets = 0
         self.error_count = 0
         self.count_token = 0
+        self.actual_line_no = 1
 
         # Consts used to track indentation
         self.NO_INDENT = 0
@@ -318,14 +325,22 @@ class Lexer(object):
     def filter(self):
         # Filter through the original tokens to create the new ones
         tokens = iter(self.lexer.token, None)
-        tokens = self.track_tokens_filter(tokens)
-        tokens = self.indentation_filter(tokens)
-        lineno = 1
-        if tokens[len(tokens)-1] is not None:
-            lineno = tokens[len(tokens)-1].lineno
-        tokens.insert(0, self.new_token("START_MARKER", 0))
-        tokens.append(self.new_token("END_MARKER", lineno))
-        return tokens
+
+        new_tokens = []
+        self.actual_line_no = 1
+        for token in tokens:
+            token.lineno = self.actual_line_no
+            if token.type != 'FAKE_NEWLINE':
+                new_tokens.append(token)
+            else:
+                self.actual_line_no += 1
+                
+        new_tokens = self.track_tokens_filter(new_tokens)
+        new_tokens = self.indentation_filter(new_tokens)
+
+        new_tokens.insert(0, self.new_token("START_MARKER", 0))
+        new_tokens.append(self.new_token("END_MARKER", self.actual_line_no))
+        return new_tokens
 
 
     def input(self, source_code):

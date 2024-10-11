@@ -8,7 +8,7 @@ def main():
     if (len(sys.argv) < 2):
         print('Please insert a .py file to transpile')
         return
-    if len(sys.argv) == 3:
+    if (len(sys.argv) == 3):
         if (sys.argv[2] == "debug"):
             debug = True
     

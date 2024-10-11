@@ -22,12 +22,14 @@ class Transpiler():
 
         data = file.read()
         self.lexer.input(data)
+        print(f'Error count for lexer: {self.lexer.error_count}')
 
         if(self.debug and self.lexer.token_stream):
             for i in self.lexer.token_stream:
                 print(i)
 
         self.parser.set_lexer(self.lexer)
-        self.parser.parse(data)
+        error_count_parse = self.parser.parse(data)
+        print(f"Error count for parsing: {error_count_parse}")
 
         

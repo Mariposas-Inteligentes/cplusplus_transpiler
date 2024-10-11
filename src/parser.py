@@ -606,9 +606,9 @@ def p_def_class(p):
 def p_error(p):
     global error_count
     if p:
-        print(f"Syntax error at '{p.value}'")
+        print(f"Syntax error at token '{p.value}', line {p.lineno}")
     else:
-        print("Syntax error at EOF")
+        print("Syntax error at EOF (unexpected end of input)")
     error_count += 1
 
 tokens = Lexer.tokens
@@ -616,7 +616,7 @@ tokens = Lexer.tokens
 class Parser:
     def __init__(self, lexer=None, debug=False):
         self.lexer = lexer
-        self.parser = yacc.yacc()
+        self.parser = yacc.yacc(debug = debug)
         self.debug = debug
 
     def set_lexer(self, lexer):
@@ -624,6 +624,5 @@ class Parser:
 
     def parse(self, input_text):
         self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
-        if self.debug:
-            global error_count
-            print(f"Error count for parsing: {error_count}")
+        global error_count
+        return error_count
