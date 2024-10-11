@@ -29,7 +29,7 @@ class Transpiler():
                 print(i)
 
         self.parser.set_lexer(self.lexer)
-        error_count_parse = self.parser.parse(data)
-        print(f"Error count for parsing: {error_count_parse}")
+        self.parser.parse(data)
+        print(f"Error count for parsing: {self.parser.error_count}")
 
         

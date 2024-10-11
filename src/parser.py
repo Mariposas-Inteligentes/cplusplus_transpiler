@@ -618,6 +618,7 @@ class Parser:
         self.lexer = lexer
         self.parser = yacc.yacc(debug = debug)
         self.debug = debug
+        self.error_count = 0
 
     def set_lexer(self, lexer):
         self.lexer = lexer
@@ -625,4 +626,4 @@ class Parser:
     def parse(self, input_text):
         self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
         global error_count
-        return error_count
+        self.error_count = error_count
