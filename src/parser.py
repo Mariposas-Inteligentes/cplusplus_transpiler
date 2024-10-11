@@ -5,7 +5,10 @@ error_count = 0
 
 precedence = (
     ('left', 'PLUS', 'MINUS'),
-    ('left', 'MUL', 'DIV'),
+    ('left', 'MUL', 'FLOOR_DIV', 'DIV',  'MODULO'),
+    ('left', 'POWER'),
+    ('left', 'PLUS_EQUALS', 'MINUS_EQUALS', 'MODULO_EQUALS', 'MUL_EQUALS', 'DIV_EQUALS'),
+    ('left', 'FLOOR_DIV_EQUALS', 'POWER_EQUALS')
 )
 
 def p_start(p):
@@ -31,6 +34,7 @@ def p_statement_values(p):
                         | list
                         | set
                         | dictionary
+                        | call_function
                         | PASS
                         | printing
                         | while_rule
@@ -62,6 +66,7 @@ def p_func_statement_values(p):
                                | dictionary
                                | PASS
                                | bool_expression
+                               | call_function
                                | printing
                                | while_rule_func
                                | for_rule_func
@@ -344,6 +349,7 @@ def p_limited_statement_values(p):
                                 | dictionary
                                 | PASS
                                 | bool_expression
+                                | call_function
                                 | printing
                                 | while_rule
                                 | for_rule
@@ -352,12 +358,18 @@ def p_limited_statement_values(p):
 def p_if_rule(p):
     '''if_rule : IF bool_expression COLON NEWLINE INDENT limited_statement DEDENT
                 | IF bool_expression COLON NEWLINE INDENT limited_statement DEDENT elif_rule
-                | IF bool_expression COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
+                | IF bool_expression COLON NEWLINE INDENT limited_statement DEDENT else_rule
+                | IF variable COLON NEWLINE INDENT limited_statement DEDENT
+                | IF variable COLON NEWLINE INDENT limited_statement DEDENT elif_rule
+                | IF variable COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
 
 def p_elif_rule(p):
     '''elif_rule : ELIF bool_expression COLON NEWLINE INDENT limited_statement DEDENT
                     | ELIF bool_expression COLON NEWLINE INDENT limited_statement DEDENT elif_rule
-                    | ELIF bool_expression COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
+                    | ELIF bool_expression COLON NEWLINE INDENT limited_statement DEDENT else_rule
+                    | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT
+                    | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT elif_rule
+                    | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
 
 def p_else_rule(p):
     '''else_rule : ELSE COLON NEWLINE INDENT limited_statement DEDENT'''
@@ -385,11 +397,13 @@ def p_loop_statement_values(p):
                                 | while_rule
                                 | for_rule
                                 | try_rule_loop
+                                | call_function
                                 | CONTINUE
                                 | BREAK'''
 
 def p_while_rule(p):
     '''while_rule : WHILE bool_expression COLON NEWLINE INDENT loop_statement DEDENT
+                    | WHILE variable COLON NEWLINE INDENT loop_statement DEDENT
                     | WHILE VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT loop_statement DEDENT
                     | WHILE OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT loop_statement DEDENT'''
 
@@ -432,6 +446,7 @@ def p_limited_statement_values_loop(p):
                                         | dictionary
                                         | PASS
                                         | bool_expression
+                                        | call_function
                                         | printing
                                         | while_rule
                                         | for_rule
@@ -442,12 +457,18 @@ def p_limited_statement_values_loop(p):
 def p_if_rule_loop(p):
     '''if_rule_loop : IF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
                     | IF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
-                    | IF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
+                    | IF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop
+                    | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT
+                    | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
+                    | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
 
 def p_elif_rule_loop(p):
     '''elif_rule_loop : ELIF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
-                        | ELIF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
-                        | ELIF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
+                      | ELIF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
+                      | ELIF bool_expression COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop
+                      | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT
+                      | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
+                      | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
 
 def p_else_rule_loop(p):
     '''else_rule_loop : ELSE COLON NEWLINE INDENT limited_statement_loop DEDENT'''
@@ -480,6 +501,7 @@ def p_limited_statement_values_func(p):
                                         | PASS
                                         | bool_expression
                                         | printing
+                                        | call_function
                                         | while_rule_func
                                         | for_rule_func
                                         | try_rule_func
@@ -488,12 +510,18 @@ def p_limited_statement_values_func(p):
 def p_if_rule_func(p):
     '''if_rule_func : IF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT
                     | IF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
-                    | IF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
+                    | IF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func
+                    | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT
+                    | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
+                    | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
 
 def p_elif_rule_func(p):
     '''elif_rule_func : ELIF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT
                         | ELIF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
-                        | ELIF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
+                        | ELIF bool_expression COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func
+                        | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT
+                        | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
+                        | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
 
 def p_else_rule_func(p):
     '''else_rule_func : ELSE COLON NEWLINE INDENT limited_statement_func DEDENT'''
@@ -529,12 +557,14 @@ def p_limited_statement_values_func_loop(p):
                                             | while_rule_func
                                             | for_rule_func
                                             | try_rule_func_loop
+                                            | call_function
                                             | return_statement
                                             | BREAK
                                             | CONTINUE'''
 
 def p_while_rule_func(p):
     '''while_rule_func : WHILE bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
+                        | WHILE variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | WHILE VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | WHILE OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
 
@@ -545,12 +575,18 @@ def p_for_rule_func(p):
 def p_if_rule_func_loop(p):
     '''if_rule_func_loop : IF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | IF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
-                        | IF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
+                        | IF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop
+                        | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
+                        | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
+                        | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
 
 def p_elif_rule_func_loop(p):
     '''elif_rule_func_loop : ELIF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                             | ELIF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
-                            | ELIF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
+                            | ELIF bool_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop
+                            | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
+                            | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
+                            | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
 
 def p_else_rule_func_loop(p):
     '''else_rule_func_loop : ELSE COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''

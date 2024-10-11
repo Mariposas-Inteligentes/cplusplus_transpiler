@@ -101,7 +101,7 @@ class Lexer(object):
 
     t_ASSIGN = r'='
     t_PLUS_EQUALS = r'\+='
-    t_MINUS_EQUALS = r'-='
+    t_MINUS_EQUALS = r'\-='
     t_MUL_EQUALS = r'\*='
     t_DIV_EQUALS = r'\/='
     t_MODULO_EQUALS = r'\%='
