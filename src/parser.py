@@ -19,7 +19,6 @@ def p_statement(p):
     '''statement : statement_values
                     | statement NEWLINE statement_values
                     | statement statement_values
-                    | statement NEWLINE
                     | statement NEWLINE statement_values NEWLINE'''
 
 def p_statement_values(p):
@@ -53,7 +52,6 @@ def p_func_statement(p):
     '''func_statement : func_statement_values
                         | func_statement NEWLINE func_statement_values
                         | func_statement func_statement_values
-                        | func_statement NEWLINE
                         | func_statement NEWLINE func_statement_values NEWLINE'''
 
 def p_func_statement_values(p):
@@ -77,13 +75,13 @@ def p_func_statement_values(p):
                                | NEWLINE'''
 
 def p_return_statement(p):
-    '''return_statement : RETURN values_and_call_function'''
+    '''return_statement : RETURN values
+                        | RETURN call_function
+                        | RETURN variable'''
 
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
-                        | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
-                        | VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS
-                        | VAR_FUNC_NAME PERIOD VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
+                        | VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
 
 def p_def_parameter(p):
     '''def_parameter : def_function_parameter'''
@@ -98,15 +96,18 @@ def p_call_parameter(p):
     '''call_parameter : call_function_parameter'''
 
 def p_call_function_parameter(p):
-    '''call_function_parameter : call_function_parameter COMMA VAR_FUNC_NAME ASSIGN values_and_call_function
-                                | VAR_FUNC_NAME ASSIGN values_and_call_function
-                                | values_and_call_function
-                                | call_function_parameter COMMA values_and_call_function'''
-
-def p_values_and_call_function(p):
-    '''values_and_call_function : values
+    '''call_function_parameter : call_function_parameter COMMA VAR_FUNC_NAME ASSIGN values
+                                | VAR_FUNC_NAME ASSIGN values
+                                | values
+                                | call_function_parameter COMMA values
+                                | call_function_parameter COMMA VAR_FUNC_NAME ASSIGN call_function
+                                | VAR_FUNC_NAME ASSIGN call_function
                                 | call_function
-                                | VAR_FUNC_NAME'''
+                                | call_function_parameter COMMA call_function
+                                | call_function_parameter COMMA VAR_FUNC_NAME ASSIGN variable
+                                | VAR_FUNC_NAME ASSIGN variable
+                                | variable
+                                | call_function_parameter COMMA variable'''
 
 def p_values(p):
     '''values : math_expression
@@ -131,6 +132,7 @@ def p_period_operator(p):
                        | period_operator PERIOD call_function
                        | PERIOD VAR_FUNC_NAME
                        | PERIOD call_function'''
+
 
 def p_access_content(p):
     '''access_content : values
@@ -163,13 +165,17 @@ def p_variable_assign_var(p):
 
 def p_variable(p):
     '''variable : VAR_FUNC_NAME
-                | VAR_FUNC_NAME period_operator
+                | variable period_operator
                 | variable OPEN_BRACKET access_content CLOSED_BRACKET'''
 
 def p_math_expression(p):
-    '''math_expression : expr_math_values
-                       | NOT expr_math_values_recv
-                       | MINUS expr_math_values_recv2
+    '''math_expression : math_values
+                       | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+                       | OPEN_PARENTHESIS STRING CLOSED_PARENTHESIS
+                       | OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
+                       | OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS
+                       | NOT math_expression
+                       | MINUS OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
                        | math_expression math_symbols expr_math_values_recv
                        | STRING math_symbols expr_math_values_recv
                        | variable math_symbols expr_math_values_recv
@@ -179,25 +185,13 @@ def p_math_expression(p):
                        | STRING math_symbols variable math_symbols expr_math_values_recv
                        | STRING math_symbols call_function math_symbols expr_math_values_recv'''
 
-def p_expr_math_values(p):
-    '''expr_math_values : math_values
-                        | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
-                        | OPEN_PARENTHESIS expr_math_values_recv CLOSED_PARENTHESIS'''
-
 def p_expr_math_values_recv(p):
     '''expr_math_values_recv : math_values
                             | STRING
                             | variable
                             | call_function
-                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
-                            | OPEN_PARENTHESIS expr_math_values_recv CLOSED_PARENTHESIS'''
+                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
     
-def p_expr_math_values_recv2(p):
-    '''expr_math_values_recv2 : variable
-                            | call_function
-                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
-                            | OPEN_PARENTHESIS expr_math_values_recv CLOSED_PARENTHESIS'''
-
 def p_math_symbols(p):
     '''math_symbols : PLUS
                     | MINUS
@@ -233,16 +227,11 @@ def p_cmp_symbols(p):
                     | MORE_EQUALS'''
 
 def p_tuple(p):
-    '''tuple : OPEN_PARENTHESIS list_tuple_recursion CLOSED_PARENTHESIS'''
+    '''tuple : OPEN_PARENTHESIS list_tuple_recursion COMMA list_tuple_values CLOSED_PARENTHESIS'''
 
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
-            | OPEN_BRACKET CLOSED_BRACKET
-            | OPEN_BRACKET list_recursion CLOSED_BRACKET'''
-
-def p_list_recursion(p):
-    '''list_recursion : list_recursion COMMA values
-                      | values'''
+            | OPEN_BRACKET CLOSED_BRACKET'''
 
 def p_list_tuple_recursion(p):
     '''list_tuple_recursion : list_tuple_recursion COMMA list_tuple_values
@@ -273,20 +262,10 @@ def p_dictionary(p):
                    | OPEN_CURLY_BRACKET CLOSED_CURLY_BRACKET'''
 
 def p_dictionary_content(p):
-    '''dictionary_content : dictionary_content COMMA dictionary_values COLON list_tuple_values
-                          | dictionary_values COLON list_tuple_values'''
-
-def p_dictionary_values(p):
-    '''dictionary_values : dictionary_tuple
-                         | values'''
-
-def p_dictionary_tuple(p):
-    '''dictionary_tuple : OPEN_PARENTHESIS dictionary_tuple_recursion CLOSED_PARENTHESIS
-                        | OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
-
-def p_dictionary_tuple_recursion(p):
-    '''dictionary_tuple_recursion : dictionary_tuple_recursion COMMA values
-                                    | values'''
+    '''dictionary_content : dictionary_content COMMA list_tuple_values COLON list_tuple_values
+                          | dictionary_content COMMA values COLON list_tuple_values
+                          | list_tuple_values COLON list_tuple_values
+                          | values COLON list_tuple_values'''
 
 def p_printing(p):
     '''printing : PRINT OPEN_PARENTHESIS print_content CLOSED_PARENTHESIS
@@ -311,7 +290,6 @@ def p_limited_statement(p):
     '''limited_statement : limited_statement_values
                             | limited_statement NEWLINE limited_statement_values
                             | limited_statement limited_statement_values
-                            | limited_statement NEWLINE
                             | limited_statement NEWLINE limited_statement_values NEWLINE'''
 
 def p_limited_statement_values(p):
@@ -356,7 +334,6 @@ def p_loop_statement(p):
     '''loop_statement : loop_statement_values
                         | loop_statement NEWLINE loop_statement_values
                         | loop_statement loop_statement_values
-                        | loop_statement NEWLINE
                         | loop_statement NEWLINE loop_statement_values NEWLINE'''
 
 def p_loop_statement_values(p):
@@ -410,7 +387,6 @@ def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop
                                 | limited_statement_loop NEWLINE limited_statement_values_loop
                                 | limited_statement_loop limited_statement_values_loop
-                                | limited_statement_loop NEWLINE
                                 | limited_statement_loop NEWLINE limited_statement_values_loop NEWLINE'''
 
 def p_limited_statement_values_loop(p):
@@ -465,7 +441,6 @@ def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_values_func
                                 | limited_statement_func NEWLINE limited_statement_values_func
                                 | limited_statement_func limited_statement_values_func
-                                | limited_statement_func NEWLINE
                                 | limited_statement_func NEWLINE limited_statement_values_func NEWLINE'''
 
 def p_limited_statement_values_func(p):
@@ -518,7 +493,6 @@ def p_except_rule_func(p):
 def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_values_func_loop
                                     | limited_statement_func_loop NEWLINE limited_statement_values_func_loop
-                                    | limited_statement_func_loop NEWLINE
                                     | limited_statement_func_loop limited_statement_values_func_loop
                                     | limited_statement_func_loop NEWLINE limited_statement_values_func_loop NEWLINE'''
 
