@@ -27,9 +27,9 @@ class Transpiler():
         if(self.debug and self.lexer.token_stream):
             for i in self.lexer.token_stream:
                 print(i)
-
-        self.parser.set_lexer(self.lexer)
-        self.parser.parse(data)
-        print(f"Error count for parsing: {self.parser.error_count}")
+        if (self.lexer.error_count == 0):
+            self.parser.set_lexer(self.lexer)
+            self.parser.parse(data)
+            print(f"Error count for parsing: {self.parser.error_count}")
 
         

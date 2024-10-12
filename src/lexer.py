@@ -119,10 +119,15 @@ class Lexer(object):
 
     t_COMMA = r'\,'
     t_PERIOD = r'\.'
-    t_COLON = r'\:'
 
     t_ignore_COMMENT = r'\#[^\n]*'
     
+    def t_COLON(self, t):
+        r'\:\s*'
+        t.value = '\:'
+        t.type = 'COLON'
+        return t
+
     def t_FLOAT(self, t):
         r'([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*)'
         t.value = float(t.value)
@@ -353,6 +358,7 @@ class Lexer(object):
             self.token_stream = self.filter()
             self.count_token = 0
         except IndentationError as e:
+            self.error_count += 1
             print(f"Error in input: {e.message} at line {e.lineno}")
             self.token_stream = []
 
