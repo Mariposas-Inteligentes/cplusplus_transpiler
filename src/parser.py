@@ -77,7 +77,8 @@ def p_func_statement_values(p):
 def p_return_statement(p):
     '''return_statement : RETURN values
                         | RETURN call_function
-                        | RETURN variable'''
+                        | RETURN variable
+                        | RETURN'''
 
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
@@ -166,7 +167,9 @@ def p_variable_assign_var(p):
 def p_variable(p):
     '''variable : VAR_FUNC_NAME
                 | variable period_operator
-                | variable OPEN_BRACKET access_content CLOSED_BRACKET'''
+                | variable OPEN_BRACKET access_content CLOSED_BRACKET
+                | variable OPEN_BRACKET access_content COLON access_content CLOSED_BRACKET
+                | variable OPEN_BRACKET access_content COLON CLOSED_BRACKET'''
 
 def p_math_expression(p):
     '''math_expression : math_values
@@ -190,7 +193,9 @@ def p_expr_math_values_recv(p):
                             | STRING
                             | variable
                             | call_function
-                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS'''
+                            | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+                            | OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
+                            | OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS'''
     
 def p_math_symbols(p):
     '''math_symbols : PLUS
