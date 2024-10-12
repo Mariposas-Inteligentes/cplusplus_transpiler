@@ -29,7 +29,7 @@ For now, this will output the tokens read from the file and any error detected. 
 
 ## **Unit tests**
 
-To run the all of the unit tests, you can execute the following command from the `src/tests` directory:
+To run the all of the unit tests (except for the parsing one), you can execute the following command from the `src/tests` directory:
 
 ``` bash
 python -m pytest
@@ -39,6 +39,12 @@ In case of wanting to run a specific test, you can execute the following command
 
 ``` bash
 python -m pytest <file_name>
+```
+
+In the case of parsing test, in order to run it, you need to be in the src folder and run the command:
+
+``` bash
+python .\tests\test_parsing.py
 ```
 
 
