@@ -123,8 +123,8 @@ class Lexer(object):
     t_ignore_COMMENT = r'\#[^\n]*'
     
     def t_COLON(self, t):
-        r'\:\s*'
-        t.value = '\:'
+        r':\ *'
+        t.value = ':'
         t.type = 'COLON'
         return t
 
