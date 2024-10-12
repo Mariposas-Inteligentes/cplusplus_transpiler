@@ -326,7 +326,21 @@ class Lexer(object):
                 new_tokens.append(self.DEDENT(token.lineno))
 
         return new_tokens
-             
+
+
+    def filter_ws(self, tokens):
+        new_tokens = []
+        i = 0
+        for token in tokens:
+            if (i-1 < 0 or i+1 >= len(tokens)):  # first or last token
+                new_tokens.append(tokens[i])
+            elif (token.type == "WHITESPACE" and tokens[i-1].type == "NEWLINE" and tokens[i+1].type == "NEWLINE"):  # I am whitespace and before and after is a newline
+                pass
+            else: # before and after was not a whitespace
+                new_tokens.append(tokens[i])
+            i +=1
+        return new_tokens
+       
     def filter(self):
         # Filter through the original tokens to create the new ones
         tokens = iter(self.lexer.token, None)
@@ -339,7 +353,7 @@ class Lexer(object):
                 new_tokens.append(token)
             else:
                 self.actual_line_no += 1
-                
+        new_tokens = self.filter_ws(new_tokens)       
         new_tokens = self.track_tokens_filter(new_tokens)
         new_tokens = self.indentation_filter(new_tokens)
 

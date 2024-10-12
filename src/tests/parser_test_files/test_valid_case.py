@@ -41,14 +41,14 @@ print(luis.age())
 a = dict() 
 a["hola"] = "mundo" 
  
- 
+    
 b = { 
     "hello": "world", 
     "spanish": a, 
     "empty": dict(), 
     "set": set(), 
     1: "1", 
-    "list": list(), 
+    "list": list() 
 } 
  
 def while_func(n): 
