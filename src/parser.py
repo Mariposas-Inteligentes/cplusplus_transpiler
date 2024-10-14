@@ -311,7 +311,7 @@ def p_printing(p):
 
 def p_print_content_recv(p):
     '''print_content_recv : print_content_recv PLUS print_content_value
-                          | print_content_recv math_expression 
+                          | print_content_recv PLUS math_expression_1
                           | print_content_value '''
 
 def p_print_content_value(p):
@@ -432,9 +432,7 @@ def p_loop_statement_values_end(p):
 
 def p_while_rule(p):
     '''while_rule : WHILE math_expression COLON NEWLINE INDENT loop_statement DEDENT
-                    | WHILE variable COLON NEWLINE INDENT loop_statement DEDENT
-                    | WHILE VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT loop_statement DEDENT
-                    | WHILE OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT loop_statement DEDENT'''
+                    | WHILE variable COLON NEWLINE INDENT loop_statement DEDENT'''
 
 def p_for_rule(p):
     '''for_rule : FOR VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT loop_statement DEDENT
@@ -651,9 +649,7 @@ def p_limited_statement_values_func_loop_end(p):
 
 def p_while_rule_func(p):
     '''while_rule_func : WHILE math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
-                        | WHILE variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
-                        | WHILE VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT limited_statement_func_loop DEDENT
-                        | WHILE OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
+                        | WHILE variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT '''
 
 def p_for_rule_func(p):
     '''for_rule_func : FOR VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT limited_statement_func_loop DEDENT
