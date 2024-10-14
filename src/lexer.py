@@ -172,7 +172,6 @@ class Lexer(object):
         r'\}'
         self.count_curly_brackets -= 1
         return t
-
     
     def t_WHITESPACE(self, t):
         r'[ ]+'
@@ -351,8 +350,7 @@ class Lexer(object):
             token.lineno = self.actual_line_no
             if token.type != 'FAKE_NEWLINE':
                 new_tokens.append(token)
-            else:
-                self.actual_line_no += 1
+
         new_tokens = self.filter_ws(new_tokens)       
         new_tokens = self.track_tokens_filter(new_tokens)
         new_tokens = self.indentation_filter(new_tokens)
