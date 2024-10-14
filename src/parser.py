@@ -75,10 +75,14 @@ def p_func_statement_values(p):
                                | NEWLINE'''
 
 def p_return_statement(p):
-    '''return_statement : RETURN values
+    '''return_statement : RETURN
                         | RETURN call_function
                         | RETURN variable
-                        | RETURN'''
+                        | RETURN values
+                        | RETURN list
+                        | RETURN dictionary
+                        | RETURN set
+                        | RETURN tuple'''
 
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
@@ -221,7 +225,8 @@ def p_math_assign(p):
 
 def p_logic_symbols(p):
     '''logic_symbols : OR
-                    | AND'''
+                    | AND
+                    | IN'''
 
 def p_cmp_symbols(p):
     '''cmp_symbols : EQUALS

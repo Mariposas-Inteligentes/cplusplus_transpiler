@@ -1,6 +1,8 @@
 def suma(a,b):  
     return ((a)+(b)) 
  
+# Commmentttt
+
 def fibbonacci(n): 
     n_1 = 1 
     n_2 = 1 
@@ -9,9 +11,9 @@ def fibbonacci(n):
         res = n_1 + n_2 
         n_1 = n_2 
         n_2 = res 
- 
+   
     return res 
- 
+          
 def factorial(n): 
     if n < 1: 
         return 1 
