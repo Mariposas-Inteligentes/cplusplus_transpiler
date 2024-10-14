@@ -602,11 +602,11 @@ def p_except_rule_func(p):
 def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_func_loop_recv
                                    | limited_statement_values_func_loop_end
-                                   | limited_statement_func_loop limited_statement_values_func_loop_end'''
+                                   | limited_statement_func_loop_recv limited_statement_values_func_loop_end'''
 
 def p_limited_statement_func_loop_recv(p):
     '''limited_statement_func_loop_recv : limited_statement_values_func_loop
-                                   | limited_statement_func_loop_recv limited_statement_values_func_loop'''
+                                        | limited_statement_func_loop_recv limited_statement_values_func_loop'''
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
