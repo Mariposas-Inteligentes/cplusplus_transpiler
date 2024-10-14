@@ -298,8 +298,7 @@ def p_print_content_value(p):
 def p_limited_statement(p):
     '''limited_statement : limited_statement_values
                             | limited_statement NEWLINE limited_statement_values
-                            | limited_statement limited_statement_values
-                            | limited_statement NEWLINE limited_statement_values NEWLINE'''
+                            | limited_statement limited_statement_values'''
 
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
@@ -342,8 +341,7 @@ def p_else_rule(p):
 def p_loop_statement(p):
     '''loop_statement : loop_statement_values
                         | loop_statement NEWLINE loop_statement_values
-                        | loop_statement loop_statement_values
-                        | loop_statement NEWLINE loop_statement_values NEWLINE'''
+                        | loop_statement loop_statement_values'''
 
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
@@ -395,8 +393,7 @@ def p_except_rule(p):
 def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop
                                 | limited_statement_loop NEWLINE limited_statement_values_loop
-                                | limited_statement_loop limited_statement_values_loop
-                                | limited_statement_loop NEWLINE limited_statement_values_loop NEWLINE'''
+                                | limited_statement_loop limited_statement_values_loop'''
 
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
@@ -449,8 +446,7 @@ def p_except_rule_loop(p):
 def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_values_func
                                 | limited_statement_func NEWLINE limited_statement_values_func
-                                | limited_statement_func limited_statement_values_func
-                                | limited_statement_func NEWLINE limited_statement_values_func NEWLINE'''
+                                | limited_statement_func limited_statement_values_func'''
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
@@ -502,8 +498,7 @@ def p_except_rule_func(p):
 def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_values_func_loop
                                     | limited_statement_func_loop NEWLINE limited_statement_values_func_loop
-                                    | limited_statement_func_loop limited_statement_values_func_loop
-                                    | limited_statement_func_loop NEWLINE limited_statement_values_func_loop NEWLINE'''
+                                    | limited_statement_func_loop limited_statement_values_func_loop'''
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
