@@ -10,7 +10,7 @@ precedence = (
     ('left', 'PLUS_EQUALS', 'MINUS_EQUALS', 'MODULO_EQUALS', 'MUL_EQUALS', 'DIV_EQUALS'),
     ('left', 'FLOOR_DIV_EQUALS', 'POWER_EQUALS'),
     ('left', 'OPEN_PARENTHESIS', 'CLOSED_PARENTHESIS'),
-    ('left', 'OPEN_BRACKET', 'OPEN_BRACKET'),
+    ('left', 'OPEN_BRACKET', 'CLOSED_BRACKET'),
     ('left', 'OPEN_CURLY_BRACKET', 'OPEN_CURLY_BRACKET')
 )
 
@@ -203,9 +203,9 @@ def p_variable(p):
 
 def p_math_expression(p):
     '''math_expression : math_expression_1
-                       | NOT math_expression_1
-                       | PLUS math_expression_1
-                       | MINUS math_expression_1'''
+                       | NOT expr_math_values_recv
+                       | PLUS expr_math_values_recv
+                       | MINUS expr_math_values_recv'''
 
 def p_math_expression_1(p):
     '''math_expression_1 : math_values
@@ -309,7 +309,6 @@ def p_printing(p):
 
 def p_print_content_recv(p):
     '''print_content_recv : print_content_recv PLUS print_content_value
-                          | print_content_recv PLUS math_expression_1
                           | print_content_value '''
 
 def p_print_content_value(p):
