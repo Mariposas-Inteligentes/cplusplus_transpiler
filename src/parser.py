@@ -274,24 +274,24 @@ def p_list_tuple_recursion(p):
                             | list_tuple_values'''
 
 def p_list_tuple_values(p):
-    '''list_tuple_values :   tuple
-                            | list
-                            | set
-                            | dictionary
-                            | values
-                            | variable
-                            | call_function'''
+    '''list_tuple_values : tuple
+                         | list
+                         | set
+                         | dictionary
+                         | values
+                         | variable
+                         | call_function'''
 
 def p_set(p):
     '''set : OPEN_CURLY_BRACKET set_recursion CLOSED_CURLY_BRACKET'''
 
 def p_set_recursion(p):
     '''set_recursion : set_recursion COMMA set_values
-                        | set_values'''
+                     | set_values'''
 
 def p_set_values(p):
     '''set_values : tuple
-                    | values'''
+                  | values'''
 
 def p_dictionary(p):
     '''dictionary : OPEN_CURLY_BRACKET dictionary_content CLOSED_CURLY_BRACKET
@@ -299,9 +299,7 @@ def p_dictionary(p):
 
 def p_dictionary_content(p):
     '''dictionary_content : dictionary_content COMMA list_tuple_values COLON list_tuple_values
-                          | dictionary_content COMMA values COLON list_tuple_values
-                          | list_tuple_values COLON list_tuple_values
-                          | values COLON list_tuple_values'''
+                          | list_tuple_values COLON list_tuple_values '''
 
 def p_printing(p):
     '''printing : PRINT OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
