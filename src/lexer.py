@@ -357,7 +357,9 @@ class Lexer(object):
         new_tokens = self.track_tokens_filter(new_tokens)
         new_tokens = self.indentation_filter(new_tokens)
 
+        
         new_tokens.insert(0, self.new_token("START_MARKER", 0))
+        new_tokens.append(self.new_token("NEWLINE", self.actual_line_no ))
         new_tokens.append(self.new_token("END_MARKER", self.actual_line_no))
         return new_tokens
 

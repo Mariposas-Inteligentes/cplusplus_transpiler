@@ -13,6 +13,7 @@ precedence = (
 
 def p_start(p):
     '''start : START_MARKER statement END_MARKER
+            | START_MARKER statement statement_values_end END_MARKER
             | START_MARKER END_MARKER'''
 
 def p_statement(p):
@@ -23,7 +24,25 @@ def p_statement_values(p):
     '''statement_values : def_function
                         | if_rule
                         | def_class
-                        | STRING
+                        | STRING NEWLINE
+                        | NONE NEWLINE
+                        | variable_assign NEWLINE
+                        | variable NEWLINE
+                        | math_expression NEWLINE
+                        | tuple NEWLINE
+                        | list NEWLINE
+                        | set NEWLINE
+                        | dictionary NEWLINE
+                        | call_function NEWLINE
+                        | PASS NEWLINE
+                        | printing NEWLINE
+                        | while_rule
+                        | for_rule
+                        | try_rule
+                        | NEWLINE'''
+
+def p_statement_values_end(p):
+    '''statement_values_end : STRING
                         | NONE
                         | variable_assign
                         | variable
@@ -34,11 +53,7 @@ def p_statement_values(p):
                         | dictionary
                         | call_function
                         | PASS
-                        | printing
-                        | while_rule
-                        | for_rule
-                        | try_rule
-                        | NEWLINE'''
+                        | printing'''
 
 def p_def_function(p):
     '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
@@ -55,28 +70,48 @@ def p_def_parameter_assign(p):
                             | VAR_FUNC_NAME ASSIGN values'''
 
 def p_func_statement(p):
-    '''func_statement : func_statement_values
-                        | func_statement func_statement_values'''
+    '''func_statement : func_statement_values_end
+                      | func_statement_recv
+                      | func_statement_recv func_statement_values_end'''
+
+def p_func_statement_recv(p):
+    '''func_statement_recv : func_statement_values
+                           | func_statement_recv func_statement_values'''
 
 def p_func_statement_values(p):
     '''func_statement_values : if_rule_func
-                               | STRING 
-                               | NONE
-                               | variable_assign
-                               | variable
-                               | tuple
-                               | list
-                               | set
-                               | dictionary
-                               | PASS
-                               | math_expression
-                               | call_function
-                               | printing
-                               | while_rule_func
-                               | for_rule_func
-                               | return_statement
-                               | try_rule_func
+                               | STRING NEWLINE
+                               | NONE NEWLINE
+                               | variable_assign NEWLINE
+                               | variable NEWLINE
+                               | tuple NEWLINE
+                               | list NEWLINE
+                               | set NEWLINE
+                               | dictionary NEWLINE
+                               | PASS NEWLINE
+                               | math_expression NEWLINE
+                               | call_function NEWLINE
+                               | printing NEWLINE
+                               | while_rule_func 
+                               | for_rule_func 
+                               | return_statement NEWLINE
+                               | try_rule_func 
                                | NEWLINE'''
+
+def p_func_statement_values_end(p):
+    '''func_statement_values_end : STRING 
+                               | NONE 
+                               | variable_assign 
+                               | variable 
+                               | tuple 
+                               | list 
+                               | set 
+                               | dictionary 
+                               | PASS 
+                               | math_expression 
+                               | call_function 
+                               | printing  
+                               | return_statement '''
 
 def p_return_statement(p):
     '''return_statement : RETURN
@@ -294,12 +329,35 @@ def p_print_content_value(p):
                             | dictionary'''
 
 def p_limited_statement(p):
-    '''limited_statement : limited_statement_values
-                         | limited_statement limited_statement_values'''
+    '''limited_statement : limited_statement_recv
+                         | limited_statement_values_end
+                         | limited_statement_recv limited_statement_values_end'''
+    
+def p_limited_statement_recv(p):
+    '''limited_statement_recv : limited_statement_values
+                              | limited_statement_recv limited_statement_values'''
 
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
-                                | STRING
+                                | STRING NEWLINE
+                                | NONE NEWLINE
+                                | variable NEWLINE
+                                | variable_assign NEWLINE
+                                | tuple NEWLINE
+                                | list NEWLINE
+                                | set NEWLINE
+                                | dictionary NEWLINE
+                                | PASS NEWLINE
+                                | math_expression NEWLINE
+                                | call_function NEWLINE
+                                | printing NEWLINE
+                                | while_rule
+                                | for_rule
+                                | try_rule
+                                | NEWLINE'''
+
+def p_limited_statement_values_end(p):
+    '''limited_statement_values_end : STRING
                                 | NONE
                                 | variable
                                 | variable_assign
@@ -310,11 +368,7 @@ def p_limited_statement_values(p):
                                 | PASS
                                 | math_expression
                                 | call_function
-                                | printing
-                                | while_rule
-                                | for_rule
-                                | try_rule
-                                | NEWLINE'''
+                                | printing '''
 
 def p_if_rule(p):
     '''if_rule : IF math_expression COLON NEWLINE INDENT limited_statement DEDENT
@@ -336,12 +390,37 @@ def p_else_rule(p):
     '''else_rule : ELSE COLON NEWLINE INDENT limited_statement DEDENT'''
 
 def p_loop_statement(p):
-    '''loop_statement : loop_statement_values
-                      | loop_statement loop_statement_values'''
+    '''loop_statement : loop_statement_recv
+                      | loop_statement_values_end
+                      | loop_statement_recv loop_statement_values_end'''
+
+def p_loop_statement_recv(p):
+    '''loop_statement_recv : loop_statement_values
+                           | loop_statement_recv loop_statement_values'''
 
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
-                                | STRING
+                                | STRING NEWLINE
+                                | NONE NEWLINE
+                                | variable NEWLINE
+                                | variable_assign NEWLINE
+                                | tuple NEWLINE
+                                | list NEWLINE
+                                | set NEWLINE
+                                | dictionary NEWLINE
+                                | PASS NEWLINE
+                                | math_expression NEWLINE
+                                | printing NEWLINE
+                                | while_rule 
+                                | for_rule
+                                | try_rule_loop
+                                | call_function NEWLINE
+                                | CONTINUE NEWLINE
+                                | BREAK NEWLINE
+                                | NEWLINE'''
+
+def p_loop_statement_values_end(p):
+    '''loop_statement_values_end : STRING
                                 | NONE
                                 | variable
                                 | variable_assign
@@ -352,13 +431,9 @@ def p_loop_statement_values(p):
                                 | PASS
                                 | math_expression
                                 | printing
-                                | while_rule
-                                | for_rule
-                                | try_rule_loop
                                 | call_function
                                 | CONTINUE
-                                | BREAK
-                                | NEWLINE'''
+                                | BREAK '''
 
 def p_while_rule(p):
     '''while_rule : WHILE math_expression COLON NEWLINE INDENT loop_statement DEDENT
@@ -387,12 +462,37 @@ def p_except_rule(p):
                     | EXCEPT COLON NEWLINE INDENT limited_statement DEDENT'''
 
 def p_limited_statement_loop(p):
-    '''limited_statement_loop : limited_statement_values_loop
-                              | limited_statement_loop limited_statement_values_loop'''
+    '''limited_statement_loop : limited_statement_values_loop_end
+                              | limited_statement_loop_recv
+                              | limited_statement_loop_recv limited_statement_values_loop_end'''
+    
+def p_limited_statement_loop_recv(p):
+    '''limited_statement_loop_recv : limited_statement_values_loop
+                                   | limited_statement_loop_recv limited_statement_values_loop'''
 
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
-                                        | STRING
+                                        | STRING NEWLINE
+                                        | NONE NEWLINE
+                                        | variable NEWLINE
+                                        | variable_assign NEWLINE
+                                        | tuple NEWLINE
+                                        | list NEWLINE
+                                        | set NEWLINE
+                                        | dictionary NEWLINE
+                                        | PASS NEWLINE
+                                        | math_expression NEWLINE
+                                        | call_function NEWLINE
+                                        | printing NEWLINE
+                                        | while_rule
+                                        | for_rule
+                                        | try_rule_loop
+                                        | BREAK NEWLINE
+                                        | CONTINUE NEWLINE
+                                        | NEWLINE'''
+
+def p_limited_statement_values_loop_end(p):
+    '''limited_statement_values_loop_end : STRING
                                         | NONE
                                         | variable
                                         | variable_assign
@@ -404,12 +504,8 @@ def p_limited_statement_values_loop(p):
                                         | math_expression
                                         | call_function
                                         | printing
-                                        | while_rule
-                                        | for_rule
-                                        | try_rule_loop
                                         | BREAK
-                                        | CONTINUE
-                                        | NEWLINE'''
+                                        | CONTINUE'''
 
 def p_if_rule_loop(p):
     '''if_rule_loop : IF math_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
@@ -439,12 +535,37 @@ def p_except_rule_loop(p):
                         | EXCEPT COLON NEWLINE INDENT limited_statement_loop DEDENT'''
 
 def p_limited_statement_func(p):
-    '''limited_statement_func : limited_statement_values_func
-                              | limited_statement_func limited_statement_values_func'''
+    '''limited_statement_func : limited_statement_func_recv
+                              | limited_statement_values_func_end
+                              | limited_statement_func_recv limited_statement_values_func_end'''
+
+def p_limited_statement_func_recv(p):
+    '''limited_statement_func_recv : limited_statement_values_func
+                                   | limited_statement_func_recv limited_statement_values_func'''
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
-                                        | STRING
+                                        | STRING NEWLINE
+                                        | NONE NEWLINE
+                                        | variable_assign NEWLINE
+                                        | variable NEWLINE
+                                        | tuple NEWLINE
+                                        | list NEWLINE
+                                        | set NEWLINE
+                                        | dictionary NEWLINE
+                                        | PASS NEWLINE
+                                        | math_expression NEWLINE
+                                        | printing NEWLINE
+                                        | call_function NEWLINE
+                                        | while_rule_func
+                                        | for_rule_func
+                                        | try_rule_func
+                                        | return_statement NEWLINE
+                                        | NEWLINE'''
+    
+
+def p_limited_statement_values_func_end(p):
+    '''limited_statement_values_func_end : STRING
                                         | NONE
                                         | variable_assign
                                         | variable
@@ -456,11 +577,7 @@ def p_limited_statement_values_func(p):
                                         | math_expression
                                         | printing
                                         | call_function
-                                        | while_rule_func
-                                        | for_rule_func
-                                        | try_rule_func
-                                        | return_statement
-                                        | NEWLINE'''
+                                        | return_statement '''
 
 def p_if_rule_func(p):
     '''if_rule_func : IF math_expression COLON NEWLINE INDENT limited_statement_func DEDENT
@@ -490,12 +607,38 @@ def p_except_rule_func(p):
                         | EXCEPT COLON NEWLINE INDENT limited_statement_func DEDENT'''
 
 def p_limited_statement_func_loop(p):
-    '''limited_statement_func_loop : limited_statement_values_func_loop
-                                   | limited_statement_func_loop limited_statement_values_func_loop'''
+    '''limited_statement_func_loop : limited_statement_func_loop_recv
+                                   | limited_statement_values_func_loop_end
+                                   | limited_statement_func_loop limited_statement_values_func_loop_end'''
+
+def p_limited_statement_func_loop_recv(p):
+    '''limited_statement_func_loop_recv : limited_statement_values_func_loop
+                                   | limited_statement_func_loop_recv limited_statement_values_func_loop'''
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
-                                            | STRING
+                                            | STRING NEWLINE
+                                            | NONE NEWLINE
+                                            | variable NEWLINE
+                                            | variable_assign NEWLINE
+                                            | tuple NEWLINE
+                                            | list NEWLINE
+                                            | set NEWLINE
+                                            | dictionary NEWLINE
+                                            | PASS NEWLINE
+                                            | math_expression NEWLINE
+                                            | printing NEWLINE
+                                            | while_rule_func 
+                                            | for_rule_func 
+                                            | try_rule_func_loop 
+                                            | call_function NEWLINE
+                                            | return_statement NEWLINE
+                                            | BREAK NEWLINE
+                                            | CONTINUE NEWLINE
+                                            | NEWLINE'''
+    
+def p_limited_statement_values_func_loop_end(p):
+    '''limited_statement_values_func_loop_end : STRING
                                             | NONE
                                             | variable
                                             | variable_assign
@@ -506,14 +649,10 @@ def p_limited_statement_values_func_loop(p):
                                             | PASS
                                             | math_expression
                                             | printing
-                                            | while_rule_func
-                                            | for_rule_func
-                                            | try_rule_func_loop
                                             | call_function
                                             | return_statement
                                             | BREAK
-                                            | CONTINUE
-                                            | NEWLINE'''
+                                            | CONTINUE '''
 
 def p_while_rule_func(p):
     '''while_rule_func : WHILE math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
