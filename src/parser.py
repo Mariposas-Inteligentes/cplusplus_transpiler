@@ -303,22 +303,16 @@ def p_dictionary_content(p):
 
 def p_printing(p):
     '''printing : PRINT OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+                | PRINT OPEN_PARENTHESIS STRING CLOSED_PARENTHESIS
+                | PRINT OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS
+                | PRINT OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS print_content_recv CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS NONE CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
 
 def p_print_content_recv(p):
-    '''print_content_recv : print_content_recv PLUS print_content_value
-                          | print_content_value '''
-
-def p_print_content_value(p):
-    '''print_content_value : STRING
-                            | call_function
-                            | variable
-                            | list
-                            | tuple
-                            | set
-                            | dictionary'''
+    '''print_content_recv : print_content_recv PLUS data_structures
+                          | data_structures '''
 
 def p_limited_statement(p):
     '''limited_statement : limited_statement_recv
