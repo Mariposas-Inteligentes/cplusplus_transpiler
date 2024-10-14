@@ -17,9 +17,7 @@ def p_start(p):
 
 def p_statement(p):
     '''statement : statement_values
-                    | statement NEWLINE statement_values
-                    | statement statement_values
-                    | statement NEWLINE statement_values NEWLINE'''
+                 | statement statement_values'''
 
 def p_statement_values(p):
     '''statement_values : def_function
@@ -58,9 +56,7 @@ def p_def_parameter_assign(p):
 
 def p_func_statement(p):
     '''func_statement : func_statement_values
-                        | func_statement NEWLINE func_statement_values
-                        | func_statement func_statement_values
-                        | func_statement NEWLINE func_statement_values NEWLINE'''
+                        | func_statement func_statement_values'''
 
 def p_func_statement_values(p):
     '''func_statement_values : if_rule_func
@@ -126,6 +122,8 @@ def p_math_values(p):
                     | PLUS INT
                     | MINUS FLOAT
                     | PLUS FLOAT'''
+
+                
 
 def p_bool_values(p):
     '''bool_values : TRUE
@@ -286,7 +284,7 @@ def p_print_content(p):
                     | print_content_value'''
 
 def p_print_content_value(p):
-    '''print_content_value : math_values
+    '''print_content_value : math_expression
                             | STRING
                             | call_function
                             | variable
@@ -297,8 +295,7 @@ def p_print_content_value(p):
 
 def p_limited_statement(p):
     '''limited_statement : limited_statement_values
-                            | limited_statement NEWLINE limited_statement_values
-                            | limited_statement limited_statement_values'''
+                         | limited_statement limited_statement_values'''
 
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
@@ -340,8 +337,7 @@ def p_else_rule(p):
 
 def p_loop_statement(p):
     '''loop_statement : loop_statement_values
-                        | loop_statement NEWLINE loop_statement_values
-                        | loop_statement loop_statement_values'''
+                      | loop_statement loop_statement_values'''
 
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
@@ -392,8 +388,7 @@ def p_except_rule(p):
 
 def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop
-                                | limited_statement_loop NEWLINE limited_statement_values_loop
-                                | limited_statement_loop limited_statement_values_loop'''
+                              | limited_statement_loop limited_statement_values_loop'''
 
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
@@ -445,8 +440,7 @@ def p_except_rule_loop(p):
 
 def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_values_func
-                                | limited_statement_func NEWLINE limited_statement_values_func
-                                | limited_statement_func limited_statement_values_func'''
+                              | limited_statement_func limited_statement_values_func'''
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
@@ -497,8 +491,7 @@ def p_except_rule_func(p):
 
 def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_values_func_loop
-                                    | limited_statement_func_loop NEWLINE limited_statement_values_func_loop
-                                    | limited_statement_func_loop limited_statement_values_func_loop'''
+                                   | limited_statement_func_loop limited_statement_values_func_loop'''
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
@@ -530,7 +523,7 @@ def p_while_rule_func(p):
 
 def p_for_rule_func(p):
     '''for_rule_func : FOR VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT limited_statement_func_loop DEDENT
-                        | FOR OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
+                     | FOR OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
 
 def p_if_rule_func_loop(p):
     '''if_rule_func_loop : IF math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
@@ -561,7 +554,7 @@ def p_except_rule_func_loop(p):
 
 def p_def_class(p):
     '''def_class : CLASS VAR_FUNC_NAME COLON NEWLINE INDENT statement DEDENT
-                    | CLASS VAR_FUNC_NAME OPEN_PARENTHESIS VAR_FUNC_NAME CLOSED_PARENTHESIS COLON NEWLINE INDENT statement DEDENT'''
+                 | CLASS VAR_FUNC_NAME OPEN_PARENTHESIS VAR_FUNC_NAME CLOSED_PARENTHESIS COLON NEWLINE INDENT statement DEDENT'''
 
 def p_error(p):
     global error_count

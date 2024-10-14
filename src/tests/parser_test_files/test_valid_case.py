@@ -2,6 +2,14 @@ def suma(a,b):
     return ((a)+(b)) 
  
 # Commmentttt
+a = {
+    1,
+    2,
+    3,
+    5, 
+    9
+}
+(suma(4, 5) + 30.5 - 20) //    (a[3] **     a[7+5*10])% persona.suma() # Important math
 
 def fibbonacci(n): 
     n_1 = 1 
