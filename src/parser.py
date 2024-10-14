@@ -44,9 +44,17 @@ def p_statement_values(p):
 
 def p_def_function(p):
     '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
-                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement NEWLINE DEDENT
-                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
-                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement NEWLINE DEDENT'''
+                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter_assign CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
+                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter COMMA def_parameter_assign CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
+                    | DEF VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT'''
+
+def p_def_parameter(p):
+    '''def_parameter : VAR_FUNC_NAME
+                     | def_parameter COMMA VAR_FUNC_NAME'''
+
+def p_def_parameter_assign(p):
+    '''def_parameter_assign : def_parameter_assign COMMA VAR_FUNC_NAME ASSIGN values
+                            | VAR_FUNC_NAME ASSIGN values'''
 
 def p_func_statement(p):
     '''func_statement : func_statement_values
@@ -87,15 +95,6 @@ def p_return_statement(p):
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
                         | VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
-
-def p_def_parameter(p):
-    '''def_parameter : def_function_parameter'''
-
-def p_def_function_parameter(p):
-    '''def_function_parameter : VAR_FUNC_NAME
-                                | def_function_parameter COMMA VAR_FUNC_NAME
-                                | def_function_parameter COMMA VAR_FUNC_NAME ASSIGN values
-                                | VAR_FUNC_NAME ASSIGN values'''
 
 def p_call_parameter(p):
     '''call_parameter : call_function_parameter'''
