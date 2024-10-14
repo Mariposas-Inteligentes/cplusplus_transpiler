@@ -11,7 +11,7 @@ precedence = (
     ('left', 'FLOOR_DIV_EQUALS', 'POWER_EQUALS'),
     ('left', 'OPEN_PARENTHESIS', 'CLOSED_PARENTHESIS'),
     ('left', 'OPEN_BRACKET', 'CLOSED_BRACKET'),
-    ('left', 'OPEN_CURLY_BRACKET', 'OPEN_CURLY_BRACKET')
+    ('left', 'OPEN_CURLY_BRACKET', 'CLOSED_CURLY_BRACKET')
 )
 
 def p_start(p):
@@ -177,9 +177,9 @@ def p_variable_assign_expr(p):
                             | variable_assign_var math_assign STRING
                             | variable math_assign call_function
                             | variable_assign_var math_assign call_function
-                            | variable ASSIGN data_structures
-                            | variable_assign_var ASSIGN data_structures'''
-
+                            | variable math_assign data_structures
+                            | variable_assign_var math_assign data_structures'''
+                            
 def p_data_structures(p):
     '''data_structures : list
                         | set
