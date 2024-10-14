@@ -202,15 +202,18 @@ def p_variable(p):
                 | variable OPEN_BRACKET access_content COLON CLOSED_BRACKET'''
 
 def p_math_expression(p):
-    '''math_expression : math_values
-                       | NOT math_expression
-                       | PLUS math_expression
-                       | MINUS math_expression
-                       | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+    '''math_expression : math_expression_1
+                       | NOT math_expression_1
+                       | PLUS math_expression_1
+                       | MINUS math_expression_1'''
+
+def p_math_expression_1(p):
+    '''math_expression_1 : math_values
+                       | OPEN_PARENTHESIS math_expression_1 CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS STRING CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS
-                       | math_expression math_symbols expr_math_values_recv
+                       | math_expression_1 math_symbols expr_math_values_recv
                        | variable math_symbols expr_math_values_recv
                        | call_function math_symbols expr_math_values_recv
                        | STRING math_symbols expr_math_values_recv'''
@@ -301,17 +304,18 @@ def p_dictionary_content(p):
                           | values COLON list_tuple_values'''
 
 def p_printing(p):
-    '''printing : PRINT OPEN_PARENTHESIS print_content CLOSED_PARENTHESIS
+    '''printing : PRINT OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
+                | PRINT OPEN_PARENTHESIS print_content_recv CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS NONE CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
 
-def p_print_content(p):
-    '''print_content : print_content PLUS print_content_value
-                    | print_content_value'''
+def p_print_content_recv(p):
+    '''print_content_recv : print_content_recv PLUS print_content_value
+                          | print_content_recv math_expression 
+                          | print_content_value '''
 
 def p_print_content_value(p):
-    '''print_content_value : math_expression
-                            | STRING
+    '''print_content_value : STRING
                             | call_function
                             | variable
                             | list
