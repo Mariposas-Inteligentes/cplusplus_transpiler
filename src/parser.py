@@ -9,6 +9,9 @@ precedence = (
     ('left', 'POWER'),
     ('left', 'PLUS_EQUALS', 'MINUS_EQUALS', 'MODULO_EQUALS', 'MUL_EQUALS', 'DIV_EQUALS'),
     ('left', 'FLOOR_DIV_EQUALS', 'POWER_EQUALS'),
+    ('left', 'OPEN_PARENTHESIS', 'CLOSED_PARENTHESIS'),
+    ('left', 'OPEN_BRACKET', 'OPEN_BRACKET'),
+    ('left', 'OPEN_CURLY_BRACKET', 'OPEN_CURLY_BRACKET')
 )
 
 def p_start(p):
@@ -125,7 +128,7 @@ def p_return_statement(p):
 
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
-                        | VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
+                     | VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
 
 def p_call_parameter(p):
     '''call_parameter : call_function_parameter'''
@@ -152,24 +155,11 @@ def p_values(p):
 def p_math_values(p):
     '''math_values : INT
                     | FLOAT
-                    | bool_values
-                    | MINUS INT
-                    | PLUS INT
-                    | MINUS FLOAT
-                    | PLUS FLOAT'''
-
-                
+                    | bool_values '''     
 
 def p_bool_values(p):
     '''bool_values : TRUE
                     | FALSE'''
-
-def p_period_operator(p):
-    '''period_operator : period_operator PERIOD VAR_FUNC_NAME
-                       | period_operator PERIOD call_function
-                       | PERIOD VAR_FUNC_NAME
-                       | PERIOD call_function'''
-
 
 def p_access_content(p):
     '''access_content : values
@@ -200,6 +190,10 @@ def p_variable_assign_var(p):
     '''variable_assign_var : variable math_assign variable
                            | variable_assign_var math_assign variable'''
 
+def p_period_operator(p):
+    '''period_operator : PERIOD VAR_FUNC_NAME
+                       | PERIOD call_function'''
+
 def p_variable(p):
     '''variable : VAR_FUNC_NAME
                 | variable period_operator
@@ -209,20 +203,17 @@ def p_variable(p):
 
 def p_math_expression(p):
     '''math_expression : math_values
+                       | NOT math_expression
+                       | PLUS math_expression
+                       | MINUS math_expression
                        | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS STRING CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS
-                       | NOT math_expression
-                       | MINUS OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
                        | math_expression math_symbols expr_math_values_recv
-                       | STRING math_symbols expr_math_values_recv
                        | variable math_symbols expr_math_values_recv
                        | call_function math_symbols expr_math_values_recv
-                       | math_expression math_symbols variable math_symbols expr_math_values_recv
-                       | math_expression math_symbols call_function math_symbols expr_math_values_recv
-                       | STRING math_symbols variable math_symbols expr_math_values_recv
-                       | STRING math_symbols call_function math_symbols expr_math_values_recv'''
+                       | STRING math_symbols expr_math_values_recv'''
 
 def p_expr_math_values_recv(p):
     '''expr_math_values_recv : math_values
