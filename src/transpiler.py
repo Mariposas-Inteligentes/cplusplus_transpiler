@@ -1,4 +1,5 @@
 from lexer import Lexer
+from parser import Parser
 
 class Transpiler():
     def __init__(self, file_name, debug=False):
@@ -6,6 +7,7 @@ class Transpiler():
         self.file_name = file_name
         self.lexer = Lexer()
         self.lexer.build()
+        self.parser = Parser(debug=self.debug)
 
     def input(self):
         if self.file_name is None:
@@ -20,7 +22,14 @@ class Transpiler():
 
         data = file.read()
         self.lexer.input(data)
+        print(f'Error count for lexer: {self.lexer.error_count}')
 
         if(self.debug and self.lexer.token_stream):
             for i in self.lexer.token_stream:
                 print(i)
+        if (self.lexer.error_count == 0):
+            self.parser.set_lexer(self.lexer)
+            self.parser.parse(data)
+            print(f"Error count for parsing: {self.parser.error_count}")
+
+        

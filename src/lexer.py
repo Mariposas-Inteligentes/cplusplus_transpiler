@@ -3,6 +3,7 @@ from common import IndentationError
 
 class Lexer(object):
     tokens = (
+        'START_MARKER',
         'IF',
         'ELSE',
         'ELIF',
@@ -51,7 +52,6 @@ class Lexer(object):
         'CLOSED_BRACKET',
         'OPEN_CURLY_BRACKET',
         'CLOSED_CURLY_BRACKET',
-        'COMMENT',
         'INDENT',
         'DEDENT',
         'NEWLINE',
@@ -59,11 +59,12 @@ class Lexer(object):
         'INT',
         'FLOAT',
         'STRING',
-        'WHITESPACE',
-        'ENDMARKER',
+        'WHITESPACE',        
         'TRY',
         'EXCEPT',
-        'IN'
+        'IN',
+        'END_MARKER',
+        'FAKE_NEWLINE'
     )
 
     RESERVED = {
@@ -101,7 +102,7 @@ class Lexer(object):
 
     t_ASSIGN = r'='
     t_PLUS_EQUALS = r'\+='
-    t_MINUS_EQUALS = r'-='
+    t_MINUS_EQUALS = r'\-='
     t_MUL_EQUALS = r'\*='
     t_DIV_EQUALS = r'\/='
     t_MODULO_EQUALS = r'\%='
@@ -118,10 +119,15 @@ class Lexer(object):
 
     t_COMMA = r'\,'
     t_PERIOD = r'\.'
-    t_COLON = r'\:'
 
-    t_ignore_COMMENT = r'\#.*'
+    t_ignore_COMMENT = r'\#[^\n]*'
     
+    def t_COLON(self, t):
+        r':\ *'
+        t.value = ':'
+        t.type = 'COLON'
+        return t
+
     def t_FLOAT(self, t):
         r'([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*)'
         t.value = float(t.value)
@@ -166,7 +172,6 @@ class Lexer(object):
         r'\}'
         self.count_curly_brackets -= 1
         return t
-
     
     def t_WHITESPACE(self, t):
         r'[ ]+'
@@ -174,10 +179,15 @@ class Lexer(object):
             return t
 
     def t_NEWLINE(self, t):
-        r'\n+'
-        t.lexer.lineno += len(t.value)
+        r'\n'
+        self.actual_line_no += 1
+        t.lexer.lineno = self.actual_line_no
+        t.lineno = self.actual_line_no
         t.type = "NEWLINE"
         if self.count_curly_brackets == 0 and self.count_brackets == 0 and self.count_parenthesis == 0:
+            return t
+        else:
+            t.type = "FAKE_NEWLINE"
             return t
 
     t_ignore  = '\t'
@@ -195,6 +205,8 @@ class Lexer(object):
         self.count_brackets = 0
         self.count_curly_brackets = 0
         self.error_count = 0
+        self.count_token = 0
+        self.actual_line_no = 1
 
         # Consts used to track indentation
         self.NO_INDENT = 0
@@ -313,17 +325,41 @@ class Lexer(object):
                 new_tokens.append(self.DEDENT(token.lineno))
 
         return new_tokens
-             
+
+
+    def filter_ws(self, tokens):
+        new_tokens = []
+        i = 0
+        for token in tokens:
+            if (i-1 < 0 or i+1 >= len(tokens)):  # first or last token
+                new_tokens.append(tokens[i])
+            elif (token.type == "WHITESPACE" and tokens[i-1].type == "NEWLINE" and tokens[i+1].type == "NEWLINE"):  # I am whitespace and before and after is a newline
+                pass
+            else: # before and after was not a whitespace
+                new_tokens.append(tokens[i])
+            i +=1
+        return new_tokens
+       
     def filter(self):
         # Filter through the original tokens to create the new ones
         tokens = iter(self.lexer.token, None)
-        tokens = self.track_tokens_filter(tokens)
-        tokens = self.indentation_filter(tokens)
-        lineno = 1
-        if tokens[len(tokens)-1] is not None:
-            lineno = tokens[len(tokens)-1].lineno
-        tokens.append(self.new_token("ENDMARKER", lineno))
-        return tokens
+
+        new_tokens = []
+        self.actual_line_no = 1
+        for token in tokens:
+            token.lineno = self.actual_line_no
+            if token.type != 'FAKE_NEWLINE':
+                new_tokens.append(token)
+
+        new_tokens = self.filter_ws(new_tokens)       
+        new_tokens = self.track_tokens_filter(new_tokens)
+        new_tokens = self.indentation_filter(new_tokens)
+
+        
+        new_tokens.insert(0, self.new_token("START_MARKER", 0))
+        new_tokens.append(self.new_token("NEWLINE", self.actual_line_no ))
+        new_tokens.append(self.new_token("END_MARKER", self.actual_line_no))
+        return new_tokens
 
 
     def input(self, source_code):
@@ -334,14 +370,23 @@ class Lexer(object):
             self.count_curly_brackets = 0
             self.lexer.input(source_code)
             self.token_stream = self.filter()
+            self.count_token = 0
         except IndentationError as e:
+            self.error_count += 1
             print(f"Error in input: {e.message} at line {e.lineno}")
             self.token_stream = []
 
-    def tokenize(self,data):
+    def tokenize(self, data):
         self.lexer.input(data)
         while True:
             tok = self.lexer.token()
             if not tok:
                 break
             print(tok)
+
+    def token(self):
+        if self.count_token < len(self.token_stream):
+            self.count_token += 1
+            return self.token_stream[self.count_token-1]
+        return None
+        

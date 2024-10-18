@@ -20,9 +20,9 @@ if True:
     token_types = [token.type for token in lexer.token_stream]
 
     expected = [
-        'IF', 'TRUE', 'COLON', 'NEWLINE', 'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE',
-        'IF', 'FALSE', 'COLON', 'NEWLINE', 'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE', 'DEDENT',
-        'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE', 'DEDENT', 'ENDMARKER'
+        'START_MARKER', 'IF', 'TRUE', 'COLON', 'NEWLINE', 'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE',
+        'IF', 'FALSE', 'COLON', 'NEWLINE', 'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE',
+        'DEDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE', 'DEDENT', 'NEWLINE', 'END_MARKER'
     ]
 
     assert token_types == expected
@@ -48,7 +48,8 @@ def func():
     token_types = [token.type for token in lexer.token_stream]
 
     expected = [
-        'DEF', 'VAR_FUNC_NAME', 'OPEN_PARENTHESIS', 'CLOSED_PARENTHESIS', 'COLON', 'NEWLINE', 'INDENT', 'RETURN', 'TRUE', 'NEWLINE', 'DEDENT', 'ENDMARKER'
+        'START_MARKER', 'DEF', 'VAR_FUNC_NAME', 'OPEN_PARENTHESIS', 'CLOSED_PARENTHESIS', 'COLON',
+        'NEWLINE','INDENT', 'RETURN', 'TRUE', 'NEWLINE', 'DEDENT', 'NEWLINE', 'END_MARKER'
     ]
 
     assert token_types == expected
@@ -74,7 +75,8 @@ if True:
     token_types = [token.type for token in lexer.token_stream]
 
     expected = [
-        'IF', 'TRUE', 'COLON', 'NEWLINE', 'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE', 'DEDENT', 'ENDMARKER'
+        'START_MARKER', 'IF', 'TRUE', 'COLON', 'NEWLINE', 'INDENT', 'PRINT','OPEN_PARENTHESIS',
+        'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE', 'DEDENT', 'NEWLINE', 'END_MARKER'
     ]
 
     assert token_types == expected
@@ -91,13 +93,11 @@ def outer():
     token_types = [token.type for token in lexer.token_stream]
 
     expected = [
-        'DEF', 'VAR_FUNC_NAME', 'OPEN_PARENTHESIS', 'CLOSED_PARENTHESIS', 'COLON', 'NEWLINE',
-        'INDENT', 'IF', 'TRUE', 'COLON', 'NEWLINE',
+        'START_MARKER', 'DEF', 'VAR_FUNC_NAME', 'OPEN_PARENTHESIS', 'CLOSED_PARENTHESIS', 'COLON',
+        'NEWLINE', 'INDENT', 'IF', 'TRUE', 'COLON', 'NEWLINE',
         'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE',
-        'IF', 'FALSE', 'COLON', 'NEWLINE',
-        'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE',
-        'DEDENT', 'DEDENT', 'DEDENT', 'ENDMARKER'
+        'IF', 'FALSE', 'COLON', 'NEWLINE', 'INDENT', 'PRINT', 'OPEN_PARENTHESIS', 'STRING', 'CLOSED_PARENTHESIS', 'NEWLINE',
+        'DEDENT', 'DEDENT', 'DEDENT', 'NEWLINE', 'END_MARKER'
     ]
-
 
     assert token_types == expected

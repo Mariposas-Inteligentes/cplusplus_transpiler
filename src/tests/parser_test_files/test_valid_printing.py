@@ -1,0 +1,8 @@
+print(variable[4].pepe() + 4 - 6)
+print("string" + " " + "string")
+print(variable1 + variable2)
+print("string" + var_str + "string")
+print(-pepe)
+print(-pepe_funct())
+print(variable)
+print("striiiiiiiiiiiing")
