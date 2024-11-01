@@ -1,5 +1,6 @@
 import ply.yacc as yacc
 from lexer import Lexer
+from node import Node
 
 error_count = 0
 
@@ -155,11 +156,16 @@ def p_values(p):
 def p_math_values(p):
     '''math_values : INT
                     | FLOAT
-                    | bool_values '''     
+                    | bool_values '''
+    if isinstance(p[1], int):
+        p[0] = Node(n_type="IntegerLiteral", value=p[1])
+    elif isinstance(p[1], float):
+        p[0] = Node(n_type="FloatLiteral", value=p[1])
 
 def p_bool_values(p):
     '''bool_values : TRUE
                     | FALSE'''
+    p[0] = Node(n_type="BooleanLiteral", value=(p[1] == 'TRUE'))
 
 def p_access_content(p):
     '''access_content : values
@@ -206,7 +212,9 @@ def p_math_expression(p):
                        | NOT expr_math_values_recv
                        | PLUS expr_math_values_recv
                        | MINUS expr_math_values_recv'''
-
+    print(p[0])
+    print(p[1])
+    
 def p_math_expression_1(p):
     '''math_expression_1 : math_values
                        | OPEN_PARENTHESIS math_expression_1 CLOSED_PARENTHESIS
@@ -217,6 +225,11 @@ def p_math_expression_1(p):
                        | variable math_symbols expr_math_values_recv
                        | call_function math_symbols expr_math_values_recv
                        | STRING math_symbols expr_math_values_recv'''
+    
+    if len(p) == 2:
+        p[0] = p[1]
+    else: # TODO(us): cambiar
+        p[0] = Node(n_type="BinaryOp", children=[p[1], p[3]], value=p[2])
 
 def p_expr_math_values_recv(p):
     '''expr_math_values_recv : math_values
@@ -226,6 +239,8 @@ def p_expr_math_values_recv(p):
                             | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
                             | OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
                             | OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS'''
+    if len(p) == 2:
+        p[0] = p[1]
     
 def p_math_symbols(p):
     '''math_symbols : PLUS
