@@ -1,7 +1,11 @@
+# Testing
 src/test_parser.py
 src/testing_parser.py
 src/parser.out
 src/parsetab.py
+
+# Visualization
+src/tree
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
