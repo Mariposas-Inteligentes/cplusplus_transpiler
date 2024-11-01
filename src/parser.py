@@ -152,6 +152,13 @@ def p_values(p):
     '''values : math_expression
                 | STRING
                 | NONE'''
+    if isinstance(p[1], Node):
+        p[0] = p[1]
+    elif isinstance(p[1], str):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    else: # None
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+        
 
 def p_math_values(p):
     '''math_values : INT
@@ -161,6 +168,8 @@ def p_math_values(p):
         p[0] = Node(n_type="IntegerLiteral", value=p[1])
     elif isinstance(p[1], float):
         p[0] = Node(n_type="FloatLiteral", value=p[1])
+    else: # Bool values
+        p[0] = p[1]
 
 def p_bool_values(p):
     '''bool_values : TRUE
@@ -212,9 +221,13 @@ def p_math_expression(p):
                        | NOT expr_math_values_recv
                        | PLUS expr_math_values_recv
                        | MINUS expr_math_values_recv'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='UnaryOp', children=[p[2]], value=p[1])
+
     print(p[0])
-    print(p[1])
-    
+            
 def p_math_expression_1(p):
     '''math_expression_1 : math_values
                        | OPEN_PARENTHESIS math_expression_1 CLOSED_PARENTHESIS
@@ -228,7 +241,9 @@ def p_math_expression_1(p):
     
     if len(p) == 2:
         p[0] = p[1]
-    else: # TODO(us): cambiar
+    elif p[1]=='(':
+        p[0] = p[2]
+    else:
         p[0] = Node(n_type="BinaryOp", children=[p[1], p[3]], value=p[2])
 
 def p_expr_math_values_recv(p):
@@ -241,6 +256,8 @@ def p_expr_math_values_recv(p):
                             | OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS'''
     if len(p) == 2:
         p[0] = p[1]
+    else:
+        p[0] = p[2]
     
 def p_math_symbols(p):
     '''math_symbols : PLUS
@@ -252,6 +269,9 @@ def p_math_symbols(p):
                     | POWER
                     | logic_symbols
                     | cmp_symbols'''
+    
+    p[0] = Node(n_type="MathSymbol", value=p[1])
+
 
 def p_math_assign(p):
     '''math_assign  : ASSIGN
@@ -262,12 +282,16 @@ def p_math_assign(p):
                     | MODULO_EQUALS
                     | FLOOR_DIV_EQUALS
                     | POWER_EQUALS'''
+    
+    p[0] = Node(n_type="MathAssign", value=p[1])
 
 
 def p_logic_symbols(p):
     '''logic_symbols : OR
                     | AND
                     | IN'''
+    
+    p[0] = Node(n_type="LogicSymbols", value=p[1])
 
 def p_cmp_symbols(p):
     '''cmp_symbols : EQUALS
@@ -276,6 +300,8 @@ def p_cmp_symbols(p):
                     | MORE
                     | LESS_EQUALS
                     | MORE_EQUALS'''
+    
+    p[0] = Node(n_type="CmpSymbols", value=p[1])
 
 def p_tuple(p):
     '''tuple : OPEN_PARENTHESIS list_tuple_recursion COMMA list_tuple_values CLOSED_PARENTHESIS'''
