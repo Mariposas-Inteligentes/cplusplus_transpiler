@@ -3,6 +3,7 @@ from lexer import Lexer
 from node import Node
 
 error_count = 0
+debug_parser = False
 
 precedence = (
     ('left', 'PLUS', 'MINUS'),
@@ -19,10 +20,26 @@ def p_start(p):
     '''start : START_MARKER statement END_MARKER
             | START_MARKER statement statement_values_end END_MARKER
             | START_MARKER END_MARKER'''
-
+    if len(p) == 4:
+        p[0] = p[2]
+    elif len(p) == 5:
+        p[0] = Node(n_type='Start', children = [p[2], p[3]])
+    else:  # Empty
+        p[0] = Node(n_type='Empty')  # TODO(profe): verificar
+        
+    # TODO(us): visualize p[0] only in debug
+    # if debug_parser:
+    print("AST tree:")
+    print(p[0])
+    p[0].visualize()
+    
 def p_statement(p):
     '''statement : statement_values
                  | statement statement_values'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])  # TODO(profe): se necesita
 
 def p_statement_values(p):
     '''statement_values : def_function
@@ -44,6 +61,12 @@ def p_statement_values(p):
                         | for_rule
                         | try_rule
                         | NEWLINE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
+        p[0] = p[1]
 
 def p_statement_values_end(p):
     '''statement_values_end : STRING
@@ -58,6 +81,12 @@ def p_statement_values_end(p):
                         | call_function
                         | PASS
                         | printing'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != 'pass':  # Ignore pass
+        p[0] = p[1]
 
 def p_def_function(p):
     '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
@@ -77,10 +106,18 @@ def p_func_statement(p):
     '''func_statement : func_statement_values_end
                       | func_statement_recv
                       | func_statement_recv func_statement_values_end'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_func_statement_recv(p):
     '''func_statement_recv : func_statement_values
                            | func_statement_recv func_statement_values'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_func_statement_values(p):
     '''func_statement_values : if_rule_func
@@ -101,6 +138,12 @@ def p_func_statement_values(p):
                                | return_statement NEWLINE
                                | try_rule_func 
                                | NEWLINE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
+        p[0] = p[1]
 
 def p_func_statement_values_end(p):
     '''func_statement_values_end : STRING 
@@ -116,6 +159,12 @@ def p_func_statement_values_end(p):
                                | call_function 
                                | printing  
                                | return_statement '''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != 'pass':  # Ignore pass
+        p[0] = p[1]
 
 def p_return_statement(p):
     '''return_statement : RETURN
@@ -154,7 +203,7 @@ def p_values(p):
                 | NONE'''
     if isinstance(p[1], Node):
         p[0] = p[1]
-    elif isinstance(p[1], str):
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     else: # None
         p[0] = Node(n_type="NoneLiteral", value=p[1])
@@ -225,8 +274,6 @@ def p_math_expression(p):
         p[0] = p[1]
     else:
         p[0] = Node(n_type='UnaryOp', children=[p[2]], value=p[1])
-
-    print(p[0])
             
 def p_math_expression_1(p):
     '''math_expression_1 : math_values
@@ -359,10 +406,18 @@ def p_limited_statement(p):
     '''limited_statement : limited_statement_recv
                          | limited_statement_values_end
                          | limited_statement_recv limited_statement_values_end'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
     
 def p_limited_statement_recv(p):
     '''limited_statement_recv : limited_statement_values
                               | limited_statement_recv limited_statement_values'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
@@ -382,6 +437,12 @@ def p_limited_statement_values(p):
                                 | for_rule
                                 | try_rule
                                 | NEWLINE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
+        p[0] = p[1]
 
 def p_limited_statement_values_end(p):
     '''limited_statement_values_end : STRING
@@ -396,6 +457,12 @@ def p_limited_statement_values_end(p):
                                 | math_expression
                                 | call_function
                                 | printing '''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != 'pass':  # Ignore pass
+        p[0] = p[1]
 
 def p_if_rule(p):
     '''if_rule : IF math_expression COLON NEWLINE INDENT limited_statement DEDENT
@@ -420,10 +487,18 @@ def p_loop_statement(p):
     '''loop_statement : loop_statement_recv
                       | loop_statement_values_end
                       | loop_statement_recv loop_statement_values_end'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_loop_statement_recv(p):
     '''loop_statement_recv : loop_statement_values
                            | loop_statement_recv loop_statement_values'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
@@ -445,6 +520,17 @@ def p_loop_statement_values(p):
                                 | CONTINUE NEWLINE
                                 | BREAK NEWLINE
                                 | NEWLINE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif p[1] == 'continue':
+        p[0] = Node(n_type="Continue", value=p[1])
+    elif p[1] == 'break':
+        p[0] = Node(n_type="Break", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
+        p[0] = p[1]
+    
 
 def p_loop_statement_values_end(p):
     '''loop_statement_values_end : STRING
@@ -461,6 +547,16 @@ def p_loop_statement_values_end(p):
                                 | call_function
                                 | CONTINUE
                                 | BREAK '''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif p[1] == 'continue':
+        p[0] = Node(n_type="Continue", value=p[1])
+    elif p[1] == 'break':
+        p[0] = Node(n_type="Break", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != 'pass':  # Ignore pass
+        p[0] = p[1]
 
 def p_while_rule(p):
     '''while_rule : WHILE math_expression COLON NEWLINE INDENT loop_statement DEDENT
@@ -490,10 +586,18 @@ def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop_end
                               | limited_statement_loop_recv
                               | limited_statement_loop_recv limited_statement_values_loop_end'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
     
 def p_limited_statement_loop_recv(p):
     '''limited_statement_loop_recv : limited_statement_values_loop
                                    | limited_statement_loop_recv limited_statement_values_loop'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
@@ -515,6 +619,16 @@ def p_limited_statement_values_loop(p):
                                         | BREAK NEWLINE
                                         | CONTINUE NEWLINE
                                         | NEWLINE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif p[1] == 'continue':
+        p[0] = Node(n_type="Continue", value=p[1])
+    elif p[1] == 'break':
+        p[0] = Node(n_type="Break", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
+        p[0] = p[1]
 
 def p_limited_statement_values_loop_end(p):
     '''limited_statement_values_loop_end : STRING
@@ -531,6 +645,16 @@ def p_limited_statement_values_loop_end(p):
                                         | printing
                                         | BREAK
                                         | CONTINUE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif p[1] == 'continue':
+        p[0] = Node(n_type="Continue", value=p[1])
+    elif p[1] == 'break':
+        p[0] = Node(n_type="Break", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != 'pass':  # Ignore pass
+        p[0] = p[1]
 
 def p_if_rule_loop(p):
     '''if_rule_loop : IF math_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
@@ -563,10 +687,18 @@ def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_func_recv
                               | limited_statement_values_func_end
                               | limited_statement_func_recv limited_statement_values_func_end'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_limited_statement_func_recv(p):
     '''limited_statement_func_recv : limited_statement_values_func
                                    | limited_statement_func_recv limited_statement_values_func'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
@@ -587,7 +719,12 @@ def p_limited_statement_values_func(p):
                                         | try_rule_func
                                         | return_statement NEWLINE
                                         | NEWLINE'''
-    
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
+        p[0] = p[1]
 
 def p_limited_statement_values_func_end(p):
     '''limited_statement_values_func_end : STRING
@@ -602,7 +739,13 @@ def p_limited_statement_values_func_end(p):
                                         | math_expression
                                         | printing
                                         | call_function
-                                        | return_statement '''
+                                        | return_statement'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != 'pass':  # Ignore pass
+        p[0] = p[1]
 
 def p_if_rule_func(p):
     '''if_rule_func : IF math_expression COLON NEWLINE INDENT limited_statement_func DEDENT
@@ -635,10 +778,18 @@ def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_func_loop_recv
                                    | limited_statement_values_func_loop_end
                                    | limited_statement_func_loop_recv limited_statement_values_func_loop_end'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_limited_statement_func_loop_recv(p):
     '''limited_statement_func_loop_recv : limited_statement_values_func_loop
                                         | limited_statement_func_loop_recv limited_statement_values_func_loop'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
@@ -661,6 +812,16 @@ def p_limited_statement_values_func_loop(p):
                                             | BREAK NEWLINE
                                             | CONTINUE NEWLINE
                                             | NEWLINE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif p[1] == 'continue':
+        p[0] = Node(n_type="Continue", value=p[1])
+    elif p[1] == 'break':
+        p[0] = Node(n_type="Break", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
+        p[0] = p[1]
     
 def p_limited_statement_values_func_loop_end(p):
     '''limited_statement_values_func_loop_end : STRING
@@ -677,7 +838,17 @@ def p_limited_statement_values_func_loop_end(p):
                                             | call_function
                                             | return_statement
                                             | BREAK
-                                            | CONTINUE '''
+                                            | CONTINUE'''
+    if p[1] == 'None': 
+        p[0] = Node(n_type="NoneLiteral", value=p[1])
+    elif p[1] == 'continue':
+        p[0] = Node(n_type="Continue", value=p[1])
+    elif p[1] == 'break':
+        p[0] = Node(n_type="Break", value=p[1])
+    elif isinstance(p[1], str) and (p[1][0] == "\'" or p[1][0] == "\""):
+        p[0] = Node(n_type="StringLiteral", value=p[1])
+    elif p[1] != 'pass':  # Ignore pass
+        p[0] = p[1]
 
 def p_while_rule_func(p):
     '''while_rule_func : WHILE math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
@@ -739,6 +910,8 @@ class Parser:
         self.lexer = lexer
 
     def parse(self, input_text):
-        self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
         global error_count
+        global debug_parser
+        self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
+        debug_parser = self.debug
         self.error_count = error_count
