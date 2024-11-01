@@ -11,6 +11,8 @@ class Node:
         indent = "  " * level
         result = f"{indent}Node(type={self.n_type}, value={self.value})\n"
         for child in self.children:
+            print(type(child))
+            print(child.value)
             result += child.__str__(level + 1)
         return result
     

@@ -22,11 +22,11 @@ def p_start(p):
             | START_MARKER END_MARKER'''
     if len(p) == 4:
         p[0] = p[2]
-    elif len(p) == 5:
+    elif len(p) == 5: # TODO(us): arreglar
         p[0] = Node(n_type='Start', children = [p[2], p[3]])
     else:  # Empty
-        p[0] = Node(n_type='Empty')  # TODO(profe): verificar
-        
+        p[0] = Node(n_type='Empty')  # TODO(profe): verificar como borrar nodos
+
     # TODO(us): visualize p[0] only in debug
     # if debug_parser:
     print("AST tree:")
@@ -229,6 +229,7 @@ def p_access_content(p):
     '''access_content : values
                       | variable
                       | tuple'''
+    p[0] = p[1]
 
 def p_variable_assign(p):
     '''variable_assign : variable_assign_var
@@ -257,13 +258,29 @@ def p_variable_assign_var(p):
 def p_period_operator(p):
     '''period_operator : PERIOD VAR_FUNC_NAME
                        | PERIOD call_function'''
+    if isinstance(p[2], Node):
+        p[0] = p[2]
+    else: # VAR_FUNC_NAME
+        p[0] = Node(n_type="VarName", value=p[2])
 
 def p_variable(p):
     '''variable : VAR_FUNC_NAME
                 | variable period_operator
-                | variable OPEN_BRACKET access_content CLOSED_BRACKET
+                | variable OPEN_BRACKET access_content CLOSED_BRACKET 
                 | variable OPEN_BRACKET access_content COLON access_content CLOSED_BRACKET
                 | variable OPEN_BRACKET access_content COLON CLOSED_BRACKET'''
+    
+    if len(p) == 2:
+        p[0] = Node(n_type="VarName", value=p[1])
+    elif len(p) == 3:  # TODO(us): Como manejar esto bien
+        p[0] = Node(n_type="AttributeMethod", children=[p[1], p[2]])
+    elif len(p) == 5:
+        p[0] = Node(n_type="AccessVariable", children=[p[1], p[3]])
+    elif len(p) == 6:
+        p[0] = Node(n_type="AccessVarList", children=[p[1], p[3]])
+    elif len(p) == 7:
+        p[0] = Node(n_type="AccessVarList", children=[p[1], p[3], p[5]])
+    
 
 def p_math_expression(p):
     '''math_expression : math_expression_1
@@ -289,7 +306,7 @@ def p_math_expression_1(p):
     if len(p) == 2:
         p[0] = p[1]
     elif p[1]=='(':
-        p[0] = p[2]
+        p[0] = Node(n_type="Parenthesis", children=[p[2]])
     else:
         p[0] = Node(n_type="BinaryOp", children=[p[1], p[3]], value=p[2])
 
@@ -304,7 +321,8 @@ def p_expr_math_values_recv(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = p[2]
+        # TODO(us): Add strings because they aren't handled
+        p[0] = Node(n_type="Parenthesis", children=[p[2]])
     
 def p_math_symbols(p):
     '''math_symbols : PLUS
@@ -352,6 +370,9 @@ def p_cmp_symbols(p):
 
 def p_tuple(p):
     '''tuple : OPEN_PARENTHESIS list_tuple_recursion COMMA list_tuple_values CLOSED_PARENTHESIS'''
+    
+    # TODO(us): borrar
+    print("soy tupla")
 
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
