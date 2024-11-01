@@ -26,7 +26,7 @@ def p_start(p):
         children = [p[2]]
         if p[3] is not None:
             children.append(p[3])
-        p[0] = Node(n_type="Start", children=children)
+        p[0] = Node(n_type='Start', children=children)
     else:  # Empty
         p[0] = Node(n_type='Empty')  # TODO(profe): verificar como borrar nodos
 
@@ -43,7 +43,7 @@ def p_statement(p):
         p[0] = p[1]
     else:
         children = [c for c in [p[1], p[2]] if c is not None]
-        p[0] = Node(n_type="Statement", children=children)
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_statement_values(p):
     '''statement_values : def_function
@@ -93,6 +93,8 @@ def p_statement_values_end(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != 'pass':  # Ignore pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_def_function(p):
     '''def_function : DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
@@ -115,7 +117,8 @@ def p_func_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_func_statement_recv(p):
     '''func_statement_recv : func_statement_values
@@ -123,7 +126,8 @@ def p_func_statement_recv(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_func_statement_values(p):
     '''func_statement_values : if_rule_func
@@ -150,6 +154,8 @@ def p_func_statement_values(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_func_statement_values_end(p):
     '''func_statement_values_end : STRING 
@@ -171,6 +177,8 @@ def p_func_statement_values_end(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != 'pass':  # Ignore pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_return_statement(p):
     '''return_statement : RETURN
@@ -436,7 +444,8 @@ def p_limited_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
     
 def p_limited_statement_recv(p):
     '''limited_statement_recv : limited_statement_values
@@ -444,7 +453,8 @@ def p_limited_statement_recv(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
@@ -470,6 +480,8 @@ def p_limited_statement_values(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_limited_statement_values_end(p):
     '''limited_statement_values_end : STRING
@@ -490,6 +502,8 @@ def p_limited_statement_values_end(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != 'pass':  # Ignore pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_if_rule(p):
     '''if_rule : IF math_expression COLON NEWLINE INDENT limited_statement DEDENT
@@ -517,7 +531,8 @@ def p_loop_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_loop_statement_recv(p):
     '''loop_statement_recv : loop_statement_values
@@ -525,7 +540,8 @@ def p_loop_statement_recv(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
@@ -557,6 +573,8 @@ def p_loop_statement_values(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
         p[0] = p[1]
+    else:
+        p[0] = None
     
 
 def p_loop_statement_values_end(p):
@@ -584,6 +602,8 @@ def p_loop_statement_values_end(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != 'pass':  # Ignore pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_while_rule(p):
     '''while_rule : WHILE math_expression COLON NEWLINE INDENT loop_statement DEDENT
@@ -616,7 +636,8 @@ def p_limited_statement_loop(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
     
 def p_limited_statement_loop_recv(p):
     '''limited_statement_loop_recv : limited_statement_values_loop
@@ -624,7 +645,8 @@ def p_limited_statement_loop_recv(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
@@ -656,6 +678,8 @@ def p_limited_statement_values_loop(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_limited_statement_values_loop_end(p):
     '''limited_statement_values_loop_end : STRING
@@ -682,6 +706,8 @@ def p_limited_statement_values_loop_end(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != 'pass':  # Ignore pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_if_rule_loop(p):
     '''if_rule_loop : IF math_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
@@ -717,7 +743,8 @@ def p_limited_statement_func(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_limited_statement_func_recv(p):
     '''limited_statement_func_recv : limited_statement_values_func
@@ -725,7 +752,8 @@ def p_limited_statement_func_recv(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
@@ -752,6 +780,8 @@ def p_limited_statement_values_func(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_limited_statement_values_func_end(p):
     '''limited_statement_values_func_end : STRING
@@ -773,6 +803,8 @@ def p_limited_statement_values_func_end(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != 'pass':  # Ignore pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_if_rule_func(p):
     '''if_rule_func : IF math_expression COLON NEWLINE INDENT limited_statement_func DEDENT
@@ -808,7 +840,8 @@ def p_limited_statement_func_loop(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_limited_statement_func_loop_recv(p):
     '''limited_statement_func_loop_recv : limited_statement_values_func_loop
@@ -816,7 +849,8 @@ def p_limited_statement_func_loop_recv(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type='Statement', children=children)
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
@@ -849,6 +883,8 @@ def p_limited_statement_values_func_loop(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
         p[0] = p[1]
+    else:
+        p[0] = None
     
 def p_limited_statement_values_func_loop_end(p):
     '''limited_statement_values_func_loop_end : STRING
@@ -876,6 +912,8 @@ def p_limited_statement_values_func_loop_end(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != 'pass':  # Ignore pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_while_rule_func(p):
     '''while_rule_func : WHILE math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
