@@ -21,9 +21,12 @@ def p_start(p):
             | START_MARKER statement statement_values_end END_MARKER
             | START_MARKER END_MARKER'''
     if len(p) == 4:
-        p[0] = p[2]
-    elif len(p) == 5: # TODO(us): arreglar
-        p[0] = Node(n_type='Start', children = [p[2], p[3]])
+        p[0] = p[2] if p[2] is not None else Node(n_type="Empty")
+    elif len(p) == 5: 
+        children = [p[2]]
+        if p[3] is not None:
+            children.append(p[3])
+        p[0] = Node(n_type="Start", children=children)
     else:  # Empty
         p[0] = Node(n_type='Empty')  # TODO(profe): verificar como borrar nodos
 
@@ -39,7 +42,8 @@ def p_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='Statement', children = [p[1], p[2]])  # TODO(profe): se necesita
+        children = [c for c in [p[1], p[2]] if c is not None]
+        p[0] = Node(n_type="Statement", children=children)
 
 def p_statement_values(p):
     '''statement_values : def_function
@@ -67,6 +71,8 @@ def p_statement_values(p):
         p[0] = Node(n_type="StringLiteral", value=p[1])
     elif p[1] != '\n' and p[1] != 'pass':  # Ignore newlines and pass
         p[0] = p[1]
+    else:
+        p[0] = None
 
 def p_statement_values_end(p):
     '''statement_values_end : STRING
