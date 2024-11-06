@@ -107,14 +107,17 @@ def p_def_function(p):
                     | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter_assign CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
                     | DEF VAR_FUNC_NAME OPEN_PARENTHESIS def_parameter COMMA def_parameter_assign CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT
                     | DEF VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS COLON NEWLINE INDENT func_statement DEDENT'''
+    # TODO(us): hacer
 
 def p_def_parameter(p):
     '''def_parameter : VAR_FUNC_NAME
                      | def_parameter COMMA VAR_FUNC_NAME'''
+    # TODO(us): hacer
 
 def p_def_parameter_assign(p):
     '''def_parameter_assign : def_parameter_assign COMMA VAR_FUNC_NAME ASSIGN values
                             | VAR_FUNC_NAME ASSIGN values'''
+    # TODO(us): hacer
 
 def p_func_statement(p):
     '''func_statement : func_statement_values_end
@@ -201,13 +204,22 @@ def p_return_statement(p):
                         | RETURN dictionary
                         | RETURN set
                         | RETURN tuple'''
+    if len(p) == 2:
+        p[0] = Node(n_type="ReturnStatement")
+    else:
+        p[0] = Node(n_type="ReturnStatement", children=[p[2]])
 
 def p_call_function(p):
     '''call_function : VAR_FUNC_NAME OPEN_PARENTHESIS call_parameter CLOSED_PARENTHESIS
                      | VAR_FUNC_NAME OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
+    if len(p) == 5: 
+        p[0] = Node(n_type="CallFunction", value=p[1], children=[p[3]])
+    else:
+        p[0] = Node(n_type="CallFunction", value=p[1])
 
 def p_call_parameter(p):
     '''call_parameter : call_function_parameter'''
+    p[0] = p[1]
 
 def p_call_function_parameter(p):
     '''call_function_parameter : call_function_parameter COMMA VAR_FUNC_NAME ASSIGN values
@@ -222,6 +234,7 @@ def p_call_function_parameter(p):
                                 | VAR_FUNC_NAME ASSIGN variable
                                 | variable
                                 | call_function_parameter COMMA variable'''
+    # TODO(us): hacer
 
 def p_values(p):
     '''values : math_expression
@@ -260,6 +273,7 @@ def p_access_content(p):
 def p_variable_assign(p):
     '''variable_assign : variable_assign_var
                        | variable_assign_expr'''
+    p[0] = p[1]
 
 def p_variable_assign_expr(p):
     '''variable_assign_expr : variable math_assign math_expression
@@ -270,16 +284,19 @@ def p_variable_assign_expr(p):
                             | variable_assign_var math_assign call_function
                             | variable math_assign data_structures
                             | variable_assign_var math_assign data_structures'''
-                            
+    p[0] = Node(n_type="VariableAssignment", children=[p[1], p[3]], value =  p[2]) 
+
 def p_data_structures(p):
     '''data_structures : list
                         | set
                         | tuple
                         | dictionary'''
+    p[0] = p[1]
 
 def p_variable_assign_var(p):
     '''variable_assign_var : variable math_assign variable
                            | variable_assign_var math_assign variable'''
+    # TODO(us): hacer
 
 def p_period_operator(p):
     '''period_operator : PERIOD VAR_FUNC_NAME
@@ -396,17 +413,19 @@ def p_cmp_symbols(p):
 
 def p_tuple(p):
     '''tuple : OPEN_PARENTHESIS list_tuple_recursion COMMA list_tuple_values CLOSED_PARENTHESIS'''
-    
+    # TODO(us): hacer
     # TODO(us): borrar
     print("soy tupla")
 
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
             | OPEN_BRACKET CLOSED_BRACKET'''
+    # TODO(us): hacer
 
 def p_list_tuple_recursion(p):
     '''list_tuple_recursion : list_tuple_recursion COMMA list_tuple_values
                             | list_tuple_values'''
+    # TODO(us): hacer
 
 def p_list_tuple_values(p):
     '''list_tuple_values : tuple
@@ -416,25 +435,31 @@ def p_list_tuple_values(p):
                          | values
                          | variable
                          | call_function'''
+    # TODO(us): hacer
 
 def p_set(p):
     '''set : OPEN_CURLY_BRACKET set_recursion CLOSED_CURLY_BRACKET'''
+    # TODO(us): hacer
 
 def p_set_recursion(p):
     '''set_recursion : set_recursion COMMA set_values
                      | set_values'''
+    # TODO(us): hacer
 
 def p_set_values(p):
     '''set_values : tuple
                   | values'''
+    # TODO(us): hacer
 
 def p_dictionary(p):
     '''dictionary : OPEN_CURLY_BRACKET dictionary_content CLOSED_CURLY_BRACKET
                    | OPEN_CURLY_BRACKET CLOSED_CURLY_BRACKET'''
+    # TODO(us): hacer
 
 def p_dictionary_content(p):
     '''dictionary_content : dictionary_content COMMA list_tuple_values COLON list_tuple_values
                           | list_tuple_values COLON list_tuple_values '''
+    # TODO(us): hacer
 
 def p_printing(p):
     '''printing : PRINT OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
@@ -444,10 +469,12 @@ def p_printing(p):
                 | PRINT OPEN_PARENTHESIS print_content_recv CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS NONE CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
+    # TODO(us): hacer
 
 def p_print_content_recv(p):
     '''print_content_recv : print_content_recv PLUS data_structures
                           | data_structures '''
+    # TODO(us): hacer
 
 def p_limited_statement(p):
     '''limited_statement : limited_statement_recv
@@ -530,6 +557,7 @@ def p_if_rule(p):
                 | IF variable COLON NEWLINE INDENT limited_statement DEDENT
                 | IF variable COLON NEWLINE INDENT limited_statement DEDENT elif_rule
                 | IF variable COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
+    # TODO(us): hacer
 
 def p_elif_rule(p):
     '''elif_rule : ELIF math_expression COLON NEWLINE INDENT limited_statement DEDENT
@@ -538,9 +566,11 @@ def p_elif_rule(p):
                     | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT
                     | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT elif_rule
                     | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
+    # TODO(us): hacer
 
 def p_else_rule(p):
     '''else_rule : ELSE COLON NEWLINE INDENT limited_statement DEDENT'''
+    # TODO(us): hacer
 
 def p_loop_statement(p):
     '''loop_statement : loop_statement_recv
@@ -632,10 +662,12 @@ def p_loop_statement_values_end(p):
 def p_while_rule(p):
     '''while_rule : WHILE math_expression COLON NEWLINE INDENT loop_statement DEDENT
                     | WHILE variable COLON NEWLINE INDENT loop_statement DEDENT'''
+    # TODO(us): hacer
 
 def p_for_rule(p):
     '''for_rule : FOR VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT loop_statement DEDENT
                 | FOR OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT loop_statement DEDENT'''
+    # TODO(us): hacer
 
 def p_for_rule_content(p):
     '''for_rule_content : call_function
@@ -644,14 +676,17 @@ def p_for_rule_content(p):
                         | tuple
                         | dictionary
                         | set'''
+    # TODO(us): hacer
 
 def p_try_rule(p):
     '''try_rule : TRY COLON NEWLINE INDENT limited_statement DEDENT
                 | TRY COLON NEWLINE INDENT limited_statement DEDENT except_rule'''
+    # TODO(us): hacer
 
 def p_except_rule(p):
     '''except_rule : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement DEDENT
                     | EXCEPT COLON NEWLINE INDENT limited_statement DEDENT'''
+    # TODO(us): hacer
 
 def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop_end
@@ -746,6 +781,7 @@ def p_if_rule_loop(p):
                     | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT
                     | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
                     | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
+    # TODO(us): hacer
 
 def p_elif_rule_loop(p):
     '''elif_rule_loop : ELIF math_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
@@ -754,17 +790,21 @@ def p_elif_rule_loop(p):
                       | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT
                       | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
                       | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
+    # TODO(us): hacer
 
 def p_else_rule_loop(p):
     '''else_rule_loop : ELSE COLON NEWLINE INDENT limited_statement_loop DEDENT'''
+    # TODO(us): hacer
 
 def p_try_rule_loop(p):
     '''try_rule_loop : TRY COLON NEWLINE INDENT limited_statement_loop DEDENT
                         | TRY COLON NEWLINE INDENT limited_statement_loop DEDENT except_rule_loop'''
+    # TODO(us): hacer
 
 def p_except_rule_loop(p):
     '''except_rule_loop : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement_loop DEDENT
                         | EXCEPT COLON NEWLINE INDENT limited_statement_loop DEDENT'''
+    # TODO(us): hacer
 
 def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_func_recv
@@ -849,6 +889,7 @@ def p_if_rule_func(p):
                     | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT
                     | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
                     | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
+    # TODO(us): hacer
 
 def p_elif_rule_func(p):
     '''elif_rule_func : ELIF math_expression COLON NEWLINE INDENT limited_statement_func DEDENT
@@ -857,17 +898,21 @@ def p_elif_rule_func(p):
                         | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT
                         | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
                         | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
+    # TODO(us): hacer
 
 def p_else_rule_func(p):
     '''else_rule_func : ELSE COLON NEWLINE INDENT limited_statement_func DEDENT'''
+    # TODO(us): hacer
 
 def p_try_rule_func(p):
     '''try_rule_func : TRY COLON NEWLINE INDENT limited_statement_func DEDENT
                         | TRY COLON NEWLINE INDENT limited_statement_func DEDENT except_rule_func'''
+    # TODO(us): hacer
 
 def p_except_rule_func(p):
     '''except_rule_func : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement_func DEDENT
                         | EXCEPT COLON NEWLINE INDENT limited_statement_func DEDENT'''
+    # TODO(us): hacer
 
 def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_func_loop_recv
@@ -960,10 +1005,12 @@ def p_limited_statement_values_func_loop_end(p):
 def p_while_rule_func(p):
     '''while_rule_func : WHILE math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | WHILE variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT '''
+    # TODO(us): hacer
 
 def p_for_rule_func(p):
     '''for_rule_func : FOR VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                      | FOR OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
+    # TODO(us): hacer
 
 def p_if_rule_func_loop(p):
     '''if_rule_func_loop : IF math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
@@ -972,6 +1019,7 @@ def p_if_rule_func_loop(p):
                         | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
                         | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
+    # TODO(us): hacer
 
 def p_elif_rule_func_loop(p):
     '''elif_rule_func_loop : ELIF math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
@@ -980,21 +1028,26 @@ def p_elif_rule_func_loop(p):
                             | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                             | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
                             | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
+    # TODO(us): hacer
 
 def p_else_rule_func_loop(p):
     '''else_rule_func_loop : ELSE COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
+    # TODO(us): hacer
 
 def p_try_rule_func_loop(p):
     '''try_rule_func_loop : TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                             | TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT except_rule_func_loop'''
+    # TODO(us): hacer
 
 def p_except_rule_func_loop(p):
     '''except_rule_func_loop : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                             | EXCEPT COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
+    # TODO(us): hacer
 
 def p_def_class(p):
     '''def_class : CLASS VAR_FUNC_NAME COLON NEWLINE INDENT statement DEDENT
                  | CLASS VAR_FUNC_NAME OPEN_PARENTHESIS VAR_FUNC_NAME CLOSED_PARENTHESIS COLON NEWLINE INDENT statement DEDENT'''
+    # TODO(us): hacer
 
 def p_error(p):
     global error_count
