@@ -1047,8 +1047,11 @@ def p_except_rule_func_loop(p):
 def p_def_class(p):
     '''def_class : CLASS VAR_FUNC_NAME COLON NEWLINE INDENT statement DEDENT
                  | CLASS VAR_FUNC_NAME OPEN_PARENTHESIS VAR_FUNC_NAME CLOSED_PARENTHESIS COLON NEWLINE INDENT statement DEDENT'''
-    # TODO(us): hacer
-
+    if len(p) == 8:  # Without inheritance
+        p[0] = Node(n_type="ClassDefinition", value=p[2], children=[p[6]])
+    else:  # With 1 level of inheritance
+        p[0] = Node(n_type="ClassDefinition", value=p[2], children=[Node(n_type="Inheritance", value=p[4]), p[9]])
+    
 def p_error(p):
     global error_count
     if p:
