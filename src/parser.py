@@ -21,7 +21,10 @@ def p_start(p):
             | START_MARKER statement statement_values_end END_MARKER
             | START_MARKER END_MARKER'''
     if len(p) == 4:
-        p[0] = p[2] if p[2] is not None else Node(n_type="Empty")
+        if p[2] is not None:
+            p[0] = Node(n_type= 'Start', children = [p[2]])
+        else:
+            p[0] = Node(n_type="Empty")
     elif len(p) == 5: 
         children = [p[2]]
         if p[3] is not None:
