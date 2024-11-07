@@ -362,16 +362,27 @@ def p_variable(p):
 
 def p_math_expression(p):
     '''math_expression : math_expression_1
-                       | NOT expr_math_values_recv
-                       | PLUS expr_math_values_recv
-                       | MINUS expr_math_values_recv'''
+                       | NOT math_expression_1
+                       | PLUS variable
+                       | MINUS variable
+                       | NOT variable
+                       | PLUS call_function
+                       | MINUS call_function
+                       | NOT call_function'''
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node(n_type='UnaryOp', children=[p[2]], value=p[1])
+        p[1] = Node(n_type="MathSymbol", value=p[1])
+        if isinstance(p[2], Node) and p[2].n_type == 'MathExpression':
+            p[2].children = [p[1]] + p[2].children
+            p[0] = p[2]
+        else:
+            p[0] = Node(n_type='MathExpression', children=[p[1], p[2]])
             
 def p_math_expression_1(p):
     '''math_expression_1 : math_values
+                       | MINUS math_expression_1
+                       | PLUS math_expression_1
                        | OPEN_PARENTHESIS math_expression_1 CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS STRING CLOSED_PARENTHESIS
                        | OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
@@ -383,7 +394,11 @@ def p_math_expression_1(p):
     
     if len(p) == 2:
         # Direct value or variable
-        p[0] = p[1]
+        p[0] = Node(n_type="MathExpression", children=[p[1]])
+    elif p[1] in ('-', '+'):
+        p[1] = Node(n_type="MathSymbol", value=p[1])
+        p[2].children = [p[1]]+ p[2].children 
+        p[0] = p[2]
     elif p[1] == '(':
         # Wrap the expression in a Parenthesis node
         p[0] = Node(n_type="Parenthesis", children=[p[2]])
@@ -409,18 +424,22 @@ def p_expr_math_values_recv(p):
                             | OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS
                             | OPEN_PARENTHESIS variable CLOSED_PARENTHESIS
                             | OPEN_PARENTHESIS call_function CLOSED_PARENTHESIS
-                            | NOT expr_math_values_recv
                             | PLUS expr_math_values_recv
                             | MINUS expr_math_values_recv'''
     if len(p) == 2:
+        if p[1][0] == '\"' or p[1][0] == '\'':
+            p[1] = Node(n_type='StringLiteral', value = p[1])
         p[0] = p[1]
+    elif p[1] in ('-', '+'):
+        p[1] = Node(n_type="MathSymbol", value=p[1])
+        p[0] = Node(n_type='MathExpression', children= [p[1] , p[2]])
     else:
         # TODO(us): Add strings because they aren't handled
         if (p[1] == '('):
             p[0] = Node(n_type="Parenthesis", children=[p[2]])
         else:
-            p[0] = Node(n_type="UnaryOp", children=[p[2]], value=p[1])
-    
+            p[0] = Node(n_type='MathExpression', children=[p[1], p[2]])
+   
 def p_math_symbols(p):
     '''math_symbols : PLUS
                     | MINUS
