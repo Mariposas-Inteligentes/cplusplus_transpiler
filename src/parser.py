@@ -334,7 +334,16 @@ def p_variable_assign_expr(p):
                             | variable_assign_var math_assign call_function
                             | variable math_assign data_structures
                             | variable_assign_var math_assign data_structures'''
-    p[0] = Node(n_type="VariableAssignment", children=[p[1], p[3]], value =  p[2]) 
+    
+    if isinstance(p[3], str) and (p[3][0] == "\'" or p[3][0] == "\""):
+        p[3] = Node(n_type="StringLiteral", value=p[3])
+    
+    if p[1].n_type == "VariableAssignment":
+        p[1].children.append(p[2])
+        p[1].children.append(p[3])
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type="VariableAssignment", children=[p[1], p[2], p[3]], value =  p[2]) 
 
 def p_data_structures(p):
     '''data_structures : list
@@ -346,7 +355,13 @@ def p_data_structures(p):
 def p_variable_assign_var(p):
     '''variable_assign_var : variable math_assign variable
                            | variable_assign_var math_assign variable'''
-    # TODO(us): hacer
+    
+    if isinstance(p[1], Node) and p[1].n_type == "VariableAssignment":
+        p[1].children.append(Node(n_type="MathAssign", value=p[2].value))
+        p[1].children.append(p[3])
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type="VariableAssignment", children=[p[1], p[2], p[3]])
 
 def p_period_operator(p):
     '''period_operator : PERIOD VAR_FUNC_NAME
