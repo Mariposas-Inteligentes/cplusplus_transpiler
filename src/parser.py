@@ -115,7 +115,8 @@ def p_def_function(p):
         p[0] = Node(n_type= 'DefFunction', children=[p[4], p[9]], value=p[2])
 
     elif len(p) == 13: # Rule 3
-        p[0] = Node(n_type= 'DefFunction', children=[p[4], p[6], p[11]], value=p[2])
+        p[6].children = [p[4]] + p[6].children
+        p[0] = Node(n_type= 'DefFunction', children=[p[6], p[11]], value=p[2])
 
     elif len(p) == 10: # Rule 4
         p[0] = Node(n_type='DefFunction', children = [p[8]], value=p[2])
@@ -127,14 +128,23 @@ def p_def_parameter(p):
         p[0] = Node(n_type="Parameter", value=p[1])
     else:
         if isinstance(p[1], Node):
-            p[0] = Node(n_type="ParameterList", children=p[1].children + [Node(n_type="Parameter", value=p[3])])
+            children = [c for c in ([Node(n_type="Parameter", value=p[1].value)] + p[1].children + [Node(n_type="Parameter", value=p[3])]) if c.value is not None]
+            p[0] = Node(n_type="ParameterList", children=children)
         else:
             p[0] = Node(n_type="ParameterList", children=[p[1], Node(n_type="Parameter", value=p[3])])
 
 def p_def_parameter_assign(p):
     '''def_parameter_assign : def_parameter_assign COMMA VAR_FUNC_NAME ASSIGN values
                             | VAR_FUNC_NAME ASSIGN values'''
-    # TODO(us): hacer
+    if len(p) == 4:
+        # Single parameter with a default value
+        param_node = Node(n_type="ParameterWithDefault", children=[p[3]], value=p[1])
+        p[0] = Node(n_type="ParameterList", children=[param_node])
+    else:
+        # Multiple parameters with default values
+        param_node = Node(n_type="ParameterWithDefault", children=[p[5]], value=p[3])
+        p[0] = Node(n_type="ParameterList", children=p[1].children + [param_node])
+
 
 def p_func_statement(p):
     '''func_statement : func_statement_values_end
