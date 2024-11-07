@@ -16,6 +16,23 @@ precedence = (
     ('left', 'OPEN_CURLY_BRACKET', 'CLOSED_CURLY_BRACKET')
 )
 
+def statement_creation(p):
+    if len(p) == 2:
+        if p[1] is not None:
+            p[0] = Node(n_type='Statement', children= [p[1]])
+        else:
+            # TODO(Us): Required?
+            p[0] = Node(n_type='EmptyStatement')
+    else:
+        children = [c for c in [p[1], p[2]] if c is not None]
+        if children[0].n_type == 'Statement' and len(children) == 2:
+            children[0].children.append(children[1])
+            p[0] = children[0]
+        elif len(children) == 1:
+            p[0] = children[0]
+
+    return p
+
 def p_start(p):
     '''start : START_MARKER statement END_MARKER
             | START_MARKER statement statement_values_end END_MARKER
@@ -42,18 +59,7 @@ def p_start(p):
 def p_statement(p):
     '''statement : statement_values
                  | statement statement_values'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_statement_values(p):
     '''statement_values : def_function
@@ -150,34 +156,12 @@ def p_func_statement(p):
     '''func_statement : func_statement_values_end
                       | func_statement_recv
                       | func_statement_recv func_statement_values_end'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): verificar como borrar nodos
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_func_statement_recv(p):
     '''func_statement_recv : func_statement_values
                            | func_statement_recv func_statement_values'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_func_statement_values(p):
     '''func_statement_values : if_rule_func
@@ -589,34 +573,12 @@ def p_limited_statement(p):
     '''limited_statement : limited_statement_recv
                          | limited_statement_values_end
                          | limited_statement_recv limited_statement_values_end'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
     
 def p_limited_statement_recv(p):
     '''limited_statement_recv : limited_statement_values
                               | limited_statement_recv limited_statement_values'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_limited_statement_values(p):
     '''limited_statement_values : if_rule
@@ -693,34 +655,12 @@ def p_loop_statement(p):
     '''loop_statement : loop_statement_recv
                       | loop_statement_values_end
                       | loop_statement_recv loop_statement_values_end'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_loop_statement_recv(p):
     '''loop_statement_recv : loop_statement_values
                            | loop_statement_recv loop_statement_values'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_loop_statement_values(p):
     '''loop_statement_values : if_rule_loop
@@ -817,34 +757,12 @@ def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop_end
                               | limited_statement_loop_recv
                               | limited_statement_loop_recv limited_statement_values_loop_end'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p= statement_creation(p)
     
 def p_limited_statement_loop_recv(p):
     '''limited_statement_loop_recv : limited_statement_values_loop
                                    | limited_statement_loop_recv limited_statement_values_loop'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_limited_statement_values_loop(p):
     '''limited_statement_values_loop : if_rule_loop
@@ -943,34 +861,12 @@ def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_func_recv
                               | limited_statement_values_func_end
                               | limited_statement_func_recv limited_statement_values_func_end'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_limited_statement_func_recv(p):
     '''limited_statement_func_recv : limited_statement_values_func
                                    | limited_statement_func_recv limited_statement_values_func'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_limited_statement_values_func(p):
     '''limited_statement_values_func : if_rule_func
@@ -1059,34 +955,12 @@ def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_func_loop_recv
                                    | limited_statement_values_func_loop_end
                                    | limited_statement_func_loop_recv limited_statement_values_func_loop_end'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_limited_statement_func_loop_recv(p):
     '''limited_statement_func_loop_recv : limited_statement_values_func_loop
                                         | limited_statement_func_loop_recv limited_statement_values_func_loop'''
-    if len(p) == 2:
-        if p[1] is not None:
-            p[0] = p[1]
-        else:
-            # TODO(Us): Required?
-            p[0] = Node(n_type='EmptyStatement')
-    else:
-        children = [c for c in [p[1], p[2]] if c is not None]
-        if len(children) == 1:
-            p[0] = children[0]
-        else:
-            p[0] = Node(n_type='Statement', children=children)
+    p = statement_creation(p)
 
 def p_limited_statement_values_func_loop(p):
     '''limited_statement_values_func_loop : if_rule_func_loop
