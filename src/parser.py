@@ -258,18 +258,33 @@ def p_call_parameter(p):
 
 def p_call_function_parameter(p):
     '''call_function_parameter : call_function_parameter COMMA VAR_FUNC_NAME ASSIGN values
-                                | VAR_FUNC_NAME ASSIGN values
-                                | values
-                                | call_function_parameter COMMA values
                                 | call_function_parameter COMMA VAR_FUNC_NAME ASSIGN call_function
-                                | VAR_FUNC_NAME ASSIGN call_function
-                                | call_function
-                                | call_function_parameter COMMA call_function
                                 | call_function_parameter COMMA VAR_FUNC_NAME ASSIGN variable
+                                | call_function_parameter COMMA values
+                                | call_function_parameter COMMA variable
+                                | call_function_parameter COMMA call_function
+                                | VAR_FUNC_NAME ASSIGN call_function
+                                | VAR_FUNC_NAME ASSIGN values
                                 | VAR_FUNC_NAME ASSIGN variable
+                                | call_function
                                 | variable
-                                | call_function_parameter COMMA variable'''
-    # TODO(us): hacer
+                                | values'''
+    if len(p) == 2:
+        # Single parameter
+        p[0] = Node(n_type="ParameterList", children=[p[1]])
+    elif len(p) == 4 and p[2] == '=':
+        # Parameter with assignment
+        param_node = Node(n_type="ParameterWithAssignment", value=p[1], children=[p[3]])
+        p[0] = Node(n_type="ParameterList", children=[param_node])
+    else:
+        # Multiple parameters 
+        if isinstance(p[1], Node) and p[1].n_type == "ParameterList":
+            new_param = Node(n_type="ParameterWithAssignment", value=p[3], children=[p[5]]) if len(p) == 6 else p[3]
+            p[1].children.append(new_param)
+            p[0] = p[1]
+        else:
+            # Create a ParameterList with two children
+            p[0] = Node(n_type="ParameterList", children=[p[1], p[3]])
 
 def p_values(p):
     '''values : math_expression
