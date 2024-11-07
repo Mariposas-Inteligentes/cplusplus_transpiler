@@ -9,7 +9,7 @@ class Node:
         
     def __str__(self, level=0):
         indent = "  " * level
-        result = f"{indent}Node(type={self.n_type}, value={self.value})\n"
+        result = f"{indent}Node(type: {self.n_type}, value: {self.value})\n"
         for child in self.children:
             print(type(child))
             print(child.value)
