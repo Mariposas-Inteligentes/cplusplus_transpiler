@@ -416,13 +416,19 @@ def p_math_expression_1(p):
         p[0] = p[2]
     elif p[1] == '(':
         # Wrap the expression in a Parenthesis node
+        if isinstance(p[2], str) and (p[2][0] == '\"' or p[2][0] == '\''):
+            p[2] = Node(n_type='StringLiteral', value = p[2])
         p[0] = Node(n_type="Parenthesis", children=[p[2]])
     else:
+        # Check if String
+        if isinstance(p[1], str) and (p[1][0] == '\"' or p[1][0] == '\''):
+            p[1] = Node(n_type='StringLiteral', value = p[1])
+            
         # Create a MathExpression node
         left_operand = p[1]
         operator_node = p[2]
         right_operand = p[3]
-        
+
         if isinstance(left_operand, Node) and left_operand.n_type == "MathExpression":
             left_operand.children.append(operator_node)
             left_operand.children.append(right_operand)
@@ -442,7 +448,7 @@ def p_expr_math_values_recv(p):
                             | PLUS expr_math_values_recv
                             | MINUS expr_math_values_recv'''
     if len(p) == 2:
-        if p[1][0] == '\"' or p[1][0] == '\'':
+        if isinstance(p[1], str) and (p[1][0] == '\"' or p[1][0] == '\''):
             p[1] = Node(n_type='StringLiteral', value = p[1])
         p[0] = p[1]
     elif p[1] in ('-', '+'):
