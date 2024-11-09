@@ -33,42 +33,29 @@ def statement_creation(p):
 
     return p
 
-def bring_up_elif(p): # TODO(us): fix
-    children_elif = [] # to add else and elif inside if, not elif. 
-    if p.n_type == "ElifRule":
-        for c in p.children:
-            if c.n_type == "ElifRule" or c.n_type == "ElseRule":
-                children_elif.append(c)
-                return_val = bring_up_elif(c)
-                children_elif += return_val
-                for r in return_val:
-                    if r in c.children:
-                        c.children.remove(r)
-                p.children.remove(c)
-    return children_elif
-
-def if_statement_creation(p): # TODO(us): creo que a estas reglas les fala call function metido en el if y elif. 
-    if len(p) == 8: # no else, nor elif
-        p[0] = Node(n_type="IfRule", children=[p[2], p[6], p[8]])
-    else:
-        # children_elif = bring_up_elif(p[8])
-        # p[0] = Node(n_type="IfRule", children=[p[2], p[6],p[8]] + children_elif)
-        p[0] = Node(n_type="IfRule", children=[p[2], p[6],p[8]])
+def if_statement_creation(p): # TODO(us): add call function to if condition
+    if_node = Node(n_type="IfRule", children=[p[2], p[6]])
+    if len(p) > 8:
+        additional_clauses = p[8:]
+        for clause in additional_clauses:
+            if isinstance(clause, Node):
+                if_node.children.append(clause)
+    p[0] = if_node
     return p
 
 def elif_statement_creation(p):
-    if len(p) == 8: # no else nor elif:
-        p[0] = Node(n_type="ElifRule", children=[p[2], p[6], p[8]])
-    else:
-        # children_elif = bring_up_elif(p[8])
-        # p[0] = Node(n_type="ElifRule", children=[p[2], p[6],p[8]] + children_elif)
-        p[0] = Node(n_type="ElifRule", children=[p[2], p[6],p[8]])
-    return p
+    elif_node = Node(n_type="ElifRule", children=[p[2], p[6]])
+    if len(p) > 8:
+        next_clause = p[8]
+        if isinstance(next_clause, Node):
+            elif_node.children.append(next_clause)
     
+    p[0] = elif_node
+    return p
+
 def else_statement_creation(p):
     p[0] = Node(n_type="ElseRule", children=[p[5]])
     return p
-
 
 def p_start(p):
     '''start : START_MARKER statement END_MARKER
