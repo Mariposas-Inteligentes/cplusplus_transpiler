@@ -33,6 +33,39 @@ def statement_creation(p):
 
     return p
 
+def if_statement_creation(p): # TODO(us): creo que a estas reglas les fala call function metido en el if y elif. 
+    if len(p) == 8: # no else, nor elif
+        p[0] = Node(n_type="IfRule", children=[p[2], p[6], p[8]])
+    else:
+        children_elif = [] # to add else and elif inside if, not elif. 
+        if p[8].n_type == "ElifRule":
+            for c in p[8].children:
+                print(c.n_type)
+                if c.n_type == "ElifRule" or c.n_type == "ElseRule":
+                    children_elif.append(c)
+                    p[8].children.remove(c)
+        p[0] = Node(n_type="IfRule", children=[p[2], p[6],p[8]] + children_elif)
+    return p
+
+def elif_statement_creation(p):
+    if len(p) == 8: # no else nor elif:
+        p[0] = Node(n_type="ElifRule", children=[p[2], p[6], p[8]])
+    else:
+        children_elif = [] # to add else and elif inside if, not elif. 
+        if p[8].n_type == "ElifRule":
+            for c in p[8].children:
+                if c.n_type == "ElifRule" or c.n_type == "ElseRule":
+                    children_elif.append(c)
+                    p[8].children.remove(c)
+        
+        p[0] = Node(n_type="ElifRule", children=[p[2], p[6],p[8]] + children_elif)
+    return p
+    
+def else_statement_creation(p):
+    p[0] = Node(n_type="ElseRule", children=[p[5]])
+    return p
+
+
 def p_start(p):
     '''start : START_MARKER statement END_MARKER
             | START_MARKER statement statement_values_end END_MARKER
@@ -296,7 +329,7 @@ def p_math_values(p):
 def p_bool_values(p):
     '''bool_values : TRUE
                     | FALSE'''
-    p[0] = Node(n_type="BooleanLiteral", value=(p[1] == 'TRUE'))
+    p[0] = Node(n_type="BooleanLiteral", value= (p[1] == 'True'))
 
 def p_access_content(p):
     '''access_content : values
@@ -636,7 +669,7 @@ def p_if_rule(p):
                 | IF variable COLON NEWLINE INDENT limited_statement DEDENT
                 | IF variable COLON NEWLINE INDENT limited_statement DEDENT elif_rule
                 | IF variable COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
-    # TODO(us): hacer
+    p = if_statement_creation(p)
 
 def p_elif_rule(p):
     '''elif_rule : ELIF math_expression COLON NEWLINE INDENT limited_statement DEDENT
@@ -645,11 +678,11 @@ def p_elif_rule(p):
                     | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT
                     | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT elif_rule
                     | ELIF variable COLON NEWLINE INDENT limited_statement DEDENT else_rule'''
-    # TODO(us): hacer
+    p = elif_statement_creation(p)
 
 def p_else_rule(p):
     '''else_rule : ELSE COLON NEWLINE INDENT limited_statement DEDENT'''
-    # TODO(us): hacer
+    p = else_statement_creation(p)
 
 def p_loop_statement(p):
     '''loop_statement : loop_statement_recv
@@ -832,7 +865,7 @@ def p_if_rule_loop(p):
                     | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT
                     | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
                     | IF variable COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
-    # TODO(us): hacer
+    p = if_statement_creation(p)
 
 def p_elif_rule_loop(p):
     '''elif_rule_loop : ELIF math_expression COLON NEWLINE INDENT limited_statement_loop DEDENT
@@ -841,11 +874,12 @@ def p_elif_rule_loop(p):
                       | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT
                       | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT elif_rule_loop
                       | ELIF variable COLON NEWLINE INDENT limited_statement_loop DEDENT else_rule_loop'''
-    # TODO(us): hacer
+    p = elif_statement_creation(p)
 
 def p_else_rule_loop(p):
     '''else_rule_loop : ELSE COLON NEWLINE INDENT limited_statement_loop DEDENT'''
-    # TODO(us): hacer
+    p = else_statement_creation(p)
+
 
 def p_try_rule_loop(p):
     '''try_rule_loop : TRY COLON NEWLINE INDENT limited_statement_loop DEDENT
@@ -926,7 +960,7 @@ def p_if_rule_func(p):
                     | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT
                     | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
                     | IF variable COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
-    # TODO(us): hacer
+    p = if_statement_creation(p)
 
 def p_elif_rule_func(p):
     '''elif_rule_func : ELIF math_expression COLON NEWLINE INDENT limited_statement_func DEDENT
@@ -935,11 +969,11 @@ def p_elif_rule_func(p):
                         | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT
                         | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT elif_rule_func
                         | ELIF variable COLON NEWLINE INDENT limited_statement_func DEDENT else_rule_func'''
-    # TODO(us): hacer
+    p = elif_statement_creation(p)
 
 def p_else_rule_func(p):
     '''else_rule_func : ELSE COLON NEWLINE INDENT limited_statement_func DEDENT'''
-    # TODO(us): hacer
+    p = else_statement_creation(p)
 
 def p_try_rule_func(p):
     '''try_rule_func : TRY COLON NEWLINE INDENT limited_statement_func DEDENT
@@ -1042,7 +1076,7 @@ def p_if_rule_func_loop(p):
                         | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
                         | IF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
-    # TODO(us): hacer
+    p = if_statement_creation(p)
 
 def p_elif_rule_func_loop(p):
     '''elif_rule_func_loop : ELIF math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
@@ -1051,11 +1085,11 @@ def p_elif_rule_func_loop(p):
                             | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                             | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT elif_rule_func_loop
                             | ELIF variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT else_rule_func_loop'''
-    # TODO(us): hacer
+    p = elif_statement_creation(p)
 
 def p_else_rule_func_loop(p):
     '''else_rule_func_loop : ELSE COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
-    # TODO(us): hacer
+    p = else_statement_creation(p)
 
 def p_try_rule_func_loop(p):
     '''try_rule_func_loop : TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT
