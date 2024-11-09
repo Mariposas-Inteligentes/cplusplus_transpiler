@@ -33,32 +33,36 @@ def statement_creation(p):
 
     return p
 
+def bring_up_elif(p): # TODO(us): fix
+    children_elif = [] # to add else and elif inside if, not elif. 
+    if p.n_type == "ElifRule":
+        for c in p.children:
+            if c.n_type == "ElifRule" or c.n_type == "ElseRule":
+                children_elif.append(c)
+                return_val = bring_up_elif(c)
+                children_elif += return_val
+                for r in return_val:
+                    if r in c.children:
+                        c.children.remove(r)
+                p.children.remove(c)
+    return children_elif
+
 def if_statement_creation(p): # TODO(us): creo que a estas reglas les fala call function metido en el if y elif. 
     if len(p) == 8: # no else, nor elif
         p[0] = Node(n_type="IfRule", children=[p[2], p[6], p[8]])
     else:
-        children_elif = [] # to add else and elif inside if, not elif. 
-        if p[8].n_type == "ElifRule":
-            for c in p[8].children:
-                print(c.n_type)
-                if c.n_type == "ElifRule" or c.n_type == "ElseRule":
-                    children_elif.append(c)
-                    p[8].children.remove(c)
-        p[0] = Node(n_type="IfRule", children=[p[2], p[6],p[8]] + children_elif)
+        # children_elif = bring_up_elif(p[8])
+        # p[0] = Node(n_type="IfRule", children=[p[2], p[6],p[8]] + children_elif)
+        p[0] = Node(n_type="IfRule", children=[p[2], p[6],p[8]])
     return p
 
 def elif_statement_creation(p):
     if len(p) == 8: # no else nor elif:
         p[0] = Node(n_type="ElifRule", children=[p[2], p[6], p[8]])
     else:
-        children_elif = [] # to add else and elif inside if, not elif. 
-        if p[8].n_type == "ElifRule":
-            for c in p[8].children:
-                if c.n_type == "ElifRule" or c.n_type == "ElseRule":
-                    children_elif.append(c)
-                    p[8].children.remove(c)
-        
-        p[0] = Node(n_type="ElifRule", children=[p[2], p[6],p[8]] + children_elif)
+        # children_elif = bring_up_elif(p[8])
+        # p[0] = Node(n_type="ElifRule", children=[p[2], p[6],p[8]] + children_elif)
+        p[0] = Node(n_type="ElifRule", children=[p[2], p[6],p[8]])
     return p
     
 def else_statement_creation(p):
