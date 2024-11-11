@@ -547,7 +547,7 @@ def p_tuple(p):
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
             | OPEN_BRACKET CLOSED_BRACKET'''
-    if len(p == 3):
+    if len(p) == 3:
         p[0] = Node(n_type='EmptyList')
     else:
         p[0] = Node(n_type='List', children=p[2].children)
