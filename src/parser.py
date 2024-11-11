@@ -490,7 +490,6 @@ def p_expr_math_values_recv(p):
         p[1] = Node(n_type="MathSymbol", value=p[1])
         p[0] = Node(n_type='MathExpression', children= [p[1] , p[2]])
     else:
-        # TODO(us): Add strings because they aren't handled
         if (p[1] == '('):
             p[0] = Node(n_type="Parenthesis", children=[p[2]])
         else:
@@ -542,19 +541,24 @@ def p_cmp_symbols(p):
 
 def p_tuple(p):
     '''tuple : OPEN_PARENTHESIS list_tuple_recursion COMMA list_tuple_values CLOSED_PARENTHESIS'''
-    # TODO(us): hacer
-    # TODO(us): borrar
-    print("soy tupla")
+    p[0] = Node(n_type='Tuple', children= p[2].children + [p[4]])
+    print(p[0].children)
 
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
             | OPEN_BRACKET CLOSED_BRACKET'''
-    # TODO(us): hacer
+    if len(p == 3):
+        p[0] = Node(n_type='EmptyList')
+    else:
+        p[0] = Node(n_type='List', children=p[2].children)
 
 def p_list_tuple_recursion(p):
     '''list_tuple_recursion : list_tuple_recursion COMMA list_tuple_values
                             | list_tuple_values'''
-    # TODO(us): hacer
+    if len(p) == 2:
+        p[0] = Node(n_type='ListTupleContent', children=[p[1]])
+    else:
+        p[0] = Node(n_type='ListTupleContent', children= p[1].children + [p[3]])
 
 def p_list_tuple_values(p):
     '''list_tuple_values : tuple
@@ -564,7 +568,7 @@ def p_list_tuple_values(p):
                          | values
                          | variable
                          | call_function'''
-    # TODO(us): hacer
+    p[0] = p[1]
 
 def p_set(p):
     '''set : OPEN_CURLY_BRACKET set_recursion CLOSED_CURLY_BRACKET'''
