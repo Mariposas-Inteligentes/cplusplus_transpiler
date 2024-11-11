@@ -33,6 +33,17 @@ def statement_creation(p):
 
     return p
 
+def level_if_statement(p):
+    if len(p.children) == 3:
+        tempP = p.children[2]
+        while len(tempP.children) == 3 and (tempP.children[2].n_type == "ElifRule" or tempP.children[2].n_type == "ElseRule"):
+            tempChild = tempP.children[2]
+            p.children.append(tempChild)
+            tempP.children.remove(tempP.children[2])
+            tempP = p.children[len(p.children)-1]
+    return p
+
+
 def if_statement_creation(p):
     if_node = Node(n_type="IfRule", children=[p[2], p[6]])
     if len(p) > 8:
@@ -41,6 +52,7 @@ def if_statement_creation(p):
             if isinstance(clause, Node):
                 if_node.children.append(clause)
     p[0] = if_node
+    p[0] = level_if_statement(p[0])
     return p
 
 def elif_statement_creation(p):
