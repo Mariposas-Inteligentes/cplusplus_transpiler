@@ -542,7 +542,6 @@ def p_cmp_symbols(p):
 def p_tuple(p):
     '''tuple : OPEN_PARENTHESIS list_tuple_recursion COMMA list_tuple_values CLOSED_PARENTHESIS'''
     p[0] = Node(n_type='Tuple', children= p[2].children + [p[4]])
-    print(p[0].children)
 
 def p_list(p):
     '''list : OPEN_BRACKET list_tuple_recursion CLOSED_BRACKET
@@ -558,7 +557,7 @@ def p_list_tuple_recursion(p):
     if len(p) == 2:
         p[0] = Node(n_type='ListTupleContent', children=[p[1]])
     else:
-        p[0] = Node(n_type='ListTupleContent', children= p[1].children + [p[3]])
+        p[0] = Node(n_type='ListTupleContent', children = p[1].children + [p[3]])
 
 def p_list_tuple_values(p):
     '''list_tuple_values : tuple
@@ -572,17 +571,22 @@ def p_list_tuple_values(p):
 
 def p_set(p):
     '''set : OPEN_CURLY_BRACKET set_recursion CLOSED_CURLY_BRACKET'''
-    # TODO(us): hacer
+    p[0] = Node(n_type ='Set', children = p[2].children)
+
 
 def p_set_recursion(p):
     '''set_recursion : set_recursion COMMA set_values
                      | set_values'''
-    # TODO(us): hacer
+    if len(p) == 2:
+        p[0] = Node(n_type='SetContent', children=[p[1]])
+    else:
+        p[0] = Node(n_type='SetContent', children = p[1].children + [p[3]] )
+
 
 def p_set_values(p):
     '''set_values : tuple
                   | values'''
-    # TODO(us): hacer
+    p[0] = p[1]
 
 def p_dictionary(p):
     '''dictionary : OPEN_CURLY_BRACKET dictionary_content CLOSED_CURLY_BRACKET
