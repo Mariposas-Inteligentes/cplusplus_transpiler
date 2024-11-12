@@ -153,6 +153,9 @@ class Entity {
     std::string get_value(){
         return value;
     }
+
+    // TODO(us): sobrecargar operadores: +, =
 };
+
 
 #endif

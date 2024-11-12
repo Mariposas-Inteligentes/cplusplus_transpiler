@@ -5,6 +5,16 @@ class CodeGenerator:
         self.root = ast[0]
         self.code = ""
         self.output_file = output_file
+        self.existing_variables = []
+
+    # TODO: nosotros agregar variables para ver si hay que definirlas
+    # Propuesta: hacer que todo en las hojas sea una variable, hasta las constantes
+    # habria que dejar reservado el nombre "aValue" (o el que escojamos)
+    def add_variable(self, var_type, value, name = None):
+        if var_type == "int":
+            name = "a" + str(value)
+        if var_type == "double":
+            name = "a" + str(int(value)) + "_" + str(value).split(".")[1]
     
     def generate_code(self):
         # TODO: generate code string
@@ -27,7 +37,7 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.type == 'Empty':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'EmptyStatement':
             # TODO(us): hacer
@@ -39,137 +49,150 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.type == 'ForLoop':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'WhileLoop':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'TryRule':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ExceptRule':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'IfRule':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ElifRule':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ElseRule':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'NoneLiteral':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'StringLiteral':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'DefFunction':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Parameter':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ParameterList':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ParameterWithDefault':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ReturnStatement':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'CallFunction':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ParameterWithAssignment':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'IntegerLiteral':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'FloatLiteral':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'BooleanLiteral':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'AccessVariable':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'AccessVarList':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'MathExpression':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'MathSymbol':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Parenthesis':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'MathAssign':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'LogicSymbols':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'CmpSymbols':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Tuple':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'EmptyList':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'List':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ListTupleContent':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Set':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'SetContent':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Dictionary':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'EmptyDictionary':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'DictionaryContent':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Print':
-          # TODO(us): hacer
+            # TODO(us): hacer
+            self.code += "std::cout << "
             pass
         elif node.type == 'EmptyPrint':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'PrintDataStructs':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'VariableAssignment':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'AttributeMethod':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'ClassDefinition':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Inheritance':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Continue':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
         elif node.type == 'Break':
-          # TODO(us): hacer
+            # TODO(us): hacer
             pass
+
+# def angie():
+#   return 20
+
+# pepito = 5 + angie()
+
+
+# Entity angie(){
+#   return Entity(int, 20)
+# }
+# Entity a5 = Entity(int, 5)
+# Entity pepito = a5 + angie()
