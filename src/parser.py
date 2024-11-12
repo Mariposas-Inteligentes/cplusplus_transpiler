@@ -16,6 +16,23 @@ precedence = (
     ('left', 'OPEN_CURLY_BRACKET', 'CLOSED_CURLY_BRACKET')
 )
 
+# TODO(us): Statement
+# Esta entrada genera doble statement
+# try:
+#   if x == 4:
+#     x = 0
+#   elif x > 4:
+#     x = -3
+#   elif x == 3:
+#     x = -2
+#   elif x == 120:
+#     x = +234
+#   elif x == True:
+#     x = False
+#   else: 
+#     x = 20
+# except:
+#   print("holi")
 def statement_creation(p):
     if len(p) == 2:
         if p[1] is not None:
@@ -42,12 +59,22 @@ def while_loop_statement(p):
     # TODO(us): hacer
     return p
 
-def try_statement(p):
-    # TODO(us): hacer
+def try_statement(p): 
+    try_block = p[5]  
+    except_block = None
+    if len(p) == 8:
+        except_block = p[7]  # TODO(us): creo que no se puede try sin catch
+    children = [c for c in [try_block, except_block] if c is not None]
+    p[0] = Node("TryRule", children=children)
     return p
 
 def catch_statement(p):
-    # TODO(us): hacer
+    exception_type = None
+    except_block = p[5]
+    if len(p) == 8:
+        exception_type = p[2]
+        except_block = p[6]
+    p[0] = Node("ExceptRule", children=[except_block], value = exception_type)
     return p
 
 def level_if_statement(p):
