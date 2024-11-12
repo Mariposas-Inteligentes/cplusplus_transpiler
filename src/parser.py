@@ -16,23 +16,12 @@ precedence = (
     ('left', 'OPEN_CURLY_BRACKET', 'CLOSED_CURLY_BRACKET')
 )
 
-# TODO(us): Statement
-# Esta entrada genera doble statement
-# try:
-#   if x == 4:
-#     x = 0
-#   elif x > 4:
-#     x = -3
-#   elif x == 3:
-#     x = -2
-#   elif x == 120:
-#     x = +234
-#   elif x == True:
-#     x = False
-#   else: 
-#     x = 20
-# except:
-#   print("holi")
+
+def level_statement(p):
+    while len(p[0].children) == 1 and p[0].children[0].n_type == "Statement":
+            p[0] = p[0].children[0]
+    return p
+
 def statement_creation(p):
     if len(p) == 2:
         if p[1] is not None:
@@ -47,9 +36,9 @@ def statement_creation(p):
         elif len(children) == 1:
             p[0] = children[0]
 
+    p = level_statement(p)
+
     return p
-
-
 
 def for_loop_statement(p):
     iterator = p[2]
@@ -94,7 +83,6 @@ def level_if_statement(p):
             tempP.children.remove(tempP.children[2])
             tempP = p.children[len(p.children)-1]
     return p
-
 
 def if_statement_creation(p):
     if_node = Node(n_type="IfRule", children=[p[2], p[6]])
@@ -870,8 +858,7 @@ def p_for_rule_content(p):
         p[0] = Node(n_type="VarName", value=p[1])
 
 def p_try_rule(p):
-    '''try_rule : TRY COLON NEWLINE INDENT limited_statement DEDENT
-                | TRY COLON NEWLINE INDENT limited_statement DEDENT except_rule'''
+    '''try_rule : TRY COLON NEWLINE INDENT limited_statement DEDENT except_rule'''
     p = try_statement(p)
 
 def p_except_rule(p):
@@ -981,8 +968,7 @@ def p_else_rule_loop(p):
 
 
 def p_try_rule_loop(p):
-    '''try_rule_loop : TRY COLON NEWLINE INDENT limited_statement_loop DEDENT
-                        | TRY COLON NEWLINE INDENT limited_statement_loop DEDENT except_rule_loop'''
+    '''try_rule_loop : TRY COLON NEWLINE INDENT limited_statement_loop DEDENT except_rule_loop'''
     p = try_statement(p)
 
 def p_except_rule_loop(p):
@@ -1081,8 +1067,7 @@ def p_else_rule_func(p):
     p = else_statement_creation(p)
 
 def p_try_rule_func(p):
-    '''try_rule_func : TRY COLON NEWLINE INDENT limited_statement_func DEDENT
-                        | TRY COLON NEWLINE INDENT limited_statement_func DEDENT except_rule_func'''
+    '''try_rule_func : TRY COLON NEWLINE INDENT limited_statement_func DEDENT except_rule_func'''
     p = try_statement(p)
 
 def p_except_rule_func(p):
@@ -1203,8 +1188,7 @@ def p_else_rule_func_loop(p):
     p = else_statement_creation(p)
 
 def p_try_rule_func_loop(p):
-    '''try_rule_func_loop : TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT
-                            | TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT except_rule_func_loop'''
+    '''try_rule_func_loop : TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT except_rule_func_loop'''
     p = try_statement(p)
 
 def p_except_rule_func_loop(p):
