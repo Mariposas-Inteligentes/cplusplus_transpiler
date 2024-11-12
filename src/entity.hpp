@@ -103,12 +103,12 @@ class Entity {
     }
 
     /*
-    Operadores:
-    +, - , *, **, /, //, ^, %
-    in, and, or, not in
+    Operators:
+        +, - , *, **, /, //, ^, %
+        in, and, or, not in
 
-    Tipos:
-    int, double, string, tuple, set, dict, class
+    Types:
+        int, double, string, tuple, set, dict, class
     */
     bool is_operable(std::string operator, Entity other) {
         bool is_operable;
