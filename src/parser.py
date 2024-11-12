@@ -4,6 +4,7 @@ from node import Node
 
 error_count = 0
 debug_parser = False
+ast = None
 
 precedence = (
     ('left', 'PLUS', 'MINUS'),
@@ -109,6 +110,7 @@ def else_statement_creation(p):
     return p
 
 def p_start(p):
+    global ast
     '''start : START_MARKER statement END_MARKER
             | START_MARKER statement statement_values_end END_MARKER
             | START_MARKER END_MARKER'''
@@ -129,6 +131,8 @@ def p_start(p):
         print("AST tree:")
         print(p[0])
         p[0].visualize()
+
+    ast = p
     
 def p_statement(p):
     '''statement : statement_values
@@ -1225,6 +1229,8 @@ class Parser:
     def parse(self, input_text):
         global error_count
         global debug_parser
+        global ast
         self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
         debug_parser = self.debug
         self.error_count = error_count
+        return ast

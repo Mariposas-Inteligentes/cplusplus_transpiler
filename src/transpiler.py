@@ -1,5 +1,6 @@
 from lexer import Lexer
 from parser import Parser
+from code_gen import CodeGenerator
 
 class Transpiler():
     def __init__(self, file_name, debug=False):
@@ -29,8 +30,12 @@ class Transpiler():
                 print(i)
         if (self.lexer.error_count == 0):
             self.parser.set_lexer(self.lexer)
-            self.parser.parse(data)
+            ast = self.parser.parse(data)
             print(f"Error count for parsing: {self.parser.error_count}")
-            print("AST succesfully created")
+            if (self.parser.error_count == 0 and ast is not None ):
+                print("AST succesfully created")
+                code = CodeGenerator("../output/output.hpp", ast)
+                code.generate_code()
+            
 
         
