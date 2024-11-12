@@ -16,7 +16,6 @@ precedence = (
     ('left', 'OPEN_CURLY_BRACKET', 'CLOSED_CURLY_BRACKET')
 )
 
-
 def level_statement(p):
     while len(p[0].children) == 1 and p[0].children[0].n_type == "Statement":
             p[0] = p[0].children[0]
@@ -60,7 +59,7 @@ def try_statement(p):
     try_block = p[5]  
     except_block = None
     if len(p) == 8:
-        except_block = p[7]  # TODO(us): creo que no se puede try sin catch
+        except_block = p[7]
     children = [c for c in [try_block, except_block] if c is not None]
     p[0] = Node("TryRule", children=children)
     return p
@@ -126,11 +125,10 @@ def p_start(p):
     else:  # Empty
         p[0] = Node(n_type='Empty')
 
-    # TODO(us): visualize p[0] only in debug
-    # if debug_parser:
-    print("AST tree:")
-    print(p[0])
-    p[0].visualize()
+    if debug_parser:
+        print("AST tree:")
+        print(p[0])
+        p[0].visualize()
     
 def p_statement(p):
     '''statement : statement_values

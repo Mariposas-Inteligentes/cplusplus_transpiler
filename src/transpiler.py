@@ -31,5 +31,6 @@ class Transpiler():
             self.parser.set_lexer(self.lexer)
             self.parser.parse(data)
             print(f"Error count for parsing: {self.parser.error_count}")
+            print("AST succesfully created")
 
         
