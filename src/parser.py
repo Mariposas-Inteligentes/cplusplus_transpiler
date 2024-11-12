@@ -52,11 +52,19 @@ def statement_creation(p):
 
 
 def for_loop_statement(p):
-    # TODO(us): hacer
+    iterator = p[2]
+    iterable = p[4]
+    loop_body = p[8]
+    if len(p) != 10: 
+        iterator = p[3]
+        iterable = p[5]
+        loop_body = p[10]
+    iterator =  Node(n_type="VarName", value=iterator)
+    p[0] = Node("ForLoop", children=[iterator, iterable, loop_body])
     return p
 
 def while_loop_statement(p):
-    # TODO(us): hacer
+    p[0] = Node("WhileLoop", children=[p[2], p[6]])
     return p
 
 def try_statement(p): 
@@ -856,7 +864,10 @@ def p_for_rule_content(p):
                         | tuple
                         | dictionary
                         | set'''
-    # TODO(us): hacer
+    if isinstance(p[1], Node):
+        p[0] = p[1]
+    else:
+        p[0] = Node(n_type="VarName", value=p[1])
 
 def p_try_rule(p):
     '''try_rule : TRY COLON NEWLINE INDENT limited_statement DEDENT
