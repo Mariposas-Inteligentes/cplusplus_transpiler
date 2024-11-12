@@ -21,7 +21,6 @@ def statement_creation(p):
         if p[1] is not None:
             p[0] = Node(n_type='Statement', children= [p[1]])
         else:
-            # TODO(Us): Required?
             p[0] = Node(n_type='EmptyStatement')
     else:
         children = [c for c in [p[1], p[2]] if c is not None]
@@ -31,6 +30,24 @@ def statement_creation(p):
         elif len(children) == 1:
             p[0] = children[0]
 
+    return p
+
+
+
+def for_loop_statement(p):
+    # TODO(us): hacer
+    return p
+
+def while_loop_statement(p):
+    # TODO(us): hacer
+    return p
+
+def try_statement(p):
+    # TODO(us): hacer
+    return p
+
+def catch_statement(p):
+    # TODO(us): hacer
     return p
 
 def level_if_statement(p):
@@ -400,7 +417,7 @@ def p_variable(p):
     
     if len(p) == 2:
         p[0] = Node(n_type="VarName", value=p[1])
-    elif len(p) == 3:  # TODO(us): Como manejar esto bien
+    elif len(p) == 3:
         p[0] = Node(n_type="AttributeMethod", children=[p[1], p[2]])
     elif len(p) == 5:
         p[0] = Node(n_type="AccessVariable", children=[p[1], p[3]])
@@ -615,12 +632,24 @@ def p_printing(p):
                 | PRINT OPEN_PARENTHESIS print_content_recv CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS NONE CLOSED_PARENTHESIS
                 | PRINT OPEN_PARENTHESIS CLOSED_PARENTHESIS'''
-    # TODO(us): hacer
+    if len(p) == 4:
+        p[0] = Node(n_type = "EmptyPrint")
+    else:
+        if p[3] == 'None':
+            p[3] = Node(n_type="NoneLiteral", value= p[3])
+        elif isinstance(p[3], str) and (p[3][0] == "\'" or p[3][0] == "\""):
+            p[3] = Node(n_type="StringLiteral", value=p[3])
+        p[0] = Node(n_type="Print", children = [p[3]] )
+        
+        
 
 def p_print_content_recv(p):
     '''print_content_recv : print_content_recv PLUS data_structures
                           | data_structures '''
-    # TODO(us): hacer
+    if len(p) == 2:
+        p[0] = Node(n_type = "PrintDataStructs", children = [p[1]])
+    else:
+        p[0] = Node(n_type = "PrintDataStructs", children = p[1].children + [p[3]])
 
 def p_limited_statement(p):
     '''limited_statement : limited_statement_recv
@@ -786,12 +815,12 @@ def p_loop_statement_values_end(p):
 def p_while_rule(p):
     '''while_rule : WHILE math_expression COLON NEWLINE INDENT loop_statement DEDENT
                     | WHILE variable COLON NEWLINE INDENT loop_statement DEDENT'''
-    # TODO(us): hacer
+    p = while_loop_statement(p)
 
 def p_for_rule(p):
     '''for_rule : FOR VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT loop_statement DEDENT
                 | FOR OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT loop_statement DEDENT'''
-    # TODO(us): hacer
+    p = for_loop_statement(p)
 
 def p_for_rule_content(p):
     '''for_rule_content : call_function
@@ -805,12 +834,12 @@ def p_for_rule_content(p):
 def p_try_rule(p):
     '''try_rule : TRY COLON NEWLINE INDENT limited_statement DEDENT
                 | TRY COLON NEWLINE INDENT limited_statement DEDENT except_rule'''
-    # TODO(us): hacer
+    p = try_statement(p)
 
 def p_except_rule(p):
     '''except_rule : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement DEDENT
                     | EXCEPT COLON NEWLINE INDENT limited_statement DEDENT'''
-    # TODO(us): hacer
+    p = catch_statement(p)
 
 def p_limited_statement_loop(p):
     '''limited_statement_loop : limited_statement_values_loop_end
@@ -916,12 +945,12 @@ def p_else_rule_loop(p):
 def p_try_rule_loop(p):
     '''try_rule_loop : TRY COLON NEWLINE INDENT limited_statement_loop DEDENT
                         | TRY COLON NEWLINE INDENT limited_statement_loop DEDENT except_rule_loop'''
-    # TODO(us): hacer
+    p = try_statement(p)
 
 def p_except_rule_loop(p):
     '''except_rule_loop : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement_loop DEDENT
                         | EXCEPT COLON NEWLINE INDENT limited_statement_loop DEDENT'''
-    # TODO(us): hacer
+    p = catch_statement(p)
 
 def p_limited_statement_func(p):
     '''limited_statement_func : limited_statement_func_recv
@@ -1016,12 +1045,12 @@ def p_else_rule_func(p):
 def p_try_rule_func(p):
     '''try_rule_func : TRY COLON NEWLINE INDENT limited_statement_func DEDENT
                         | TRY COLON NEWLINE INDENT limited_statement_func DEDENT except_rule_func'''
-    # TODO(us): hacer
+    p = try_statement(p)
 
 def p_except_rule_func(p):
     '''except_rule_func : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement_func DEDENT
                         | EXCEPT COLON NEWLINE INDENT limited_statement_func DEDENT'''
-    # TODO(us): hacer
+    p = catch_statement(p)
 
 def p_limited_statement_func_loop(p):
     '''limited_statement_func_loop : limited_statement_func_loop_recv
@@ -1100,12 +1129,12 @@ def p_limited_statement_values_func_loop_end(p):
 def p_while_rule_func(p):
     '''while_rule_func : WHILE math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                         | WHILE variable COLON NEWLINE INDENT limited_statement_func_loop DEDENT '''
-    # TODO(us): hacer
+    p = while_loop_statement(p)
 
 def p_for_rule_func(p):
     '''for_rule_func : FOR VAR_FUNC_NAME IN for_rule_content COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                      | FOR OPEN_PARENTHESIS VAR_FUNC_NAME IN for_rule_content CLOSED_PARENTHESIS COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
-    # TODO(us): hacer
+    p = for_loop_statement(p)
 
 def p_if_rule_func_loop(p):
     '''if_rule_func_loop : IF math_expression COLON NEWLINE INDENT limited_statement_func_loop DEDENT
@@ -1138,12 +1167,12 @@ def p_else_rule_func_loop(p):
 def p_try_rule_func_loop(p):
     '''try_rule_func_loop : TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                             | TRY COLON NEWLINE INDENT limited_statement_func_loop DEDENT except_rule_func_loop'''
-    # TODO(us): hacer
+    p = try_statement(p)
 
 def p_except_rule_func_loop(p):
     '''except_rule_func_loop : EXCEPT VAR_FUNC_NAME COLON NEWLINE INDENT limited_statement_func_loop DEDENT
                             | EXCEPT COLON NEWLINE INDENT limited_statement_func_loop DEDENT'''
-    # TODO(us): hacer
+    p = catch_statement(p)
 
 def p_def_class(p):
     '''def_class : CLASS VAR_FUNC_NAME COLON NEWLINE INDENT statement DEDENT
