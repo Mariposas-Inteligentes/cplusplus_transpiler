@@ -84,7 +84,7 @@ def p_start(p):
             children.append(p[3])
         p[0] = Node(n_type='Start', children=children)
     else:  # Empty
-        p[0] = Node(n_type='Empty')  # TODO(profe): verificar como borrar nodos
+        p[0] = Node(n_type='Empty')
 
     # TODO(us): visualize p[0] only in debug
     # if debug_parser:
@@ -591,12 +591,21 @@ def p_set_values(p):
 def p_dictionary(p):
     '''dictionary : OPEN_CURLY_BRACKET dictionary_content CLOSED_CURLY_BRACKET
                    | OPEN_CURLY_BRACKET CLOSED_CURLY_BRACKET'''
-    # TODO(us): hacer
+    if len(p) == 3:
+        p[0] = Node(n_type='EmptyDictionary')
+    else:
+        p[0] = Node(n_type='Dictionary', children=p[2].children)
 
 def p_dictionary_content(p):
     '''dictionary_content : dictionary_content COMMA list_tuple_values COLON list_tuple_values
                           | list_tuple_values COLON list_tuple_values '''
-    # TODO(us): hacer
+    # Even positions have keys and odd positions have values
+    if len(p) == 4:
+        p[0] = Node(n_type='DictionaryContent', children=[p[1], p[3]])
+    else:
+        p[0] = Node(n_type='DictionaryContent', children = p[1].children + [p[3], p[5]] )
+
+
 
 def p_printing(p):
     '''printing : PRINT OPEN_PARENTHESIS math_expression CLOSED_PARENTHESIS

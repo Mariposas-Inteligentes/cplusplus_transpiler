@@ -16,7 +16,7 @@ class Node:
     
     def add_to_graph(self, graph, parent_id=None):
         node_id = id(self)
-        label = f"{self.n_type}\nValue: {self.value}" if self.value else self.n_type
+        label = f"{self.n_type}\nValue: {self.value}" if self.value is not None else self.n_type
         graph.add_node(node_id, label=label)
 
         if parent_id is not None:
