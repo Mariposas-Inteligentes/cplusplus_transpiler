@@ -1,8 +1,14 @@
+# Compiled executables
+src/a.out
+*.gch
+
 # Testing
 src/test_parser.py
 src/testing_parser.py
 src/parser.out
 src/parsetab.py
+src/pruebas.cpp
+
 
 .vscode/
 

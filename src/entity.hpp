@@ -1,53 +1,55 @@
 #ifndef ENTITY
 #define ENTITY
 
+#include "common.hpp"
+
 #include <string>
 #include <cmath>
 #include <stdexcept>
 
 class Entity {
   private:
-    std::string type;
+    int type;
     std::string value;
 
-    bool check_string(Entity& other, std::string operator_type) {
-        if (operator_type == "+" && other.type == "string") {
+    bool check_string(const Entity& other, std::string operator_type)const {
+        if (operator_type == "+" && other.type == STRING) {
             return true;
         }
-        if (operator_type == "*" && other.type == "int") {
+        if (operator_type == "*" && other.type == INT) {
             return true;
         }
-        if (operator_type == "in" && other.type = "string") {
+        if (operator_type == "in" && other.type == STRING) {
             return true;
         }
-        if (operator_type == "not in" && other.type = "string") {
+        if (operator_type == "not in" && other.type == STRING) {
             return true;
         }
         
         return false;
     }
 
-    bool check_number(Entity& other, std::string operator_type) {
-        if (operator_type == "+" && other.type == "string") {
+    bool check_number(const Entity& other, std::string operator_type)const {
+        if (operator_type == "+" && other.type == STRING) {
             return true;
         }
-        if (other.typpe == "int" || other.type == "double") {
+        if (other.type == INT || other.type == BOOL || other.type == DOUBLE) {
             return true;
         }
-        if (operator_type == "*" && other.type == "list") {
+        if (operator_type == "*" && other.type == LIST) {
             return true;
         }
-        if (operator_type == "*" && other.type == "tuple") {
+        if (operator_type == "*" && other.type == TUPLE) {
             return true;
         }
         return false;
     }
 
-    bool check_list(Entity& other, std::string operator_type) {
-        if (operator_type == "+" && other.type == "list") {
+   bool check_list(const Entity& other, std::string operator_type)const {
+        if (operator_type == "+" && other.type == LIST) {
             return true;
         }
-        if (operator_type == "*" && other.type == "int") {
+        if (operator_type == "*" && other.type == INT) {
             return true;
         }
         if (operator_type == "in") {
@@ -59,24 +61,11 @@ class Entity {
         return false;
     }
 
-    bool check_tuple(Entity& other, std::string operator_type) {
-        if (operator_type == "+" && other.type == "tuple") {
+    bool check_tuple(const Entity&other, std::string operator_type)const {
+        if (operator_type == "+" && other.type == TUPLE) {
             return true;
         }
-        if (operator_type == "*" && other.type == "int") {
-            return true;
-        }
-        if (operator_type == "in") {
-            return true;
-        }
-        if (operator_type == "not in") {
-            return true;
-        }
-        return false;
-    }
-
-    bool check_set(Entity& other, std::string operator_type) {
-        if (operator_type == "-" && other.type == "tuple") {
+        if (operator_type == "*" && other.type == INT) {
             return true;
         }
         if (operator_type == "in") {
@@ -88,7 +77,20 @@ class Entity {
         return false;
     }
 
-    bool check_dict(Entity& other, std::string operator_type) {
+    bool check_set(const Entity& other, std::string operator_type)const {
+        if (operator_type == "-" && other.type == TUPLE) {
+            return true;
+        }
+        if (operator_type == "in") {
+            return true;
+        }
+        if (operator_type == "not in") {
+            return true;
+        }        
+        return false;
+    }
+
+    bool check_dict(const Entity& other, std::string operator_type)const {
         if (operator_type == "in") {
             return true;
         }
@@ -99,7 +101,7 @@ class Entity {
     }
 
   public:
-    Entity(std::string type, std::string value) {
+    Entity(int type, std::string value) {
         this->type = type;
         this->value = value;
     }
@@ -113,36 +115,37 @@ class Entity {
         int, double, string, tuple, set, dict, class
     */
    // TODO(us): implementar is operable para las diferentes comparaciones
-   // o cambiar los operadores
-    bool is_operable(std::string operator_type, Entity& other) {
+   // o cambiar losoperadores
+    bool is_operable(std::string operator_type, const Entity& other)const {
         bool is_operable;
-        switch(this->type) {  // TODO(us): Creo que el switch solo puede tener integers
-            case "string":
+        
+        switch(this->type) {
+            case STRING:
                 is_operable = check_string(other, operator_type);
                 break;
-            case "int": case "double":
+            case INT: case DOUBLE: case BOOL:
                 is_operable = check_number(other, operator_type);
                 break;
-            case "list":
+            case LIST:
                 is_operable = check_list(other, operator_type);
                 break;
-            case "tuple":
+            case TUPLE:
                 is_operable = check_tuple(other, operator_type);
                 break;
-            case "set":
+            case SET:
                 is_operable = check_set(other, operator_type);
                 break;
-            case "dict":
+            case DICT:
                 is_operable = check_dict(other, operator_type);
                 break;
-            case "class":
+            case CLASS:
                 is_operable = true;
                 break;
         }
         return is_operable;
     }
 
-    void set_type(std::string type){
+    void set_type(int type){
         this->type = type;
     }
     
@@ -150,7 +153,7 @@ class Entity {
         this->value = value;
     }
     
-    std::string get_type(){
+    int get_type(){
         return type;
     }
     
@@ -159,54 +162,54 @@ class Entity {
     }
 
    // TODO(us): dependiendo cómo guardemos una lista y así, puede que haya que cambiar
-   // lo que significa sumar o restar y así (actualmente solo se concatenan cosas)
+   // lo que significa sumar o restr y así (actualente solo se concatenan cosas)
 
-    Entity  operator+(const Entity& other) const {
+    Entity operator+(const Entity& other) const {
         if (this->is_operable("+", other)) {
-            if (this->type == "string" && other.type == "string") {
-                return Entity("string", this->value + other.value);
+            if (this->type == STRING && other.type == STRING) {
+                return Entity(STRING, this->value + other.value);
             }
-            if ((this->type == "int" || this->type == "double") && (other.type == "int" || other.type == "double")) {
+            if ((this->type == INT || this->type == DOUBLE) && (other.type == INT || other.type == DOUBLE)) {
                 double result = std::stod(this->value) + std::stod(other.value);
                 return Entity(this->type, std::to_string(result));
             }
-            if (this->type == "list" && other.type == "list") {
-                return Entity("list", this->value + "," + other.value); // Simple concatenation
+            if (this->type == LIST && other.type == LIST) {
+                return Entity(LIST, this->value + "," + other.value); // Simple concatenation
             }
-            if (this->type == "tuple" && other.type == "tuple") {
-                return Entity("tuple", this->value + "," + other.value); // Simple concatenation
+            if (this->type == TUPLE && other.type == TUPLE) {
+                return Entity(TUPLE, this->value + "," + other.value); // Simple concatenation
             }
         }
-        throw std::invalid_argument("Invalid operation for the given types with +.");
+        throw std::invalid_argument("Invalid operaton for the given types with +.");
     }
 
     Entity  operator-(const Entity& other) const {
         if (this->is_operable("-", other)) {
-            if ((this->type == "int" || this->type == "double") && (other.type == "int" || other.type == "double")) {
+            if ((this->type == INT || this->type == DOUBLE) && (other.type == INT || other.type == DOUBLE)) {
                 double result = std::stod(this->value) - std::stod(other.value);
                 return Entity(this->type, std::to_string(result));
             }
-            if (this->type == "set" && other.type == "set") {
+            if (this->type == SET && other.type == SET) {
                 // TODO(us): hacer
-                return Entity("set", ""); // Placeholder
+                return Entity(SET, ""); // Placeholder
             }
         }
-        throw std::invalid_argument("Invalid operation for the given types with -.");
+        throw std::invalid_argument("Invlid operation for the given types with -.");
     }
 
-    Entity  operator*(const Entity& other) const {
+    Entity operator*(const Entity& other) const {
         if (this->is_operable("*", other)) {
-            if (this->type == "int" && other.type == "int") {
+            if (this->type == INT && other.type == INT) {
                 int result = std::stoi(this->value) * std::stoi(other.value);
-                return Entity("int", std::to_string(result));
+                return Entity(INT, std::to_string(result));
             }
-            if (this->type == "string" && other.type == "int") {
+            if (this->type == STRING && other.type == INT) {
                 std::string result;
                 int times = std::stoi(other.value);
                 for (int i = 0; i < times; ++i) result += this->value;
-                return Entity("string", result);
+                return Entity(STRING, result);
             }
-            if ((this->type == "list" || this->type == "tuple") && other.type == "int") {
+            if ((this->type == LIST || this->type == TUPLE) && other.type == INT) {
                 std::string result;
                 int times = std::stoi(other.value);
                 for (int i = 0; i < times; ++i) result += this->value + ",";
@@ -216,38 +219,38 @@ class Entity {
         throw std::invalid_argument("Invalid operation for the given types with *.");
     }
 
-    Entity  operator/(const Entity& other) const {
+    Entity operator/(const Entity& other) const {
         if (this->is_operable("/", other)) {
-            if ((this->type == "int" || this->type == "double") && (other.type == "int" || other.type == "double")) {
+            if ((this->type == INT || this->type == DOUBLE) && (other.type == INT || other.type == DOUBLE)) {
                 if (other.value == "0") throw std::runtime_error("Division by zero");
                 double result = std::stod(this->value) / std::stod(other.value);
                 return Entity(this->type, std::to_string(result));
             }
         }
-        throw std::invalid_argument("Invalid operation for the given types with /.");
+       throw std::invalid_argument("Invalid operation for the given types with /.");
     }
 
-    Entity  operator%(const Entity& other) const {
+    Entity operator%(const Entity& other) const {
         if (this->is_operable("%", other)) {
             int result = std::stoi(this->value) % std::stoi(other.value);
-            return Entity("int", std::to_string(result));
-        }
+            return Entity(INT, std::to_string(result));
+       }
         throw std::invalid_argument("Invalid operation for the given types with %.");
     }
 
-    Entity  operator^(const Entity& other) const {
+    Entity operator^(const Entity& other) const {
         if (this->is_operable("^", other)) {
             double result = std::pow(std::stod(this->value), std::stod(other.value));
             return Entity(this->type, std::to_string(result));
         }
-        throw std::invalid_argument("Invalid operation for the given types with ^.");
+        throw std::invalid_argument("Invalid opration for the given types with ^.");
     }
 
     // Logical and Comparison operator_types
-    Entity  operator&&(const Entity& other) const {
+    Entity operator&&(const Entity& other) const {
         if (this->is_operable("and", other)) {
             bool result = (this->value != "0" && other.value != "0");
-            return Entity("bool", result ? "1" : "0");
+            return Entity(BOOL, result ? "1" : "0");
         }
         throw std::invalid_argument("Invalid operation for the given types with &&.");
     }
@@ -255,55 +258,55 @@ class Entity {
     Entity  operator||(const Entity& other) const {
         if (this->is_operable("or", other)) {
             bool result = (this->value != "0" || other.value != "0");
-            return Entity("bool", result ? "1" : "0");
-        }
+            return Entity(BOOL, result ? "1" : "0");
+       }
         throw std::invalid_argument("Invalid operation for the given types with ||.");
     }
 
     // Comparison operator_types
-    bool operator_type==(const Entity& other) const {
-        if (this->is_operable("==", other)) {
-            return this->value == other.value;
+    bool operator==(const Entity& other) const {
+        if (this->type == other.type) {
+           return this->value == other.value;
         }
         throw std::invalid_argument("Invalid operation for the given types with ==.");
     }
 
-    bool operator_type!=(const Entity& other) const {
-        if (this->is_operable("!=", other)) {
-            return this->value != other.value;
+    bool operator!=(const Entity& other) const {
+        if (this->type == other.type) {
+           return this->value != other.value;
         }
         throw std::invalid_argument("Invalid operation for the given types with !=.");
     }
 
-    bool operator_type<(const Entity& other) const {
-        if (this->is_operable("<", other)) {
-            return std::stod(this->value) < std::stod(other.value);
+    bool operator<(const Entity& other) const {
+        if (this->type == other.type) {
+           return std::stod(this->value) < std::stod(other.value);
         }
         throw std::invalid_argument("Invalid operation for the given types with <.");
     }
 
-    bool operator_type>(const Entity& other) const {
-        if (this->is_operable(">", other)) {
-            return std::stod(this->value) > std::stod(other.value);
+    bool operator>(const Entity& other) const {
+        if (this->type == other.type) {
+           return std::stod(this->value) > std::stod(other.value);
         }
         throw std::invalid_argument("Invalid operation for the given types with >.");
     }
 
-    bool operator_type<=(const Entity& other) const {
-        if (this->is_operable("<=", other)) {
-            return std::stod(this->value) <= std::stod(other.value);
+    bool operator<=(const Entity& other) const {
+        if (this->type == other.type) {
+           return std::stod(this->value) <= std::stod(other.value);
         }
         throw std::invalid_argument("Invalid operation for the given types with <=.");
     }
 
-    bool operator_type>=(const Entity& other) const {
-        if (this->is_operable(">=", other)) {
+    bool operator>=(const Entity& other) const {
+        if (this->type == other.type) {
             return std::stod(this->value) >= std::stod(other.value);
         }
-        throw std::invalid_argument("Invalid operation for the given types with >=.");
+        throw std::invalid_argument("Inalid operation for he given types with >=.");
     }
 
-    bool operator_type!() const {
+    bool operator!() const {
         return this->value == "0";
     }
 
