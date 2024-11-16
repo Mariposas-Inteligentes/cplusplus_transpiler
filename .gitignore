@@ -1,5 +1,6 @@
 # Compiled executables
 src/a.out
+output/
 *.gch
 
 # Testing

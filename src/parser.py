@@ -110,7 +110,6 @@ def else_statement_creation(p):
     return p
 
 def p_start(p):
-    global ast
     '''start : START_MARKER statement END_MARKER
             | START_MARKER statement statement_values_end END_MARKER
             | START_MARKER END_MARKER'''
@@ -131,7 +130,7 @@ def p_start(p):
         print("AST tree:")
         print(p[0])
         p[0].visualize()
-
+    global ast
     ast = p
     
 def p_statement(p):
