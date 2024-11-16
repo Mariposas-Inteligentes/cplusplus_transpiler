@@ -10,6 +10,7 @@ class CodeGenerator:
         self.int_vector = []
         self.float_vector = []
         self.string_vector = []
+        self.existing_variables = {}
     
     def generate_code(self):
         self.code += "#include <iostream>\n"
@@ -40,8 +41,41 @@ class CodeGenerator:
         else:
             index = len(vector)
             vector.append(value)
-            self.code += f"Entity {var_type}_{index}({var_type.upper()}, \"{value}\");\n"
-        self.code += f"{var_type}_{index};\n"
+            if var_type == "string" and len(value) > 1:  # Remove " and ' to avoid problems
+                stripped_value = value[1:-1]
+            else:
+                stripped_value = value
+
+            self.code += f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n"
+        return f"{var_type}_{index}"
+    
+
+    def process_variable_assignment(self, variable_name, value_node):
+        cpp_variable_name = f"py_{variable_name}"
+
+        # Check if the variable already exists
+        if cpp_variable_name not in self.existing_variables:
+            value_representation = self.get_cpp_value(value_node)
+            self.code += f"Entity {cpp_variable_name} = {value_representation};\n"
+            self.existing_variables[cpp_variable_name] = True
+        else:
+            # Variable exists: Just assign the value
+            value_representation = self.get_cpp_value(value_node)
+            self.code += f"{cpp_variable_name} = {value_representation};\n"
+        
+
+    def get_cpp_value(self, value_node):
+        if value_node.n_type == 'IntegerLiteral':
+            return self.handle_literal(value_node.value, 'int', self.int_vector)
+        elif value_node.n_type == 'FloatLiteral':
+            return self.handle_literal(value_node.value, 'double', self.float_vector)
+        elif value_node.n_type == 'StringLiteral':
+            return self.handle_literal(value_node.value, 'string', self.string_vector)
+        elif value_node.n_type == 'VarName':
+            return f"py_{value_node.value}"
+        else:
+            raise ValueError(f"Unsupported value node type: {value_node.n_type}")
+
 
     def process_node(self, node):
         if node.n_type == 'Start':
@@ -175,8 +209,10 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.n_type == 'VariableAssignment':
-            # TODO(us): hacer
-            pass
+            print("Aca toy 3")
+            variable_name = node.children[0].value  # First child: variable name
+            value_node = node.children[1]          # Second child: value
+            self.process_variable_assignment(variable_name, value_node)
         elif node.n_type == 'AttributeMethod':
             # TODO(us): hacer
             pass

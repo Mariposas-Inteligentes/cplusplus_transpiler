@@ -404,7 +404,7 @@ def p_variable_assign_expr(p):
         p[1].children.append(p[3])
         p[0] = p[1]
     else:
-        p[0] = Node(n_type="VariableAssignment", children=[p[1], p[2], p[3]], value =  p[2]) 
+        p[0] = Node(n_type="VariableAssignment", children=[p[1], p[2], p[3]], value =  p[2].value) 
 
 def p_data_structures(p):
     '''data_structures : list
@@ -418,7 +418,7 @@ def p_variable_assign_var(p):
                            | variable_assign_var math_assign variable'''
     
     if isinstance(p[1], Node) and p[1].n_type == "VariableAssignment":
-        p[1].children.append(Node(n_type="MathAssign", value=p[2].value))
+        p[1].children.append(Node(n_type="VariableAssignment", value=p[2].value))
         p[1].children.append(p[3])
         p[0] = p[1]
     else:
@@ -1229,7 +1229,7 @@ class Parser:
         global error_count
         global debug_parser
         global ast
-        self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
         debug_parser = self.debug
+        self.parser.parse(input_text, lexer=self.lexer, debug=self.debug)
         self.error_count = error_count
         return ast
