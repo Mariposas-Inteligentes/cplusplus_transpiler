@@ -32,6 +32,7 @@ class CodeGenerator:
         if node.children:
             for c in node.children:
                 self.generate_code_recv(c)
+                self.process_node(node)
         else:  # Leaf node
             self.process_node(node)
 
@@ -50,18 +51,24 @@ class CodeGenerator:
         return f"{var_type}_{index}"
     
 
-    def process_variable_assignment(self, variable_name, value_node):
+    def process_variable_assignment(self, node):
+        variable_name = node.children[0].value
         cpp_variable_name = f"py_{variable_name}"
 
-        # Check if the variable already exists
+        operator = node.children[1].value # operator
+        right_node = node.children[2]  # asignee
+
+        value_representation = self.get_cpp_value(right_node)
+
         if cpp_variable_name not in self.existing_variables:
-            value_representation = self.get_cpp_value(value_node)
-            self.code += f"Entity {cpp_variable_name} = {value_representation};\n"
+            # Define the variable for the first time
+            self.code += f"Entity {cpp_variable_name} {operator} {value_representation};\n"
             self.existing_variables[cpp_variable_name] = True
         else:
-            # Variable exists: Just assign the value
-            value_representation = self.get_cpp_value(value_node)
-            self.code += f"{cpp_variable_name} = {value_representation};\n"
+            # Update the variable if it already exists
+            self.code += f"{cpp_variable_name} {operator} {value_representation};\n"
+
+
         
 
     def get_cpp_value(self, value_node):
@@ -209,10 +216,8 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.n_type == 'VariableAssignment':
-            print("Aca toy 3")
-            variable_name = node.children[0].value  # First child: variable name
-            value_node = node.children[1]          # Second child: value
-            self.process_variable_assignment(variable_name, value_node)
+            # self.process_variable_assignment(node)
+            pass
         elif node.n_type == 'AttributeMethod':
             # TODO(us): hacer
             pass
