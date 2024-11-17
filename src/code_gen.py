@@ -136,7 +136,35 @@ class CodeGenerator:
             self.generate_code_recv(child)
         self.code += "}\n"
 
-        
+    def process_function_call(self, node):
+        function_name = node.children[0].value
+
+        args = [self.get_cpp_value(arg) for arg in node.children[1:]]
+
+        if function_name == 'sum':
+            if len(args) == 1 and args[0].startswith("std::vector"):
+                self.code += f"std::accumulate({args[0]}.begin(), {args[0]}.end(), 0);\n"
+            else:
+                return " + ".join(args)
+        elif function_name in ['int', 'string', 'double', 'bool']:
+            cpp_type = function_name.upper() if function_name != 'string' else 'std::string'
+            return f"static_cast<{cpp_type}>({args[0]})"
+        elif function_name == 'type':
+            return f"{args[0]}.get_type()"
+        else:
+            return f"{function_name}({', '.join(args)})"
+
+    def process_while_loop(self, node):
+        condition = self.get_cpp_value(node.children[0])
+        self.code += f"while (({condition}).is_true()) {{\n"
+        for child in node.children[1:]:
+            self.generate_code_recv(child)
+        self.code += "}\n"
+
+    def process_for_loop(self, node): # TODO(us): implement when we have call function
+        pass
+
+
 
     def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
@@ -177,13 +205,11 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
 
-        elif node.n_type == 'ForLoop':
-            # TODO(us): hacer
-            pass
-
         elif node.n_type == 'WhileLoop':
-            # TODO(us): hacer
-            pass
+            self.process_while_loop(node)
+
+        elif node.n_type == 'ForLoop':
+            self.process_for_loop(node)
 
         elif node.n_type == 'TryRule':
             # TODO(us): hacer
@@ -236,8 +262,7 @@ class CodeGenerator:
             pass
 
         elif node.n_type == 'CallFunction':
-            # TODO(us): hacer
-            pass
+            self.process_function_call(node)
 
         elif node.n_type == 'ParameterWithAssignment':
             # TODO(us): hacer
