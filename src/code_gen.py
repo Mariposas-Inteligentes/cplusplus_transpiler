@@ -33,10 +33,13 @@ class CodeGenerator:
             f.write(self.code)
 
     def generate_code_recv(self, node):
-        self.process_node(node)
-        if node.children:
-            for child in node.children:
-                self.generate_code_recv(child)
+        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule']:
+            self.process_node(node)
+        else:
+            self.process_node(node)
+            if node.children:
+                for child in node.children:
+                    self.generate_code_recv(child)
 
     def handle_literal(self, value, var_type, vector):
         if value in vector:
@@ -98,7 +101,40 @@ class CodeGenerator:
         code_to_add += " << std::endl;\n"
         self.code += code_to_add
 
+    def process_if(self, node):
+        condition = self.get_cpp_value(node.children[0])
+        self.code += f"if (({condition}).is_true()) {{\n"
+        ended = False # avoid extra curly brackets
+        for child in node.children[1:]:
+            if (child.n_type == "ElifRule" or child.n_type == "ElseRule") and not ended:
+                self.code += "}\n"
+                ended = True
+            self.generate_code_recv(child)
+        if not ended:
+            self.code += "}\n"
 
+    def process_elif(self, node):
+        
+        self.code += "else {\n"
+        # the else has to be apart from the if in case we need
+        # to define a variable for the condition
+        condition = self.get_cpp_value(node.children[0])
+        self.code += f"if (({condition}).is_true())"
+        self.code += "{\n"
+        ended = False
+        for child in node.children[1:]:
+            if (child.n_type == "ElifRule" or child.n_type == "Else") and not ended:
+                self.code += "}\n"
+            self.generate_code_recv(child)
+        if not ended:
+            self.code += "}\n"
+        self.code += "}\n"
+
+    def process_else(self, node):
+        self.code += "else {\n"
+        for child in node.children:
+            self.generate_code_recv(child)
+        self.code += "}\n"
 
         
 
@@ -149,14 +185,11 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.n_type == 'IfRule':
-            # TODO(us): hacer
-            pass
+            self.process_if(node)
         elif node.n_type == 'ElifRule':
-            # TODO(us): hacer
-            pass
+            self.process_elif(node)
         elif node.n_type == 'ElseRule':
-            # TODO(us): hacer
-            pass
+            self.process_else(node)
         elif node.n_type == 'NoneLiteral':
             # TODO(us): hacer
             pass
@@ -248,7 +281,8 @@ class CodeGenerator:
         elif node.n_type == 'PrintDataStructs':
             self.code += "std::cout << std::endl;"
         elif node.n_type == 'VariableAssignment':
-            self.process_variable_assignment(node)
+            # self.process_variable_assignment(node)
+            pass # TODO(us): pensar si es necesario
 
         elif node.n_type == 'AttributeMethod':
             # TODO(us): hacer

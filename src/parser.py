@@ -546,8 +546,10 @@ def p_math_symbols(p):
                     | POWER
                     | logic_symbols
                     | cmp_symbols'''
-    
-    p[0] = Node(n_type="MathSymbol", value=p[1])
+    if (isinstance(p[1], Node)):
+        p[0] = Node(n_type="MathSymbol", value=p[1].value)
+    else:
+        p[0] = Node(n_type="MathSymbol", value=p[1])
 
 
 def p_math_assign(p):

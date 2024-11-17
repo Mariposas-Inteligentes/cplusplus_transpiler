@@ -168,6 +168,10 @@ class Entity {
         return value;
     }
 
+    bool is_true() {
+        return (value == "1");
+    }
+
     bool analyze_int_double(int type) const {
         if ((this->type == DOUBLE || this->type == INT) && type == DOUBLE){
             return true;
