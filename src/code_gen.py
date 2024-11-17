@@ -68,6 +68,21 @@ class CodeGenerator:
             self.code += f"{cpp_variable_name} {operator} {value};\n"
 
 
+    def process_math_expression(self, node):
+        components = [] # to store each operand
+
+        for child in node.children:
+            if child.n_type == 'MathSymbol': # child is an operator
+                components.append(child.value)
+            elif child.n_type == 'Parenthesis': # child is an operator
+                inner_expression = self.get_cpp_value(child.children[0]) 
+                components.append(f"({inner_expression})")
+            else: # Normal operand
+                components.append(self.get_cpp_value(child))
+
+        # Join everything
+        return " ".join(components)
+
         
 
     def get_cpp_value(self, value_node):
@@ -79,6 +94,8 @@ class CodeGenerator:
             return self.handle_literal(value_node.value, 'string', self.string_vector)
         elif value_node.n_type == 'VarName':
             return f"py_{value_node.value}"
+        elif value_node.n_type == 'MathExpression':
+            return self.process_math_expression(value_node)
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
 
@@ -160,8 +177,7 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.n_type == 'MathExpression':
-            # TODO(us): hacer
-            pass
+            self.process_math_expression(node)
         elif node.n_type == 'MathSymbol':
             # TODO(us): hacer
             pass
