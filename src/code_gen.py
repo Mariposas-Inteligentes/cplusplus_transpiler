@@ -11,12 +11,15 @@ class CodeGenerator:
         self.float_vector = []
         self.string_vector = []
         self.existing_variables = {}
-        self.processed_nodes = []
     
     def generate_code(self):
         self.code += "#include <iostream>\n"
         self.code += "#include <string>\n"
         self.code += "#include \"entity.hpp\"\n"
+
+        # Always define true and false
+        self.code += "Entity bool_true(INT, \"1\");\n"
+        self.code += "Entity bool_false(INT, \"0\");\n"
         
         # get code ready
         self.generate_code_recv(self.root)
@@ -82,6 +85,20 @@ class CodeGenerator:
 
         # Join everything
         return " ".join(components)
+    
+    def process_print(self, node):
+        code_to_add = "std::cout"
+
+        for child in node.children:
+            if child.n_type == 'MathExpression':
+                expression = self.process_math_expression(child)
+                code_to_add += f" << {expression}"
+            else: 
+               code_to_add += f" << {self.get_cpp_value(child)}"
+        code_to_add += " << std::endl;\n"
+        self.code += code_to_add
+
+
 
         
 
@@ -96,10 +113,13 @@ class CodeGenerator:
             return f"py_{value_node.value}"
         elif value_node.n_type == 'MathExpression':
             return self.process_math_expression(value_node)
+        elif value_node.n_type == 'BooleanLiteral':
+            return "bool_true" if value_node.value == True else "bool_false"
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
 
 
+    # TODO(us): when we have something that should return true or false, we need to use the value
     def process_node(self, node):
         if node.n_type == 'Start':
             # TODO(us): hacer
@@ -168,8 +188,8 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.n_type == 'BooleanLiteral':
-            # TODO(us): hacer
-            pass
+            cpp_value = "bool_true" if node.value == True else "bool_false"
+            self.code += f"{cpp_value};\n"
         elif node.n_type == 'AccessVariable':
             # TODO(us): hacer
             pass
@@ -221,15 +241,12 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.n_type == 'Print':
-            # TODO(us): hacer
-            self.code += "std::cout << "
-            pass
+            self.process_print(node)
         elif node.n_type == 'EmptyPrint':
             # TODO(us): hacer
             pass
         elif node.n_type == 'PrintDataStructs':
-            # TODO(us): hacer
-            pass
+            self.code += "std::cout << std::endl;"
         elif node.n_type == 'VariableAssignment':
             self.process_variable_assignment(node)
 
