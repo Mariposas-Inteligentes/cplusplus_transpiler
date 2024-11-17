@@ -11,6 +11,7 @@ class CodeGenerator:
         self.float_vector = []
         self.string_vector = []
         self.existing_variables = {}
+        self.processed_nodes = []
     
     def generate_code(self):
         self.code += "#include <iostream>\n"
@@ -29,12 +30,10 @@ class CodeGenerator:
             f.write(self.code)
 
     def generate_code_recv(self, node):
+        self.process_node(node)
         if node.children:
-            for c in node.children:
-                self.generate_code_recv(c)
-                self.process_node(node)
-        else:  # Leaf node
-            self.process_node(node)
+            for child in node.children:
+                self.generate_code_recv(child)
 
     def handle_literal(self, value, var_type, vector):
         if value in vector:
@@ -58,15 +57,15 @@ class CodeGenerator:
         operator = node.children[1].value # operator
         right_node = node.children[2]  # asignee
 
-        value_representation = self.get_cpp_value(right_node)
+        value = self.get_cpp_value(right_node)
 
         if cpp_variable_name not in self.existing_variables:
             # Define the variable for the first time
-            self.code += f"Entity {cpp_variable_name} {operator} {value_representation};\n"
+            self.code += f"Entity {cpp_variable_name} {operator} {value};\n"
             self.existing_variables[cpp_variable_name] = True
         else:
             # Update the variable if it already exists
-            self.code += f"{cpp_variable_name} {operator} {value_representation};\n"
+            self.code += f"{cpp_variable_name} {operator} {value};\n"
 
 
         
@@ -216,8 +215,8 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         elif node.n_type == 'VariableAssignment':
-            # self.process_variable_assignment(node)
-            pass
+            self.process_variable_assignment(node)
+
         elif node.n_type == 'AttributeMethod':
             # TODO(us): hacer
             pass
