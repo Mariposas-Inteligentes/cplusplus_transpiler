@@ -10,7 +10,7 @@
 
 class Entity {
   public:
-    friend std::ostream& operator<<(std::ostream& os, Entity& entity) {
+    friend std::ostream& operator<<(std::ostream& os, Entity entity) {
         os << entity.get_value();
         return os;
     }

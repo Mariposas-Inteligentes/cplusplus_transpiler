@@ -1,6 +1,8 @@
 # Compiled executables
 src/a.out
-output/output.hpp
+output/main.cpp
+output/output.cpp
+output/*.out
 *.gch
 
 # Testing

@@ -4,7 +4,10 @@ from node import Node
 class CodeGenerator:
     def __init__(self, output_file, ast):
         self.root = ast[0]
+        self.variables = ""
         self.code = ""
+        self.classes = ""
+        self.functions = ""
         self.output_file = output_file
 
         self.int_vector = []
@@ -13,16 +16,20 @@ class CodeGenerator:
         self.existing_variables = {}
     
     def generate_code(self):
-        self.code += "#include <iostream>\n"
-        self.code += "#include <string>\n"
-        self.code += "#include \"entity.hpp\"\n"
+        # Get code ready
+        self.generate_code_recv(self.root)
+        self.code = self.variables + self.code
 
         # Always define true and false
-        self.code += "Entity bool_true(INT, \"1\");\n"
-        self.code += "Entity bool_false(INT, \"0\");\n"
-        
-        # get code ready
-        self.generate_code_recv(self.root)
+        self.code = "Entity bool_true(INT, \"1\");\n" + self.code
+        self.code = "Entity bool_false(INT, \"0\");\n" + self.code
+
+        # Append necessary includes
+        self.code = "int main() {\n" + self.code
+        self.code = "#include \"entity.hpp\"\n" + self.code
+        self.code = "#include <string>\n" + self.code
+        self.code = "#include <iostream>\n" + self.code
+        self.code += "return 0;\n}"
 
         # Write to file (make sure directory exists)
         output_dir = os.path.dirname(self.output_file)
@@ -52,7 +59,7 @@ class CodeGenerator:
             else:
                 stripped_value = value
 
-            self.code += f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n"
+            self.variables += f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n"
         return f"{var_type}_{index}"
     
 
@@ -67,7 +74,11 @@ class CodeGenerator:
 
         if cpp_variable_name not in self.existing_variables:
             # Define the variable for the first time
-            self.code += f"Entity {cpp_variable_name} {operator} {value};\n"
+
+            # define variable at the beginning of document
+            self.variables += f"Entity {cpp_variable_name} = Entity(INT, \"0\");\n"
+            # use in the variable
+            self.code +=  f"{cpp_variable_name} {operator} {value};\n"
             self.existing_variables[cpp_variable_name] = True
         else:
             # Update the variable if it already exists
@@ -91,7 +102,6 @@ class CodeGenerator:
     
     def process_print(self, node):
         code_to_add = "std::cout"
-
         for child in node.children:
             if child.n_type == 'MathExpression':
                 expression = self.process_math_expression(child)
@@ -114,12 +124,10 @@ class CodeGenerator:
             self.code += "}\n"
 
     def process_elif(self, node):
-        
-        self.code += "else {\n"
         # the else has to be apart from the if in case we need
         # to define a variable for the condition
         condition = self.get_cpp_value(node.children[0])
-        self.code += f"if (({condition}).is_true())"
+        self.code += f"else if (({condition}).is_true())"
         self.code += "{\n"
         ended = False
         for child in node.children[1:]:
@@ -128,7 +136,6 @@ class CodeGenerator:
             self.generate_code_recv(child)
         if not ended:
             self.code += "}\n"
-        self.code += "}\n"
 
     def process_else(self, node):
         self.code += "else {\n"
@@ -375,7 +382,6 @@ class CodeGenerator:
         elif node.n_type == 'Break':
             # TODO(us): hacer
             pass
-
 
 # def angie():
 #   return 20
