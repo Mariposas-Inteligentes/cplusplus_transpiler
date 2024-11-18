@@ -7,29 +7,41 @@ class CodeGenerator:
         self.variables = ""
         self.code = ""
         self.classes = ""
-        self.functions = ""
+        self.func_variables = ""
+        self.func_code = ""
         self.output_file = output_file
 
-        self.int_vector = []
-        self.float_vector = []
-        self.string_vector = []
-        self.existing_variables = {}
+        self.in_function = False
+        self.main_int_vector = []
+        self.main_float_vector = []
+        self.main_string_vector = []
+        self.main_existing_variables = {}
+
+        self.func_int_vector = []
+        self.func_float_vector = []
+        self.func_string_vector = []
+        self.func_existing_variables = {}
     
     def generate_code(self):
         # Get code ready
         self.generate_code_recv(self.root)
         self.code = self.variables + self.code
 
+        # function for all normal code
+        self.code = "int python_root() {\n" + self.code
+
         # Always define true and false
         self.code = "Entity bool_true(INT, \"1\");\n" + self.code
         self.code = "Entity bool_false(INT, \"0\");\n" + self.code
 
         # Append necessary includes
-        self.code = "int main() {\n" + self.code
         self.code = "#include \"entity.hpp\"\n" + self.code
         self.code = "#include <string>\n" + self.code
         self.code = "#include <iostream>\n" + self.code
-        self.code += "return 0;\n}"
+        self.code += "return 0;\n}\n"
+        self.code += "int main() {\npython_root();\n}"
+
+        # self.indent_code()
 
         # Write to file (make sure directory exists)
         output_dir = os.path.dirname(self.output_file)
@@ -48,6 +60,18 @@ class CodeGenerator:
                 for child in node.children:
                     self.generate_code_recv(child)
 
+    def append_text(self, type, to_append):
+        if type == "c":
+            if not self.in_function:
+                self.code += to_append
+            else:
+                self.func_code += to_append
+        elif type == "v":
+            if not self.in_function:
+                self.variables += to_append
+            else:
+                self.func_variables += to_append
+
     def handle_literal(self, value, var_type, vector):
         if value in vector:
             index = vector.index(value)
@@ -59,7 +83,7 @@ class CodeGenerator:
             else:
                 stripped_value = value
 
-            self.variables += f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n"
+            self.append_text("v", f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n")
         return f"{var_type}_{index}"
     
 
@@ -72,17 +96,22 @@ class CodeGenerator:
 
         value = self.get_cpp_value(right_node)
 
-        if cpp_variable_name not in self.existing_variables:
+        if not self.in_function:
+            existing_variables = self.main_existing_variables
+        else:
+            existing_variables = self.func_existing_variables
+
+        if cpp_variable_name not in existing_variables:
             # Define the variable for the first time
 
             # define variable at the beginning of document
-            self.variables += f"Entity {cpp_variable_name} = Entity(INT, \"0\");\n"
+            self.append_text("v", f"Entity {cpp_variable_name} = Entity(INT, \"0\");\n")
             # use in the variable
-            self.code +=  f"{cpp_variable_name} {operator} {value};\n"
-            self.existing_variables[cpp_variable_name] = True
+            self.append_text("c", f"{cpp_variable_name} {operator} {value};\n")
+            existing_variables[cpp_variable_name] = True
         else:
             # Update the variable if it already exists
-            self.code += f"{cpp_variable_name} {operator} {value};\n"
+            self.append_text("c", f"{cpp_variable_name} {operator} {value};\n")
 
 
     def process_math_expression(self, node):
@@ -109,39 +138,39 @@ class CodeGenerator:
             else: 
                code_to_add += f" << {self.get_cpp_value(child)}"
         code_to_add += " << std::endl;\n"
-        self.code += code_to_add
+        self.append_text("c", code_to_add)
 
     def process_if(self, node):
         condition = self.get_cpp_value(node.children[0])
-        self.code += f"if (({condition}).is_true()) {{\n"
+        self.append_text("c", f"if (({condition}).is_true()) {{\n")
         ended = False # avoid extra curly brackets
         for child in node.children[1:]:
             if (child.n_type == "ElifRule" or child.n_type == "ElseRule") and not ended:
-                self.code += "}\n"
+                self.append_text("c", "}\n")
                 ended = True
             self.generate_code_recv(child)
         if not ended:
-            self.code += "}\n"
+            self.append_text("c", "}\n")
 
     def process_elif(self, node):
         # the else has to be apart from the if in case we need
         # to define a variable for the condition
         condition = self.get_cpp_value(node.children[0])
-        self.code += f"else if (({condition}).is_true())"
-        self.code += "{\n"
+        self.append_text("c", f"else if (({condition}).is_true())")
+        self.append_text("c", "{\n")
         ended = False
         for child in node.children[1:]:
             if (child.n_type == "ElifRule" or child.n_type == "Else") and not ended:
-                self.code += "}\n"
+                self.append_text("c", "}\n")
             self.generate_code_recv(child)
         if not ended:
-            self.code += "}\n"
+            self.append_text("c","}\n")
 
     def process_else(self, node):
-        self.code += "else {\n"
+        self.append_text("c", "else {\n")
         for child in node.children:
             self.generate_code_recv(child)
-        self.code += "}\n"
+        self.append_text("c", "}\n")
 
     def process_function_call(self, node):
         function_name = node.children[0].value
@@ -150,7 +179,7 @@ class CodeGenerator:
 
         if function_name == 'sum':
             if len(args) == 1 and args[0].startswith("std::vector"):
-                self.code += f"std::accumulate({args[0]}.begin(), {args[0]}.end(), 0);\n"
+                self.append_text("c", f"std::accumulate({args[0]}.begin(), {args[0]}.end(), 0);\n")
             else:
                 return " + ".join(args)
         elif function_name in ['int', 'string', 'double', 'bool']:
@@ -163,23 +192,24 @@ class CodeGenerator:
 
     def process_while_loop(self, node):
         condition = self.get_cpp_value(node.children[0])
-        self.code += f"while (({condition}).is_true()) {{\n"
+        self.append_text("c", f"while (({condition}).is_true()) {{\n")
         for child in node.children[1:]:
             self.generate_code_recv(child)
-        self.code += "}\n"
+        self.append_text("c", "}\n")
 
     def process_for_loop(self, node): # TODO(us): implement when we have call function
         pass
 
+    def handle_def_function(self, node):
+        pass
 
-
-    def get_cpp_value(self, value_node):
+    def get_cpp_value_internal(self, value_node, int_vector, string_vector, float_vector):
         if value_node.n_type == 'IntegerLiteral':
-            return self.handle_literal(value_node.value, 'int', self.int_vector)
+            return self.handle_literal(value_node.value, 'int', int_vector)
         elif value_node.n_type == 'FloatLiteral':
-            return self.handle_literal(value_node.value, 'double', self.float_vector)
+            return self.handle_literal(value_node.value, 'double', float_vector)
         elif value_node.n_type == 'StringLiteral':
-            return self.handle_literal(value_node.value, 'string', self.string_vector)
+            return self.handle_literal(value_node.value, 'string', string_vector)
         elif value_node.n_type == 'VarName':
             return f"py_{value_node.value}"
         elif value_node.n_type == 'MathExpression':
@@ -189,6 +219,17 @@ class CodeGenerator:
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
 
+    def get_cpp_value(self, value_node):
+        if not self.in_function:
+            int_vector = self.main_int_vector
+            float_vector = self.main_float_vector
+            string_vector = self.main_string_vector
+            return self.get_cpp_value_internal(value_node, int_vector, string_vector, float_vector)
+        else:
+            int_vector = self.func_int_vector
+            float_vector = self.func_float_vector
+            string_vector = self.func_string_vector
+            return self.get_cpp_value_internal(value_node, int_vector, string_vector, float_vector)
 
     # TODO(us): when we have something that should return true or false, we need to use the value
     def process_node(self, node):
@@ -240,17 +281,25 @@ class CodeGenerator:
             pass
 
         elif node.n_type == 'IntegerLiteral':
-            self.handle_literal(node.value, 'int', self.int_vector)
+            if not self.in_function:
+                self.handle_literal(node.value, 'int', self.main_int_vector)
+            else:
+                self.handle_literal(node.value, 'int', self.func_int_vector)
 
         elif node.n_type == 'FloatLiteral':
-            self.handle_literal(node.value, 'double', self.float_vector)
+            if not self.in_function:
+                self.handle_literal(node.value, 'double', self.main_float_vector)
+            else:
+                self.handle_literal(node.value, 'double', self.func_float_vector)
 
         elif node.n_type == 'StringLiteral':
-            self.handle_literal(node.value, 'string', self.string_vector)
+            if not self.in_function:
+                self.handle_literal(node.value, 'string', self.main_string_vector)
+            else:
+                self.handle_literal(node.value, 'string', self.func_string_vector)
 
         elif node.n_type == 'DefFunction':
-            # TODO(us): hacer
-            pass
+            self.handle_def_function(node)
 
         elif node.n_type == 'Parameter':
             # TODO(us): hacer
@@ -353,12 +402,10 @@ class CodeGenerator:
             self.process_print(node)
 
         elif node.n_type == 'EmptyPrint':
-            # TODO(us): hacer
-            pass
-
+            self.append_text("c", "std::cout << std::endl;")
 
         elif node.n_type == 'PrintDataStructs':
-            self.code += "std::cout << std::endl;"
+            pass # TODO(us): hacer
 
         elif node.n_type == 'VariableAssignment':
             self.process_variable_assignment(node)
@@ -382,6 +429,19 @@ class CodeGenerator:
         elif node.n_type == 'Break':
             # TODO(us): hacer
             pass
+        
+    def indent_code(self):
+        indent_count = 0
+        new_code = ""
+        for line in self.code.splitlines():
+            if "{\n" in line:
+                new_code += "\t"*indent_count + line
+                indent_count += 1
+                break
+            if "{\n" in line:
+                indent_count -= 1
+            new_code += "\t"*indent_count + line
+        self.code = new_code
 
 # def angie():
 #   return 20
