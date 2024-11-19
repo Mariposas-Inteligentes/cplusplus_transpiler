@@ -34,7 +34,7 @@ class Transpiler():
             print(f"Error count for parsing: {self.parser.error_count}")
             if (self.parser.error_count == 0 and ast is not None ):
                 print("AST succesfully created")
-                code = CodeGenerator("../output/main.cpp", ast)
+                code = CodeGenerator(ast)
                 code.generate_code()
                 print("Code was generated succesfully")
             

@@ -1,4 +1,5 @@
 enum type_values{
+    NONE,
     STRING,
     INT,
     DOUBLE,

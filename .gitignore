@@ -2,6 +2,7 @@
 src/a.out
 output/main.cpp
 output/output.cpp
+output/functions.hpp
 output/*.out
 *.gch
 
