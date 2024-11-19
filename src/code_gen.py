@@ -35,6 +35,7 @@ class CodeGenerator:
         self.code = "#include \"entity.hpp\"\n" + self.code
         self.code = "#include <string>\n" + self.code
         self.code = "#include <iostream>\n" + self.code
+        self.code = "#include <stdexcept>\n" + self.code
         self.code += "return 0;\n}\n"
         self.code += "int main() {\npython_root();\n}"
         self.globals = "#include \"entity.hpp\"\n" + self.globals
@@ -57,7 +58,7 @@ class CodeGenerator:
             f.write(content)
 
     def generate_code_recv(self, node):
-        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction']:
+        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule']:
             self.process_node(node)
         else:
             self.process_node(node)
@@ -326,11 +327,10 @@ class CodeGenerator:
             self.process_for_loop(node)
 
         elif node.n_type == 'TryRule':
-            self.process_try(node) # TODO(us): revisar que sirva
+            self.process_try(node)
 
         elif node.n_type == 'ExceptRule':
-            # TODO(us): hacer
-            pass
+            pass #handled in class
 
         elif node.n_type == 'IfRule':
             self.process_if(node)
@@ -367,16 +367,13 @@ class CodeGenerator:
             self.handle_def_function(node)
 
         elif node.n_type == 'Parameter':
-            # TODO(us): hacer
-            pass
+            pass #handled in function
 
         elif node.n_type == 'ParameterList':
-            # TODO(us): hacer
-            pass
+            pass # handled in function
 
         elif node.n_type == 'ParameterWithDefault':
-            # TODO(us): hacer
-            pass
+            pass #handled in function
 
         elif node.n_type == 'ReturnStatement':
             self.handle_return(node)
@@ -488,11 +485,11 @@ class CodeGenerator:
             pass
 
         elif node.n_type == 'Continue':
-            # TODO(us): hacer
+            self.append_text("c", "continue; \n")
             pass
 
         elif node.n_type == 'Break':
-            # TODO(us): hacer
+            self.append_text("c", "break; \n")
             pass
         
     def indent_code(self, code):
