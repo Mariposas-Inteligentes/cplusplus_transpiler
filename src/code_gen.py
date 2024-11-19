@@ -57,7 +57,7 @@ class CodeGenerator:
             f.write(content)
 
     def generate_code_recv(self, node):
-        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule']:
+        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction']:
             self.process_node(node)
         else:
             self.process_node(node)
@@ -66,6 +66,9 @@ class CodeGenerator:
                     self.generate_code_recv(child)
 
     def append_text(self, t_type, to_append, begin = False):
+        # c => code
+        # v => variable
+        # g => global
         if not begin:
             if t_type == "c":
                 if not self.in_function:
@@ -268,8 +271,11 @@ class CodeGenerator:
         self.in_function = False
 
     def handle_return(self, node):
-        # TODO(us): hacer
-        pass
+        if len(node.children) == 0:
+            self.append_text("c", "return none;\n")
+        else:
+            value = self.get_cpp_value(node.children[0])
+            self.append_text("c", f"return {value};\n")
 
     def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
@@ -282,6 +288,8 @@ class CodeGenerator:
             return f"py_{value_node.value}"
         elif value_node.n_type == 'MathExpression':
             return self.process_math_expression(value_node)
+        elif value_node.n_type == 'Parenthesis': 
+            return self.get_cpp_value(value_node.children[0])
         elif value_node.n_type == 'BooleanLiteral':
             return "bool_true" if value_node.value == True else "bool_false"
         elif value_node.n_type == 'NoneLiteral':

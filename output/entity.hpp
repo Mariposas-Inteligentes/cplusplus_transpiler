@@ -169,7 +169,8 @@ class Entity {
     }
 
     bool is_true() {
-        return (value == "1");
+        // TODO(us): Confirm
+        return (value != "0");
     }
 
     bool analyze_int_double(int type) const {
@@ -410,6 +411,8 @@ class Entity {
     Entity not_in(const Entity& container) const {
         return !this->in(container);
     }
+
+    // TODO(us): operators: +=, -=, =...
 
 };
 
