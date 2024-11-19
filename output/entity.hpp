@@ -189,9 +189,75 @@ class Entity {
         return type;
     }
     
-    std::string get_value(){
-        return value;
+    std::string get_value() const {
+        switch (this->type) {
+            case INT:
+            case DOUBLE:
+            case STRING:
+                // Return the value directly for primitive types
+                return value;
+            case LIST:
+                return serialize_list();
+            case TUPLE:
+                return serialize_tuple();
+            case SET:
+                return serialize_set();
+            case DICT:
+                return serialize_dict();
+            default:
+                throw std::runtime_error("Unsupported type in get_value() retrieval.");
+        }
     }
+
+    // Serialization helpers
+    std::string serialize_list() const {
+        std::string result = "[";
+        for (size_t i = 0; i < list.size(); ++i) {
+            result += list[i].get_value();
+            if (i != list.size() - 1) {
+                result += ", ";
+            }
+        }
+        result += "]";
+        return result;
+    }
+
+    std::string serialize_tuple() const {
+        std::string result = "(";
+        for (size_t i = 0; i < tuple.size(); ++i) {
+            result += tuple[i].get_value();
+            if (i != tuple.size() - 1) {
+                result += ", ";
+            }
+        }
+        result += ")";
+        return result;
+    }
+
+    std::string serialize_set() const {
+        std::string result = "{";
+        for (auto it = set.begin(); it != set.end(); ++it) {
+            result += it->get_value();
+            if (std::next(it) != set.end()) {
+                result += ", ";
+            }
+        }
+        result += "}";
+        return result;
+    }
+
+    std::string serialize_dict() const {
+        std::string result = "{";
+        for (auto it = dict.begin(); it != dict.end(); ++it) {
+            result += it->first.get_value() + ": " + it->second.get_value();
+            if (std::next(it) != dict.end()) {
+                result += ", ";
+            }
+        }
+        result += "}";
+        return result;
+    }
+
 
     bool is_true() const {
         double num_value = 0.0;
@@ -217,11 +283,13 @@ class Entity {
             case CLASS: // TODO(us): check if it's this way
                 return true;
                 break;
+             case NONE:
+                // NoneType is always false
+                return false;
             default: 
                 throw std::runtime_error("Unsupported type in is_true() evaluation.");
         }
     }
-
 
     bool analyze_int_double(int type) const {
         if ((this->type == DOUBLE || this->type == INT) && type == DOUBLE){
@@ -349,15 +417,17 @@ class Entity {
 
     // Comparison operator_types
     Entity operator==(const Entity& other) const {
-        if (this->type == other.type) {
-            bool result = this->value == other.value;
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
+        if (this->type != other.type) {
+            return Entity(INT, "0");
         }
-        throw std::invalid_argument("Invalid operation for the given types with ==.");
+
+        // TODO(us): Make sure this works with lists, tuples
+        bool result = this->value == other.value;
+        if (result) {
+            return Entity(INT, "1");
+        } else { 
+            return Entity(INT, "0");
+        }
     }
 
     Entity operator!=(const Entity& other) const {
@@ -388,6 +458,7 @@ class Entity {
         }
 
         if (this->type == STRING) {
+            // TODO(us): check this
             int i, j = 0;
             while (i < this->value.length() && j < other.value.length()) {
                 if (this->value[i] > other.value[j]) {
@@ -407,6 +478,7 @@ class Entity {
 
         bool result = false;
         if (this->type == INT || this->type == DOUBLE) {
+        
            result = std::stod(this->value) > std::stod(other.value);
            if (result) {
                 return Entity(INT, "1");
@@ -416,6 +488,7 @@ class Entity {
         }
 
         if (this->type == STRING) {
+            // TODO(us): check this
             int i, j = 0;
             while (i < this->value.length() && j < other.value.length()) {
                 if (this->value[i] < other.value[j]) {
@@ -540,6 +613,35 @@ class Entity {
             throw std::invalid_argument("Invalid operation for ^= with the given types.");
         }
         return *this;
+    }
+
+    // TODO(us): what other methods of list?
+
+    void list_append(Entity new_value) {
+        if (this->type != LIST) {
+            throw std::invalid_argument("Invalid operation list append for variable.");
+        } 
+        this->list.push_back(new_value);   
+    }
+
+    Entity list_count() {
+        if (this->type != LIST) {
+            throw std::invalid_argument("Invalid operation list count for variable.");
+        }
+        return Entity(INT, std::to_string(this->list.size()));
+    }
+
+    void list_remove(Entity value) {
+        if (this->type != LIST) {
+            throw std::invalid_argument("Invalid operation list remove for variable.");
+        }
+        
+        for (int i = 0; i < this->list.size(); ++i) {
+            if ((this->list[i] == value).is_true()) {
+                this->list.erase(this->list.begin() + i);
+                break;
+            }
+        }
     }
 
 };
