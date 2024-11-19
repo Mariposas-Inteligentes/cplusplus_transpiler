@@ -46,10 +46,11 @@ class CodeGenerator:
         self.code = "#include <stdexcept>\n" + self.code
         self.code += "return 0;\n}\n"
         self.code += "int main() {\npython_root();\n}"
-        self.globals = "#include \"entity.hpp\"\n" + self.globals
-        self.functions = "#include \"globals.hpp\"\n" + self.functions
+        self.globals = "#include \"entity.hpp\"\n\n" + self.globals
+        self.functions = "#include \"globals.hpp\"\n\n" + self.functions
         
-        self.classes = "#include \"entity.hpp\"\n" + self.classes
+        self.classes = "#include \"entity.hpp\"\n\n" + self.classes
+        self.classes = "#include \"globals.hpp\"\n" + self.classes
         self.classes = "#include <string>\n" + self.classes
         self.classes = "#include <iostream>\n" + self.classes
         self.classes = "#include <stdexcept>\n" + self.classes
