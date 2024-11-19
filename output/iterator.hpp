@@ -1,5 +1,16 @@
 #include "entity.hpp"
 
+
+
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <stdexcept>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <algorithm>
+
 #ifndef ENTITY_ITERATOR
 #define ENTITY_ITERATOR
 

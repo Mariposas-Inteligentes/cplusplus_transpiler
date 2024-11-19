@@ -2,7 +2,7 @@
 #define ENTITY
 
 #include "common.hpp"
-#include "iterator.hpp"
+#include "iterator.hpp" // TODO(us): remove circular dependency
 
 #include <cmath>
 #include <iostream>
@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <algorithm>
 
 // TODO(us): Pass some public methods to private
 class Iterator;
@@ -85,6 +86,9 @@ class Entity {
         if (operator_type == "*" && other.type == INT) {
             return true;
         }
+        if (operator_type == "-" && other.type == LIST) {
+            return true;
+        }
         if (operator_type == "in") {
             return true;
         }
@@ -111,7 +115,7 @@ class Entity {
     }
 
     bool check_set(const Entity& other, std::string operator_type)const {
-        if (operator_type == "-" && other.type == SET) {
+        if ((operator_type == "-" || operator_type == "+") && other.type == SET) {
             return true;
         }
         if (operator_type == "in") {
@@ -315,8 +319,6 @@ class Entity {
         return false;
     }
 
-   // TODO(us): dependiendo cómo guardemos una lista y así, puede que haya que cambiar
-   // lo que significa sumar o restr y así (actualente solo se concatenan cosas)
     Entity operator+(const Entity& other) const {
         if (this->is_operable("+", other)) {
             if (this->type == STRING && other.type == STRING) {
@@ -331,10 +333,22 @@ class Entity {
                 return Entity(DOUBLE, std::to_string(result));
             }
             if (this->type == LIST && other.type == LIST) {
-                return Entity(LIST, this->value + "," + other.value); // Simple concatenation
+                Entity result(LIST, "");
+                result.list = this->list;
+                result.list.insert(result.list.end(), other.list.begin(), other.list.end());
+                return result;
             }
             if (this->type == TUPLE && other.type == TUPLE) {
-                return Entity(TUPLE, this->value + "," + other.value); // Simple concatenation
+                Entity result(TUPLE, "");
+                result.tuple = this->tuple;
+                result.tuple.insert(result.tuple.end(), other.tuple.begin(), other.tuple.end());
+                return result;
+            }
+            if (this->type == SET && other.type == SET) {
+                Entity result(SET, "");
+                result.set = this->set;
+                result.set.insert(other.set.begin(), other.set.end());
+                return result;
             }
         }
         throw std::invalid_argument("Invalid operaton for the given types with +.");
@@ -350,9 +364,24 @@ class Entity {
                 int result = std::stoi(this->value) - std::stoi(other.value);
                 return Entity(this->type, std::to_string(result));
             }
+            if (this->type == LIST && other.type == LIST) {
+                Entity result(LIST, "");
+                result.list = this->list;
+                for (const auto& elem : other.list) {
+                    result.list.erase(
+                        std::remove_if(result.list.begin(), result.list.end(),
+                                    [&](const Entity& e) { return (e == elem).is_true(); }),
+                        result.list.end());
+                }
+                return result;
+            }
             if (this->type == SET && other.type == SET) {
-                // TODO(us): hacer
-                return Entity(SET, ""); // Placeholder
+                Entity result(SET, "");
+                result.set = this->set;
+                for (const auto& elem : other.set) {
+                    result.set.erase(elem);
+                }
+                return result;
             }
         }
         throw std::invalid_argument("Invlid operation for the given types with -.");
@@ -371,14 +400,25 @@ class Entity {
             if (this->type == STRING && other.type == INT) {
                 std::string result;
                 int times = std::stoi(other.value);
-                for (int i = 0; i < times; ++i) result += this->value;
+                for (int i = 0; i < times; ++i) {
+                    result += this->value;
+                }
                 return Entity(STRING, result);
             }
             if ((this->type == LIST || this->type == TUPLE) && other.type == INT) {
-                std::string result;
+                Entity result(this->type, "");
                 int times = std::stoi(other.value);
-                for (int i = 0; i < times; ++i) result += this->value + ",";
-                return Entity(this->type, result);
+                if (times < 0) {
+                    throw std::invalid_argument("Invalid operation: cannot repeat a list/tuple negative times.");
+                }
+                for (int i = 0; i < times; ++i) {
+                    if (this->type == LIST) {
+                        result.list.insert(result.list.end(), this->list.begin(), this->list.end());
+                    } else if (this->type == TUPLE) {
+                        result.tuple.insert(result.tuple.end(), this->tuple.begin(), this->tuple.end());
+                    }
+                }
+                return result;
             }
         }
         throw std::invalid_argument("Invalid operation for the given types with *.");
@@ -812,13 +852,13 @@ class Entity {
         }
         return Entity(INT, "0");
     }
-
+    
     Iterator iter(){
         return Iterator(this);
     }
-    
     // TODO(us): +, -... of all the data structures
 };
 
 
 #endif
+
