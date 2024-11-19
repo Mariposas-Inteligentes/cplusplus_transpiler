@@ -169,9 +169,34 @@ class Entity {
     }
 
     bool is_true() {
-        // TODO(us): Confirm
-        return (value != "0");
+        double num_value = 0.0;
+        switch (this->type) {
+            case INT:
+            case DOUBLE: 
+                num_value = std::stod(this->value);
+                return num_value != 0.0;
+                break;
+            case STRING: 
+                return !this->value.empty();
+                break;
+            case LIST: // TODO(us): check if it's this way
+            case TUPLE:
+                return !this->value.empty();
+                break;
+            case SET: // TODO(us): check if it's this way
+                return !this->value.empty();
+                break;
+            case DICT: // TODO(us): check if it's this way
+                return !this->value.empty();
+                break;
+            case CLASS: // TODO(us): check if it's this way
+                return true;
+                break;
+            default: 
+                throw std::runtime_error("Unsupported type in is_true() evaluation.");
+        }
     }
+
 
     bool analyze_int_double(int type) const {
         if ((this->type == DOUBLE || this->type == INT) && type == DOUBLE){
@@ -185,7 +210,6 @@ class Entity {
 
    // TODO(us): dependiendo cómo guardemos una lista y así, puede que haya que cambiar
    // lo que significa sumar o restr y así (actualente solo se concatenan cosas)
-
     Entity operator+(const Entity& other) const {
         if (this->is_operable("+", other)) {
             if (this->type == STRING && other.type == STRING) {
@@ -412,7 +436,68 @@ class Entity {
         return !this->in(container);
     }
 
-    // TODO(us): operators: +=, -=, =...
+    // TODO(us): check operators: +=, -=, =...
+     Entity& operator=(const Entity& other) {
+        if (this != &other) { 
+            this->type = other.type;
+            this->value = other.value;
+        }
+        return *this;
+    }
+
+    Entity& operator+=(const Entity& other) {
+        if (this->is_operable("+", other)) {
+            *this = *this + other;
+        } else {
+            throw std::invalid_argument("Invalid operation for += with the given types.");
+        }
+        return *this;
+    }
+
+    Entity& operator-=(const Entity& other) {
+        if (this->is_operable("-", other)) {
+            *this = *this - other;
+        } else {
+            throw std::invalid_argument("Invalid operation for -= with the given types.");
+        }
+        return *this;
+    }
+
+    Entity& operator*=(const Entity& other) {
+        if (this->is_operable("*", other)) {
+            *this = *this * other;
+        } else {
+            throw std::invalid_argument("Invalid operation for *= with the given types.");
+        }
+        return *this;
+    }
+
+    Entity& operator/=(const Entity& other) {
+        if (this->is_operable("/", other)) {
+            *this = *this / other;
+        } else {
+            throw std::invalid_argument("Invalid operation for /= with the given types.");
+        }
+        return *this;
+    }
+
+    Entity& operator%=(const Entity& other) {
+        if (this->is_operable("%", other)) {
+            *this = *this % other;
+        } else {
+            throw std::invalid_argument("Invalid operation for %= with the given types.");
+        }
+        return *this;
+    }
+
+    Entity& operator^=(const Entity& other) {
+        if (this->is_operable("^", other)) {
+            *this = *this ^ other;
+        } else {
+            throw std::invalid_argument("Invalid operation for ^= with the given types.");
+        }
+        return *this;
+    }
 
 };
 
