@@ -11,17 +11,10 @@ class CodeGenerator:
         self.func_code = ""
         self.functions = ""
         self.globals = ""
-        self.calculating_params = False
 
         self.in_function = False
-        self.main_int_vector = []
-        self.main_float_vector = []
-        self.main_string_vector = []
+        self.global_vector = []
         self.main_existing_variables = {}
-
-        self.func_int_vector = []
-        self.func_float_vector = []
-        self.func_string_vector = []
         self.func_existing_variables = {}
     
     def generate_code(self):
@@ -38,18 +31,24 @@ class CodeGenerator:
         self.code = "Entity none(NONE, \"NULL\");\n" + self.code
 
         # Append necessary includes
+        self.code = "#include \"functions.hpp\"\n" + self.code
         self.code = "#include \"entity.hpp\"\n" + self.code
         self.code = "#include <string>\n" + self.code
         self.code = "#include <iostream>\n" + self.code
-        self.code = "#include \"functions.hpp\"\n" + self.code
         self.code += "return 0;\n}\n"
         self.code += "int main() {\npython_root();\n}"
+        self.globals = "#include \"entity.hpp\"\n" + self.globals
+        
+        print(self.functions)
+        
+        self.functions = "#include \"globals.hpp\"\n" + self.functions
 
         # TODO(us): indent code
         # self.indent_code()
 
         self.write_file("../output/main.cpp", self.code)
         self.write_file("../output/functions.hpp", self.functions)
+        self.write_file("../output/globals.hpp", self.globals)
 
     def write_file(self, path, content):
         # Write to file (make sure directory exists)
@@ -81,6 +80,8 @@ class CodeGenerator:
                     self.variables += to_append
                 else:
                     self.func_variables += to_append
+            elif t_type == "g":
+                self.globals += to_append
         else:
             if t_type == "c":
                 if not self.in_function:
@@ -92,8 +93,11 @@ class CodeGenerator:
                     self.variables = to_append + self.variables
                 else:
                     self.func_variables = to_append + self.func_variables
+            elif t_type == "g":
+                self.globals = to_append + self.globals
 
-    def handle_literal(self, value, var_type, vector):
+    def handle_literal(self, value, var_type):
+        vector = self.global_vector  # TODO(us): borrar
         if value in vector:
             index = vector.index(value)
         else:
@@ -104,7 +108,7 @@ class CodeGenerator:
             else:
                 stripped_value = value
 
-            self.append_text("v", f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n")
+            self.append_text("g", f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n")
         return f"{var_type}_{index}"
     
     def process_variable_assignment(self, node):
@@ -204,7 +208,6 @@ class CodeGenerator:
             self.generate_code_recv(child)
         self.append_text("c", "}\n")  
 
-
     def process_try(self, node):
         self.append_text("c", "try {\n")
         for child in node.children:
@@ -258,25 +261,25 @@ class CodeGenerator:
         func_name = f"py_{node.value}"
         parameters = self.find_parameters(node)
         
-        self.process_node(node.children[-1])
+        self.generate_code_recv(node.children[-1])
         self.append_text("c", self.func_variables, True)
         self.append_text("c", f"Entity {func_name}({parameters}){{\n", True)
         
         # TODO(us): return
         
-        self.append_text("c", "}\n")
+        self.append_text("c", "return \n")
 
         # At the end of the function, set in_function to false
         self.functions += self.func_code
         self.in_function = False
 
-    def get_cpp_value_internal(self, value_node, int_vector, string_vector, float_vector):
+    def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
-            return self.handle_literal(value_node.value, 'int', int_vector)
+            return self.handle_literal(value_node.value, 'int')
         elif value_node.n_type == 'FloatLiteral':
-            return self.handle_literal(value_node.value, 'double', float_vector)
+            return self.handle_literal(value_node.value, 'double')
         elif value_node.n_type == 'StringLiteral':
-            return self.handle_literal(value_node.value, 'string', string_vector)
+            return self.handle_literal(value_node.value, 'string')
         elif value_node.n_type == 'VarName':
             return f"py_{value_node.value}"
         elif value_node.n_type == 'MathExpression':
@@ -287,19 +290,7 @@ class CodeGenerator:
             return "none" 
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
-
-    def get_cpp_value(self, value_node):
-        if not self.in_function:
-            int_vector = self.main_int_vector
-            float_vector = self.main_float_vector
-            string_vector = self.main_string_vector
-            return self.get_cpp_value_internal(value_node, int_vector, string_vector, float_vector)
-        else:
-            int_vector = self.func_int_vector
-            float_vector = self.func_float_vector
-            string_vector = self.func_string_vector
-            return self.get_cpp_value_internal(value_node, int_vector, string_vector, float_vector)
-
+    
     # TODO(us): when we have something that should return true or false, we need to use the value
     def process_node(self, node):
         if node.n_type == 'Start':
@@ -350,21 +341,21 @@ class CodeGenerator:
 
         elif node.n_type == 'IntegerLiteral':
             if not self.in_function:
-                self.handle_literal(node.value, 'int', self.main_int_vector)
+                self.handle_literal(node.value, 'int')
             else:
-                self.handle_literal(node.value, 'int', self.func_int_vector)
+                self.handle_literal(node.value, 'int')
 
         elif node.n_type == 'FloatLiteral':
             if not self.in_function:
-                self.handle_literal(node.value, 'double', self.main_float_vector)
+                self.handle_literal(node.value, 'double')
             else:
-                self.handle_literal(node.value, 'double', self.func_float_vector)
+                self.handle_literal(node.value, 'double')
 
         elif node.n_type == 'StringLiteral':
             if not self.in_function:
-                self.handle_literal(node.value, 'string', self.main_string_vector)
+                self.handle_literal(node.value, 'string')
             else:
-                self.handle_literal(node.value, 'string', self.func_string_vector)
+                self.handle_literal(node.value, 'string')
 
         elif node.n_type == 'DefFunction':
             self.handle_def_function(node)
