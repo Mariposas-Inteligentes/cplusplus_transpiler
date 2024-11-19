@@ -533,6 +533,7 @@ class Entity {
 
     // TODO(us): revisar que tenga sentido
     Entity in(const Entity& container) const {
+        
         if (container.is_operable("in", *this)) {
             bool result = container.value.find(this->value) != std::string::npos;
             if (result) {
@@ -614,6 +615,19 @@ class Entity {
         }
         return *this;
     }
+    
+    Entity& operator[](const Entity& key) {
+        switch(this->type) {
+            case LIST:
+                return this->access_vector(this->list, key);
+            case TUPLE:
+                return this->access_vector(this->tuple, key);
+            case DICT:
+                return this->access_dict(key);
+            default:
+                throw std::invalid_argument("Operator [] invalid type");
+        }
+    }
 
     void list_append(Entity new_value) {
         if (this->type != LIST) {
@@ -670,27 +684,44 @@ class Entity {
         return vector[index_value];
     }
 
+    // TODO(us): poner en documentación que si accede algo ilegal, se crea uno
     Entity& access_dict(const Entity& key) {
         auto found_key = this->dict.find(key);
         if (found_key == this->dict.end()) {
-           throw std::invalid_argument("Operator [] invalid key for dictionary");
+           this->dict[key] = Entity(NONE, "NULL");
         }
 
         return this->dict[key];
     }
 
-    Entity& operator[](const Entity& key) {
-        switch(this->type) {
-            case LIST:
-                return this->access_vector(this->list, key);
-            case TUPLE:
-                return this->access_vector(this->tuple, key);
-            case DICT:
-                return this->access_dict(key);
-            default:
-                throw std::invalid_argument("Operator [] invalid type");
+    Entity dict_in(Entity key) {
+        if (this->type != DICT) {
+            throw std::invalid_argument("Invalid operation \'in\' for non dictionary");
         }
+
+        auto found_key = this->dict.find(key);
+        if (found_key == this->dict.end()) {
+           return Entity(INT, "0");  // False
+        }
+        return Entity(INT, "1");  // True
     }
+
+    Entity dict_pop(Entity key) {
+        if (this->type != DICT) {
+            throw std::invalid_argument("Invalid operation \'pop\' for non dictionary");
+        }
+        auto it = this->dict.find(key);
+        if (it != this->dict.end()) {
+            Entity value = it->second;
+            this->dict.erase(it);
+            return value;
+        }
+        return Entity(NONE, "NULL");
+    }
+
+    // TODO(us): next, iter
+    // TODO(us): operators of tuple
+    // TODO(us): operators of set
 };
 
 
