@@ -301,20 +301,16 @@ class CodeGenerator:
     # TODO(us): when we have something that should return true or false, we need to use the value
     def process_node(self, node):
         if node.n_type == 'Start':
-            # TODO(us): hacer
-            pass
+            pass # Just used as a start point
 
         elif node.n_type == 'Empty':
-            # TODO(us): hacer
-            pass
+            pass # it is already empty
 
         elif node.n_type == 'EmptyStatement':
-            # TODO(us): hacer
-            pass
+            pass # just pass the statement
 
         elif node.n_type == 'Statement':
-            # TODO(us): hacer
-            pass
+            pass # just pass the statement
 
         elif node.n_type == 'VarName':
             # TODO(us): hacer
@@ -330,7 +326,7 @@ class CodeGenerator:
             self.process_try(node)
 
         elif node.n_type == 'ExceptRule':
-            pass #handled in class
+            pass # handled in try rule
 
         elif node.n_type == 'IfRule':
             self.process_if(node)
@@ -342,8 +338,7 @@ class CodeGenerator:
             self.process_else(node)
 
         elif node.n_type == 'NoneLiteral':
-            # TODO(us): hacer
-            pass
+            pass # global value
 
         elif node.n_type == 'IntegerLiteral':
             if not self.in_function:
@@ -367,13 +362,13 @@ class CodeGenerator:
             self.handle_def_function(node)
 
         elif node.n_type == 'Parameter':
-            pass #handled in function
+            pass # handled in function
 
         elif node.n_type == 'ParameterList':
             pass # handled in function
 
         elif node.n_type == 'ParameterWithDefault':
-            pass #handled in function
+            pass # handled in function
 
         elif node.n_type == 'ReturnStatement':
             self.handle_return(node)
@@ -387,11 +382,7 @@ class CodeGenerator:
             pass
 
         elif node.n_type == 'BooleanLiteral':
-            # TODO(us): think if it is needed (When I uncomment this code, it just trows boolean values in the code)
-            # Test input: x = True + 8 - False
-            # cpp_value = "bool_true" if node.value == True else "bool_false"
-            # self.code += f"{cpp_value};\n"
-            pass 
+            pass # Global values
 
         elif node.n_type == 'AccessVariable':
             # TODO(us): hacer
@@ -405,24 +396,19 @@ class CodeGenerator:
             self.process_math_expression(node)
 
         elif node.n_type == 'MathSymbol':
-            # TODO(us): hacer
-            pass
+            pass # Math expression is in charge
 
         elif node.n_type == 'Parenthesis':
-            # TODO(us): hacer
-            pass
+            pass # Math expression is in charge
 
         elif node.n_type == 'MathAssign':
-            # TODO(us): hacer
-            pass
+            pass # Math expression is in charge
 
         elif node.n_type == 'LogicSymbols':
-            # TODO(us): hacer
-            pass
+            pass # Math expression is in charge
 
         elif node.n_type == 'CmpSymbols':
-            # TODO(us): hacer
-            pass
+            pass # Math expression is in charge
 
         elif node.n_type == 'Tuple':
             # TODO(us): hacer
