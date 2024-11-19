@@ -26,9 +26,9 @@ class CodeGenerator:
         self.code = "int python_root() {\n" + self.code
 
         # Always define true and false
-        self.code = "Entity bool_true(INT, \"1\");\n" + self.code
-        self.code = "Entity bool_false(INT, \"0\");\n" + self.code
-        self.code = "Entity none(NONE, \"NULL\");\n" + self.code
+        self.globals += "Entity bool_true(INT, \"1\");\n"
+        self.globals += "Entity bool_false(INT, \"0\");\n"
+        self.globals += "Entity none(NONE, \"NULL\");\n"
 
         # Append necessary includes
         self.code = "#include \"functions.hpp\"\n" + self.code
@@ -38,9 +38,6 @@ class CodeGenerator:
         self.code += "return 0;\n}\n"
         self.code += "int main() {\npython_root();\n}"
         self.globals = "#include \"entity.hpp\"\n" + self.globals
-        
-        print(self.functions)
-        
         self.functions = "#include \"globals.hpp\"\n" + self.functions
 
         # TODO(us): indent code
@@ -264,10 +261,7 @@ class CodeGenerator:
         self.generate_code_recv(node.children[-1])
         self.append_text("c", self.func_variables, True)
         self.append_text("c", f"Entity {func_name}({parameters}){{\n", True)
-        
-        # TODO(us): return
-        
-        self.append_text("c", "return \n")
+        self.append_text("c", "return none;\n}\n")
 
         # At the end of the function, set in_function to false
         self.functions += self.func_code

@@ -3,6 +3,7 @@ src/a.out
 output/main.cpp
 output/output.cpp
 output/functions.hpp
+output/globals.hpp
 output/*.out
 *.gch
 
