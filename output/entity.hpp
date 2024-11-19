@@ -11,6 +11,8 @@
 #include <unordered_set>
 #include <vector>
 
+// TODO(us): Pass some public methods to private
+
 class Entity {
   public:
     friend std::ostream& operator<<(std::ostream& os, Entity entity) {
@@ -35,6 +37,7 @@ class Entity {
   private:
     int type;
     std::string value;
+    bool append_tuple;
     std::vector<Entity> list;
     std::vector<Entity> tuple;
     std::unordered_map<Entity, Entity, Entity::HashFunction, Entity::EqualsComparator> dict;
@@ -132,6 +135,7 @@ class Entity {
     Entity(int type, std::string value) {
         this->type = type;
         this->value = value;
+        this->append_tuple = true;
     }
 
     bool equals(const Entity& other) const {
@@ -187,6 +191,14 @@ class Entity {
     
     int get_type(){
         return type;
+    }
+
+    void set_append_tuple(bool value){
+        this->append_tuple = value;
+    }
+    
+    bool get_append_tuple(){
+        return this->append_tuple;
     }
     
     std::string get_value() const {
@@ -532,21 +544,44 @@ class Entity {
     // Membership operator_types
 
     // TODO(us): revisar que tenga sentido
-    Entity in(const Entity& container) const {
-        
+    Entity in(Entity& container) {
         if (container.is_operable("in", *this)) {
-            bool result = container.value.find(this->value) != std::string::npos;
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
+            switch(this->type) {
+                case LIST:
+                    return this->list_in(container);
+                case TUPLE:
+                    // TODO(us): implement
+                    break;
+                case DICT:
+                    return this->dict_in(container);
+                case SET:
+                    // TODO(us): implement
+                    break;
+                default:
+                    throw std::invalid_argument("Invalid operation for 'in' with the given types.");
             }
         }
         throw std::invalid_argument("Invalid operation for 'in' with the given types.");
     }
 
-    Entity not_in(const Entity& container) const {
+    Entity not_in(Entity& container) {
         return !this->in(container);
+    }
+
+    Entity count() {
+        switch(this->type){
+            case TUPLE:
+                return this->vector_count(this->tuple);
+            case LIST:
+                return this->vector_count(this->list);
+            case SET:
+                return this->set_count();
+            case DICT:
+                return this->dict_count();
+            default:
+                throw std::invalid_argument("Invalid operation for 'in' with the given types.");
+
+        }
     }
 
     // TODO(us): check operators: +=, -=, =...
@@ -621,6 +656,7 @@ class Entity {
             case LIST:
                 return this->access_vector(this->list, key);
             case TUPLE:
+                // TODO(us): Confirm that we do check this
                 return this->access_vector(this->tuple, key);
             case DICT:
                 return this->access_dict(key);
@@ -629,28 +665,46 @@ class Entity {
         }
     }
 
-    void list_append(Entity new_value) {
+    void append(const Entity& value) {
+        switch(this->type) {
+            case LIST:
+                this->vector_append(value, this->list);
+                break;
+            case TUPLE:
+                if (this->append_tuple == true) {
+                    this->vector_append(value, this->tuple);
+                }
+                else {
+                    throw std::invalid_argument("The tuple does not support item assignment");
+                }
+                break;
+            case SET:
+                this->set.insert(value);
+                break;
+            default:
+                throw std::invalid_argument("Operator \'append\' invalid type");
+        }
+    }
+
+    Entity vector_count(std::vector<Entity>& vector) {
+        return Entity(INT, std::to_string(vector.size()));
+    }
+
+    void vector_append(Entity new_value, std::vector<Entity> vector) {
         if (this->type != LIST) {
             throw std::invalid_argument("Invalid operation list append for variable.");
         } 
-        this->list.push_back(new_value);   
+        vector.push_back(new_value);   
     }
 
-    Entity list_count() {
-        if (this->type != LIST) {
-            throw std::invalid_argument("Invalid operation list count for variable.");
-        }
-        return Entity(INT, std::to_string(this->list.size()));
-    }
-
-    void list_remove(Entity value) {
+    void list_remove(Entity value, std::vector<Entity> vector) {
         if (this->type != LIST) {
             throw std::invalid_argument("Invalid operation list remove for variable.");
         }
         
         for (int i = 0; i < this->list.size(); ++i) {
-            if ((this->list[i] == value).is_true()) {
-                this->list.erase(this->list.begin() + i);
+            if ((vector[i] == value).is_true()) {
+                vector.erase(this->list.begin() + i);
                 break;
             }
         }
@@ -718,9 +772,16 @@ class Entity {
         }
         return Entity(NONE, "NULL");
     }
+    
+    Entity dict_count() {
+        return Entity(INT, std::to_string(this->dict.size()));
+    }
+    
+    Entity set_count() {
+        return Entity(INT, std::to_string(this->set.size()));
+    }
 
     // TODO(us): next, iter
-    // TODO(us): operators of tuple
     // TODO(us): operators of set
 };
 
