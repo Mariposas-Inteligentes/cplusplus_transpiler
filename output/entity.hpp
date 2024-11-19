@@ -2,6 +2,7 @@
 #define ENTITY
 
 #include "common.hpp"
+#include "iterator.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -12,13 +13,14 @@
 #include <vector>
 
 // TODO(us): Pass some public methods to private
-
+class Iterator;
 class Entity {
   public:
     friend std::ostream& operator<<(std::ostream& os, Entity entity) {
         os << entity.get_value();
         return os;
     }
+    friend class Iterator;
 
     struct HashFunction {
         std::size_t operator()(const Entity& entity) const {
@@ -811,7 +813,11 @@ class Entity {
         return Entity(INT, "0");
     }
 
-    // TODO(us): next, iter
+    Iterator iter(){
+        return Iterator(this);
+    }
+    
+    // TODO(us): +, -... of all the data structures
 };
 
 
