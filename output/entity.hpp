@@ -109,7 +109,7 @@ class Entity {
     }
 
     bool check_set(const Entity& other, std::string operator_type)const {
-        if (operator_type == "-" && other.type == TUPLE) {
+        if (operator_type == "-" && other.type == SET) {
             return true;
         }
         if (operator_type == "in") {
@@ -548,15 +548,13 @@ class Entity {
         if (container.is_operable("in", *this)) {
             switch(this->type) {
                 case LIST:
-                    return this->list_in(container);
+                    return this->vector_in(container, this->list);
                 case TUPLE:
-                    // TODO(us): implement
-                    break;
+                    return this->vector_in(container, this->tuple);
                 case DICT:
                     return this->dict_in(container);
                 case SET:
-                    // TODO(us): implement
-                    break;
+                    return this->set_in(container);
                 default:
                     throw std::invalid_argument("Invalid operation for 'in' with the given types.");
             }
@@ -679,10 +677,32 @@ class Entity {
                 }
                 break;
             case SET:
-                this->set.insert(value);
+                this->set_append(value);
                 break;
             default:
                 throw std::invalid_argument("Operator \'append\' invalid type");
+        }
+    }
+
+    void remove(Entity element) {
+        switch (this->type) {
+            case LIST:
+                this->vector_remove(element, this->list);
+                break;
+            case SET:
+                this->set_remove(element);
+            default:
+                throw std::invalid_argument("Operator \'remove\' for invalid type");
+
+        }
+    }
+
+    Entity pop(Entity element) {
+        switch (this->type) {
+            case DICT:
+                return this->dict_pop(element);
+            default:
+                throw std::invalid_argument("Operator \'pop\' for invalid type");                
         }
     }
 
@@ -697,7 +717,7 @@ class Entity {
         vector.push_back(new_value);   
     }
 
-    void list_remove(Entity value, std::vector<Entity> vector) {
+    void vector_remove(Entity value, std::vector<Entity> vector) {
         if (this->type != LIST) {
             throw std::invalid_argument("Invalid operation list remove for variable.");
         }
@@ -710,12 +730,9 @@ class Entity {
         }
     }
 
-    Entity list_in(Entity value) {
-        if (this->type != LIST) {
-            throw std::invalid_argument("Invalid operation list remove for variable.");
-        }
-        for (int i = 0; i < this->list.size(); ++i) {
-            if ((this->list[i] == value).is_true()) {
+    Entity vector_in(Entity value, std::vector<Entity> vector) {
+        for (int i = 0; i < vector.size(); ++i) {
+            if ((vector[i] == value).is_true()) {
                 return Entity(INT, "1");
             }
         }
@@ -761,9 +778,6 @@ class Entity {
     }
 
     Entity dict_pop(Entity key) {
-        if (this->type != DICT) {
-            throw std::invalid_argument("Invalid operation \'pop\' for non dictionary");
-        }
         auto it = this->dict.find(key);
         if (it != this->dict.end()) {
             Entity value = it->second;
@@ -781,8 +795,23 @@ class Entity {
         return Entity(INT, std::to_string(this->set.size()));
     }
 
+    void set_remove(Entity element) {
+        this->set.erase(element);
+    }
+
+    void set_append(Entity value) {
+        this->set.insert(value);
+    }
+
+    Entity set_in(Entity value) {
+        auto result = this->set.find(value);
+        if (result != this->set.end()){
+            return Entity(INT, "1");
+        }
+        return Entity(INT, "0");
+    }
+
     // TODO(us): next, iter
-    // TODO(us): operators of set
 };
 
 
