@@ -40,8 +40,8 @@ class CodeGenerator:
         self.globals = "#include \"entity.hpp\"\n" + self.globals
         self.functions = "#include \"globals.hpp\"\n" + self.functions
 
-        # TODO(us): indent code
-        # self.indent_code()
+        self.code = self.indent_code(self.code)
+        self.functions = self.indent_code(self.functions)
 
         self.write_file("../output/main.cpp", self.code)
         self.write_file("../output/functions.hpp", self.functions)
@@ -267,6 +267,10 @@ class CodeGenerator:
         self.functions += self.func_code
         self.in_function = False
 
+    def handle_return(self, node):
+        # TODO(us): hacer
+        pass
+
     def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
             return self.handle_literal(value_node.value, 'int')
@@ -367,8 +371,7 @@ class CodeGenerator:
             pass
 
         elif node.n_type == 'ReturnStatement':
-            # TODO(us): hacer
-            pass
+            self.handle_return(node)
 
         elif node.n_type == 'CallFunction':
             # TODO(us): hacer
@@ -484,11 +487,11 @@ class CodeGenerator:
             # TODO(us): hacer
             pass
         
-    def indent_code(self):
+    def indent_code(self, code):
         indent_count = 0
         new_code = ""
         
-        for line in self.code.splitlines():
+        for line in code.splitlines():
             stripped_line = line.strip()
             
             if stripped_line.endswith("}"):
@@ -499,4 +502,4 @@ class CodeGenerator:
             if stripped_line.endswith("{"):
                 indent_count += 1
 
-        self.code = new_code.lstrip("\n")
+        return new_code.lstrip("\n")
