@@ -278,6 +278,40 @@ class CodeGenerator:
             value = self.get_cpp_value(node.children[0])
             self.append_text("c", f"return {value};\n")
 
+    # TODO(us): revisar lo de si está true no
+    def handle_data_structure(self, elements, var_type):
+        vector = self.global_vector
+        
+        if var_type == "list" or var_type == "tuple":
+            serialized_value = [self.get_cpp_value(el) for el in elements]
+        elif var_type == "set":
+            serialized_value = {self.get_cpp_value(el) for el in elements}
+        elif var_type == "dict":
+            serialized_value = {self.get_cpp_value(k): self.get_cpp_value(v) for k, v in elements.items()}
+        else:
+            raise ValueError(f"Unsupported data structure type: {var_type}")
+
+        if serialized_value in vector:
+            index = vector.index(serialized_value)
+        else:
+            index = len(vector)
+            vector.append(serialized_value)
+
+            self.append_text("g", f"Entity {var_type}_{index}({var_type.upper()}, \"\");\n")
+            if var_type in ["list", "tuple", "set"]:
+                for el in elements:
+                    cpp_element = self.get_cpp_value(el)
+                    self.append_text("c", f"{var_type}_{index}.append({cpp_element});\n")
+            elif var_type == "dict":
+                for key, value in elements.items():
+                    cpp_key = self.get_cpp_value(key)
+                    cpp_value = self.get_cpp_value(value)
+                    self.append_text("c", f"{var_type}_{index}[{cpp_key}] = {cpp_value};\n")
+
+        return f"{var_type}_{index}"
+
+
+
     def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
             return self.handle_literal(value_node.value, 'int')
@@ -295,6 +329,27 @@ class CodeGenerator:
             return "bool_true" if value_node.value == True else "bool_false"
         elif value_node.n_type == 'NoneLiteral':
             return "none" 
+        elif value_node.n_type == 'List':
+            list_elements = value_node.children
+            return self.handle_data_structure(list_elements, 'list')
+        elif value_node.n_type == 'Tuple':
+            tuple_elements = value_node.children
+            return self.handle_data_structure(tuple_elements, 'tuple')
+        elif value_node.n_type == 'Set':
+            set_elements = value_node.children
+            return self.handle_data_structure(set_elements, 'set')
+        elif value_node.n_type == 'Dictionary':
+            dict_elements = {}
+            for i in range(0, len(value_node.children), 2):
+                key = value_node.children[i]
+                value = value_node.children[i + 1]
+                dict_elements[key] = value
+            return self.handle_data_structure(dict_elements, 'dict')
+
+        elif value_node.n_type == 'EmptyList':
+            return self.handle_data_structure([], 'list')
+        elif value_node.n_type == 'EmptyDictionary':
+            return self.handle_data_structure({}, 'dict')
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
     
@@ -410,41 +465,29 @@ class CodeGenerator:
         elif node.n_type == 'CmpSymbols':
             pass # Math expression is in charge
 
+        if node.n_type == 'List':
+            list_elements = node.children
+            self.handle_data_structure(list_elements, "list")
+
         elif node.n_type == 'Tuple':
-            # TODO(us): hacer
-            pass
-
-        elif node.n_type == 'EmptyList':
-            # TODO(us): hacer
-            pass
-
-        elif node.n_type == 'List':
-            # TODO(us): hacer
-            pass
-
-        elif node.n_type == 'ListTupleContent':
-            # TODO(us): hacer
-            pass
+            tuple_elements = node.children
+            self.handle_data_structure(tuple_elements, "tuple")
 
         elif node.n_type == 'Set':
-            # TODO(us): hacer
-            pass
-
-        elif node.n_type == 'SetContent':
-            # TODO(us): hacer
-            pass
+            set_elements = node.children
+            self.handle_data_structure(set_elements, "set")
 
         elif node.n_type == 'Dictionary':
-            # TODO(us): hacer
-            pass
+            dict_elements = {}
+            for i in range(0, len(node.children), 2):
+                key = node.children[i]
+                value = node.children[i + 1]
+                dict_elements[key] = value
+            self.handle_data_structure(dict_elements, "dict")
 
-        elif node.n_type == 'EmptyDictionary':
-            # TODO(us): hacer
-            pass
-
-        elif node.n_type == 'DictionaryContent':
-            # TODO(us): hacer
-            pass
+        elif node.n_type in ['EmptyList', 'EmptyDictionary']:
+            empty_type = 'list' if node.n_type == 'EmptyList' else 'dict'
+            self.handle_data_structure([], empty_type)
 
         elif node.n_type == 'Print':
             self.process_print(node)
@@ -453,7 +496,7 @@ class CodeGenerator:
             self.append_text("c", "std::cout << std::endl;")
 
         elif node.n_type == 'PrintDataStructs':
-            pass # TODO(us): hacer
+            self.process_print(node) # TODO(us): revisar
 
         elif node.n_type == 'VariableAssignment':
             self.process_variable_assignment(node)
