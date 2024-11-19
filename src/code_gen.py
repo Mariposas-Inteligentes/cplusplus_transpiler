@@ -6,16 +6,23 @@ class CodeGenerator:
         self.root = ast[0]
         self.variables = ""
         self.code = ""
-        self.classes = ""
+
+        self. in_class = False
+        self.classes = "" # store all classes
+        self.class_single = ""  # store a class
+        self.class_attributes = "" # store atributes for a class
+
+        self.in_function = False
         self.func_variables = ""
         self.func_code = ""
         self.functions = ""
+
         self.globals = ""
 
-        self.in_function = False
         self.global_vector = []
         self.main_existing_variables = {}
         self.func_existing_variables = {}
+        self.class_existing_attributes = {}
     
     def generate_code(self):
         # Get code ready
@@ -32,6 +39,7 @@ class CodeGenerator:
 
         # Append necessary includes
         self.code = "#include \"functions.hpp\"\n" + self.code
+        self.code = "#include \"classes.hpp\"\n" + self.code
         self.code = "#include \"entity.hpp\"\n" + self.code
         self.code = "#include <string>\n" + self.code
         self.code = "#include <iostream>\n" + self.code
@@ -40,13 +48,22 @@ class CodeGenerator:
         self.code += "int main() {\npython_root();\n}"
         self.globals = "#include \"entity.hpp\"\n" + self.globals
         self.functions = "#include \"globals.hpp\"\n" + self.functions
+        
+        self.classes = "#include \"entity.hpp\"\n" + self.classes
+        self.classes = "#include <string>\n" + self.classes
+        self.classes = "#include <iostream>\n" + self.classes
+        self.classes = "#include <stdexcept>\n" + self.classes
+
 
         self.code = self.indent_code(self.code)
         self.functions = self.indent_code(self.functions)
+        self.classes = self.indent_code(self.classes)
 
         self.write_file("../output/main.cpp", self.code)
         self.write_file("../output/functions.hpp", self.functions)
         self.write_file("../output/globals.hpp", self.globals)
+        self.write_file("../output/classes.hpp", self.classes)
+
 
     def write_file(self, path, content):
         # Write to file (make sure directory exists)
@@ -58,7 +75,7 @@ class CodeGenerator:
             f.write(content)
 
     def generate_code_recv(self, node):
-        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule']:
+        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule', 'ClassDefinition']:
             self.process_node(node)
         else:
             self.process_node(node)
@@ -70,6 +87,9 @@ class CodeGenerator:
         # c => code
         # v => variable
         # g => global
+        # ca => class attribute
+        # cs => single class
+
         if not begin:
             if t_type == "c":
                 if not self.in_function:
@@ -83,6 +103,10 @@ class CodeGenerator:
                     self.func_variables += to_append
             elif t_type == "g":
                 self.globals += to_append
+            elif t_type == "ca":
+                self.class_attributes += to_append
+            elif t_type == "cs":
+                self.class_single += to_append
         else:
             if t_type == "c":
                 if not self.in_function:
@@ -96,6 +120,10 @@ class CodeGenerator:
                     self.func_variables = to_append + self.func_variables
             elif t_type == "g":
                 self.globals = to_append + self.globals
+            elif t_type == "ca":
+                self.class_attributes = to_append + self.class_attributes
+            elif t_type == "cs":
+                self.class_single = to_append + self.class_single
 
     def handle_literal(self, value, var_type):
         vector = self.global_vector  # TODO(us): borrar
@@ -258,6 +286,7 @@ class CodeGenerator:
         self.in_function = True
         self.func_code = ""
         self.func_variables = ""
+        self.func_existing_variables = {}
 
         func_name = f"py_{node.value}"
         parameters = self.find_parameters(node)
@@ -266,9 +295,10 @@ class CodeGenerator:
         self.append_text("c", self.func_variables, True)
         self.append_text("c", f"Entity {func_name}({parameters}){{\n", True)
         self.append_text("c", "return none;\n}\n")
-
-        # At the end of the function, set in_function to false
-        self.functions += self.func_code
+        if not self.in_class:
+            self.functions += self.func_code
+        else:
+            self.class_single += self.func_code
         self.in_function = False
 
     def handle_return(self, node):
@@ -278,10 +308,10 @@ class CodeGenerator:
             value = self.get_cpp_value(node.children[0])
             self.append_text("c", f"return {value};\n")
 
-    # TODO(us): revisar lo de si está true no
+    # TODO(us): revisar lo de si está true no (para poder agregarle a tupla)
     def handle_data_structure(self, elements, var_type):
         vector = self.global_vector
-        
+
         if var_type == "list" or var_type == "tuple":
             serialized_value = [self.get_cpp_value(el) for el in elements]
         elif var_type == "set":
@@ -309,6 +339,35 @@ class CodeGenerator:
                     self.append_text("c", f"{var_type}_{index}[{cpp_key}] = {cpp_value};\n")
 
         return f"{var_type}_{index}"
+
+    # TODO(us): Cada vez que vemos un self. eso tiene que ser un atributo
+    def handle_class_definition(self, node):
+        self.in_class = True
+        self.class_attributes = ""
+        self.class_single = ""
+        self.class_existing_attributes = {}
+
+        class_name = f"py_{node.value}"
+        if node.children[0].n_type == "Inheritance":
+            inheritance = f"py_{node.children[0].value}"
+        else:
+            inheritance = None
+        
+        # generate children
+        self.generate_code_recv(node.children[-1])
+
+        # TODO(us): append attributes
+        # TODO(us): ifndef?
+        if inheritance is not None:
+            self.append_text("cs", f"class {class_name} : public {inheritance}{{\npublic: \n", True)
+        else: 
+            self.append_text("cs", f"class {class_name}{{\npublic:\n", True)
+
+        self.append_text("cs", "};\n")
+        self.classes += self.class_single
+        self.in_class = False
+
+
 
 
 
@@ -353,7 +412,7 @@ class CodeGenerator:
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
     
-    # TODO(us): when we have something that should return true or false, we need to use the value
+
     def process_node(self, node):
         if node.n_type == 'Start':
             pass # Just used as a start point
@@ -433,7 +492,7 @@ class CodeGenerator:
             self.process_function_call(node)
 
         elif node.n_type == 'ParameterWithAssignment':
-            # TODO(us): hacer
+            # TODO(us): hacer en call function
             pass
 
         elif node.n_type == 'BooleanLiteral':
@@ -506,6 +565,7 @@ class CodeGenerator:
             pass
 
         elif node.n_type == 'ClassDefinition':
+            self.handle_class_definition(node)
             # TODO(us): hacer
             pass
 
@@ -520,7 +580,8 @@ class CodeGenerator:
         elif node.n_type == 'Break':
             self.append_text("c", "break; \n")
             pass
-        
+    
+    # TODO(us): que indente bien clases
     def indent_code(self, code):
         indent_count = 0
         new_code = ""
