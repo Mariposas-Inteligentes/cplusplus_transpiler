@@ -250,6 +250,8 @@ class CodeGenerator:
             self.append_text("c", "}\n") # TODO(us): revisar si quitamos try sin catch
 
     def process_function_call(self, node):
+        # __init__
+        # castings, range, sum
         pass
 
     def process_while_loop(self, node):
@@ -283,6 +285,7 @@ class CodeGenerator:
 
         return parameters[:-2]
 
+    # TODO(us): handle __init__
     def handle_def_function(self, node):
         self.in_function = True
         self.func_code = ""
@@ -367,8 +370,6 @@ class CodeGenerator:
         self.append_text("cs", "};\n")
         self.classes += self.class_single
         self.in_class = False
-
-
 
 
 
@@ -501,10 +502,12 @@ class CodeGenerator:
 
         elif node.n_type == 'AccessVariable':
             # TODO(us): hacer
+            # Self -> needs to be function attribute
             pass
 
         elif node.n_type == 'AccessVarList':
             # TODO(us): hacer
+            # Self -> needs to be function attribute
             pass
 
         elif node.n_type == 'MathExpression':
@@ -567,12 +570,10 @@ class CodeGenerator:
 
         elif node.n_type == 'ClassDefinition':
             self.handle_class_definition(node)
-            # TODO(us): hacer
             pass
 
         elif node.n_type == 'Inheritance':
-            # TODO(us): hacer
-            pass
+            pass # implemented in class
 
         elif node.n_type == 'Continue':
             self.append_text("c", "continue; \n")
@@ -582,7 +583,7 @@ class CodeGenerator:
             self.append_text("c", "break; \n")
             pass
     
-    # TODO(us): que indente bien clases
+    # TODO(us): propperly indent classes
     def indent_code(self, code):
         indent_count = 0
         new_code = ""
