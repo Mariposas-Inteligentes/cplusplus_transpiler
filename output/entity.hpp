@@ -549,17 +549,17 @@ class Entity {
     }
 
     // TODO(us): check operators: +=, -=, =...
-      Entity& operator=(const Entity& other) {
-            if (this != &other) {
-                this->type = other.type;
-                this->value = other.value;
-                this->list = other.list;
-                this->tuple = other.tuple;
-                this->set = other.set;
-                this->dict = other.dict;
-            }
-            return *this;
+    Entity& operator=(const Entity& other) {
+        if (this != &other) {
+            this->type = other.type;
+            this->value = other.value;
+            this->list = other.list;
+            this->tuple = other.tuple;
+            this->set = other.set;
+            this->dict = other.dict;
         }
+        return *this;
+    }
 
     Entity& operator+=(const Entity& other) {
         if (this->is_operable("+", other)) {
@@ -615,8 +615,6 @@ class Entity {
         return *this;
     }
 
-    // TODO(us): what other methods of list?
-
     void list_append(Entity new_value) {
         if (this->type != LIST) {
             throw std::invalid_argument("Invalid operation list append for variable.");
@@ -644,6 +642,55 @@ class Entity {
         }
     }
 
+    Entity list_in(Entity value) {
+        if (this->type != LIST) {
+            throw std::invalid_argument("Invalid operation list remove for variable.");
+        }
+        for (int i = 0; i < this->list.size(); ++i) {
+            if ((this->list[i] == value).is_true()) {
+                return Entity(INT, "1");
+            }
+        }
+        return Entity(INT, "0");
+    }
+
+    Entity& access_vector(std::vector<Entity>& vector, const Entity& index) {
+        if (index.type != INT){
+            throw std::invalid_argument("Operator [] invalid index type");
+        }
+
+        int index_value = std::stoi(index.value);
+        if (index_value < -1 * vector.size() || index_value >= vector.size()){
+            throw std::invalid_argument("Operator [] invalid index type");
+        }
+        if (index_value < 0) {
+            index_value = vector.size() + index_value;
+        }
+        
+        return vector[index_value];
+    }
+
+    Entity& access_dict(const Entity& key) {
+        auto found_key = this->dict.find(key);
+        if (found_key == this->dict.end()) {
+           throw std::invalid_argument("Operator [] invalid key for dictionary");
+        }
+
+        return this->dict[key];
+    }
+
+    Entity& operator[](const Entity& key) {
+        switch(this->type) {
+            case LIST:
+                return this->access_vector(this->list, key);
+            case TUPLE:
+                return this->access_vector(this->tuple, key);
+            case DICT:
+                return this->access_dict(key);
+            default:
+                throw std::invalid_argument("Operator [] invalid type");
+        }
+    }
 };
 
 
