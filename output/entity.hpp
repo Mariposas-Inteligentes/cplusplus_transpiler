@@ -996,6 +996,32 @@ class Entity {
     Iterator iter(){
         return Iterator(this);
     }
+
+    Iterator begin() {
+        return Iterator(this);
+    }
+
+    Iterator end() {
+        Iterator it(this);
+        switch (this->type) {
+            case LIST:
+                it.list_iter = this->list.end();
+                break;
+            case TUPLE:
+                it.tuple_iter = this->tuple.end();
+                break;
+            case SET:
+                it.set_iter = this->set.end();
+                break;
+            case DICT:
+                it.dict_iter = this->dict.end();
+                break;
+            default:
+                throw std::runtime_error("Unsupported type for iterator");
+        }
+        return it;
+    }
+
     // TODO(us): +, -... of all the data structures (check if they are okay)
 };
 
