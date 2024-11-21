@@ -141,7 +141,7 @@ class CodeGenerator:
             else:
                 stripped_value = value
 
-            self.append_text("g", f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\", true);\n")
+            self.append_text("g", f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n")
         return f"{var_type}_{index}"
     
     def process_variable_assignment(self, node):
@@ -168,7 +168,6 @@ class CodeGenerator:
         else:
             # Update the variable if it already exists
             self.append_text("c", f"{cpp_variable_name} {operator} {value};\n")
-            self.append_text("c", f"{cpp_variable_name}.set_active(true);\n")
 
     def process_math_expression(self, node):
         components = [] # to store each operand
@@ -196,7 +195,6 @@ class CodeGenerator:
         code_to_add += " << std::endl;\n"
         self.append_text("c", code_to_add)
 
-    # TODO(us): extract active and set it back at the end of the conditions, loops and try catches
     def process_if(self, node):
         condition = self.get_cpp_value(node.children[0])
         self.append_text("c", f"if (({condition}).is_true()) {{\n")
