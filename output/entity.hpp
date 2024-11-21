@@ -18,6 +18,7 @@ class Iterator;
 class Entity {
   public:
     friend std::ostream& operator<<(std::ostream& os, Entity entity) {
+        entity.check_active(entity);
         os << entity.get_value();
         return os;
     }
@@ -38,6 +39,7 @@ class Entity {
     };
 
   private:
+    bool active;
     int type;
     std::string value;
     bool append_tuple;
@@ -138,14 +140,29 @@ class Entity {
     }
 
   public:
-    Entity(int type, std::string value) {
+    Entity(int type, std::string value, bool active = false) {
         this->type = type;
         this->value = value;
         this->append_tuple = true;
+        this->active = active;
     }
 
     bool equals(const Entity& other) const {
         return this->type == other.type && this->value == other.value;
+    }
+
+    bool get_active(){
+        return this->active;
+    }
+
+    void set_active(bool active) {
+        this->active = active;
+    }
+
+    void check_active(const Entity object) const{
+        if (!object.active) {
+            throw std::runtime_error("Variable is not defined");
+        }
     }
 
     /*
@@ -159,6 +176,8 @@ class Entity {
    // TODO(us): implementar is operable para las diferentes comparaciones
    // o cambiar losoperadores
     bool is_operable(std::string operator_type, const Entity& other)const {
+        check_active(*this);
+        check_active(other);
         bool is_operable;
         
         switch(this->type) {
@@ -208,6 +227,7 @@ class Entity {
     }
     
     std::string get_value() const {
+        check_active(*this);
         switch (this->type) {
             case INT:
             case DOUBLE:
@@ -278,6 +298,7 @@ class Entity {
 
 
     bool is_true() const {
+        check_active(*this);
         double num_value = 0.0;
         switch (this->type) {
             case INT:
@@ -313,6 +334,7 @@ class Entity {
 
 
     Entity type() const {
+        check_active(*this);
         switch (type) {
             case INT: return Entity(STRING, "int");
             case DOUBLE: return Entity(STRING,"float");
@@ -328,6 +350,7 @@ class Entity {
     }
 
     Entity cast(int target_type) const {
+        check_active(*this);
         switch (target_type) {
             case INT: return to_int();
             case DOUBLE: return to_double();
@@ -413,7 +436,9 @@ class Entity {
     }
 
 
-    Entity sum(Entity start = Entity(INT, "0")) {
+    Entity sum(Entity start = Entity(INT, "0", true)) {
+        check_active(*this);
+        check_active(start);
         if (start.get_type() != INT && start.get_type() != DOUBLE) {
             throw std::invalid_argument("Start value must be INT or DOUBLE.");
         }
@@ -450,6 +475,7 @@ class Entity {
 
 
     bool analyze_int_double(int type) const {
+        check_active(*this);
         if ((this->type == DOUBLE || this->type == INT) && type == DOUBLE){
             return true;
         }
@@ -460,32 +486,34 @@ class Entity {
     }
 
     Entity operator+(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->is_operable("+", other)) {
             if (this->type == STRING && other.type == STRING) {
-                return Entity(STRING, this->value + other.value);
+                return Entity(STRING, this->value + other.value, true);
             }
             if (this->type == INT && other.type == INT) {
                 int result = std::stoi(this->value) + std::stoi(other.value);
-                return Entity(this->type, std::to_string(result));
+                return Entity(this->type, std::to_string(result), true);
             }
             if (this->analyze_int_double(other.type)) {
                 double result = std::stod(this->value) + std::stod(other.value);
-                return Entity(DOUBLE, std::to_string(result));
+                return Entity(DOUBLE, std::to_string(result), true);
             }
             if (this->type == LIST && other.type == LIST) {
-                Entity result(LIST, "");
+                Entity result(LIST, "", true);
                 result.list = this->list;
                 result.list.insert(result.list.end(), other.list.begin(), other.list.end());
                 return result;
             }
             if (this->type == TUPLE && other.type == TUPLE) {
-                Entity result(TUPLE, "");
+                Entity result(TUPLE, "", true);
                 result.tuple = this->tuple;
                 result.tuple.insert(result.tuple.end(), other.tuple.begin(), other.tuple.end());
                 return result;
             }
             if (this->type == SET && other.type == SET) {
-                Entity result(SET, "");
+                Entity result(SET, "", true);
                 result.set = this->set;
                 result.set.insert(other.set.begin(), other.set.end());
                 return result;
@@ -495,14 +523,16 @@ class Entity {
     }
 
     Entity operator-(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->is_operable("-", other)) {
             if (this->analyze_int_double(other.type)) {
                 double result = std::stod(this->value) - std::stod(other.value);
-                return Entity(DOUBLE, std::to_string(result));
+                return Entity(DOUBLE, std::to_string(result), true);
             }
             if (this->type == INT && other.type == INT ) {
                 int result = std::stoi(this->value) - std::stoi(other.value);
-                return Entity(this->type, std::to_string(result));
+                return Entity(this->type, std::to_string(result), true);
             }
             if (this->type == LIST && other.type == LIST) {
                 Entity result(LIST, "");
@@ -528,14 +558,16 @@ class Entity {
     }
 
     Entity operator*(const Entity& other) const {
+        check_active(*this);
+        check_active(other);       
         if (this->is_operable("*", other)) {
             if (this->analyze_int_double(other.type)) {
                 double result = std::stod(this->value) * std::stod(other.value);
-                return Entity(DOUBLE, std::to_string(result));
+                return Entity(DOUBLE, std::to_string(result), true);
             }
             if (this->type == INT && other.type == INT) {
                 int result = std::stoi(this->value) * std::stoi(other.value);
-                return Entity(INT, std::to_string(result));
+                return Entity(INT, std::to_string(result), true);
             }
             if (this->type == STRING && other.type == INT) {
                 std::string result;
@@ -543,7 +575,7 @@ class Entity {
                 for (int i = 0; i < times; ++i) {
                     result += this->value;
                 }
-                return Entity(STRING, result);
+                return Entity(STRING, result, true);
             }
             if ((this->type == LIST || this->type == TUPLE) && other.type == INT) {
                 Entity result(this->type, "");
@@ -565,36 +597,42 @@ class Entity {
     }
 
     Entity operator/(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->is_operable("/", other)) {
             if (this->type == INT && other.type == INT) {
                 int result = std::stoi(this->value) / std::stoi(other.value);
-                return Entity(this->type, std::to_string(result));
+                return Entity(this->type, std::to_string(result), true);
             }
             if (this->analyze_int_double(other.type)) {
                 double result = std::stod(this->value) / std::stod(other.value);
-                return Entity(DOUBLE, std::to_string(result));
+                return Entity(DOUBLE, std::to_string(result), true);
             }
         }
        throw std::invalid_argument("Invalid operation for the given types with /.");
     }
 
     Entity operator%(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->is_operable("%", other)) {
             int result = std::stoi(this->value) % std::stoi(other.value);
-            return Entity(INT, std::to_string(result));
+            return Entity(INT, std::to_string(result), true);
        }
         throw std::invalid_argument("Invalid operation for the given types with %.");
     }
 
     Entity operator^(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->is_operable("^", other)) {
             if (this->analyze_int_double(other.type)) {
                 double result = std::pow(std::stod(this->value), std::stod(other.value));
-                return Entity(DOUBLE, std::to_string(result));
+                return Entity(DOUBLE, std::to_string(result), true);
             }
             if (this->type == INT && other.type == INT) {
                 int result = std::pow(std::stoi(this->value),std::stoi(other.value));
-                return Entity(this->type, std::to_string(result));
+                return Entity(this->type, std::to_string(result), true);
             }
         }
         throw std::invalid_argument("Invalid opration for the given types with ^.");
@@ -602,41 +640,51 @@ class Entity {
 
     // Logical and Comparison operator_types
     Entity operator&&(const Entity& other) const {
-        return Entity(INT, (this->is_true() && other.is_true()) ? "1" : "0");
+        check_active(*this);
+        check_active(other);
+        return Entity(INT, (this->is_true() && other.is_true()) ? "1" : "0", true);
     }
 
     Entity operator||(const Entity& other) const {
-        return Entity(INT, (this->is_true() || other.is_true()) ? "1" : "0");
+        check_active(*this);
+        check_active(other);
+        return Entity(INT, (this->is_true() || other.is_true()) ? "1" : "0", true);
     }
 
     // Comparison operator_types
     Entity operator==(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->type != other.type) {
-            return Entity(INT, "0");
+            return Entity(INT, "0", true);
         }
 
         // TODO(us): Make sure this works with lists, tuples
         bool result = this->value == other.value;
         if (result) {
-            return Entity(INT, "1");
+            return Entity(INT, "1", true);
         } else { 
-            return Entity(INT, "0");
+            return Entity(INT, "0", true);
         }
     }
 
     Entity operator!=(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->type == other.type) {
             bool result = this->value != other.value;
             if (result) {
-                return Entity(INT, "1");
+                return Entity(INT, "1", true);
             } else { 
-                return Entity(INT, "0");
+                return Entity(INT, "0", true);
             }
         }
         throw std::invalid_argument("Invalid operation for the given types with !=.");
     }
 
     Entity operator<(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->type != other.type) {
             throw std::invalid_argument("Invalid operation for the given types with <.");    
         }
@@ -645,9 +693,9 @@ class Entity {
         if (this->type == INT || this->type == DOUBLE) {
             result =  std::stod(this->value) < std::stod(other.value);
             if (result) {
-                return Entity(INT, "1");
+                return Entity(INT, "1", true);
             } else { 
-                return Entity(INT, "0");
+                return Entity(INT, "0", true);
             }
         }
 
@@ -656,16 +704,18 @@ class Entity {
             int i, j = 0;
             while (i < this->value.length() && j < other.value.length()) {
                 if (this->value[i] > other.value[j]) {
-                    return Entity(INT, "0");
+                    return Entity(INT, "0", true);
                 }
                 ++i;
                 ++j;
             }
-            return Entity(INT, "1");
+            return Entity(INT, "1", true);
         }
     }
 
     Entity operator>(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->type != other.type) {
             throw std::invalid_argument("Invalid operation for the given types with >.");    
         }
@@ -675,9 +725,9 @@ class Entity {
         
            result = std::stod(this->value) > std::stod(other.value);
            if (result) {
-                return Entity(INT, "1");
+                return Entity(INT, "1", true);
             } else { 
-                return Entity(INT, "0");
+                return Entity(INT, "0", true);
             }
         }
 
@@ -686,47 +736,54 @@ class Entity {
             int i, j = 0;
             while (i < this->value.length() && j < other.value.length()) {
                 if (this->value[i] < other.value[j]) {
-                    return Entity(INT, "0");
+                    return Entity(INT, "0", true);
                 }
                 ++i;
                 ++j;
             }
-            return Entity(INT, "1");
+            return Entity(INT, "1", true);
         }
     }
 
     Entity operator<=(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->type == other.type) {
            bool result = std::stod(this->value) <= std::stod(other.value);
            if (result) {
-                return Entity(INT, "1");
+                return Entity(INT, "1", true);
             } else { 
-                return Entity(INT, "0");
+                return Entity(INT, "0", true);
             }
         }
         throw std::invalid_argument("Invalid operation for the given types with <=.");
     }
 
     Entity operator>=(const Entity& other) const {
+        check_active(*this);
+        check_active(other);
         if (this->type == other.type) {
             bool result = std::stod(this->value) >= std::stod(other.value);
             if (result) {
-                return Entity(INT, "1");
+                return Entity(INT, "1", true);
             } else { 
-                return Entity(INT, "0");
+                return Entity(INT, "0", true);
             }
         }
         throw std::invalid_argument("Inalid operation for he given types with >=.");
     }
 
     Entity operator!() const {
-        return Entity(INT, (!this->is_true()) ? "1" : "0");
+        check_active(*this);
+        return Entity(INT, (!this->is_true()) ? "1" : "0", true);
     }
 
     // Membership operator_types
 
     // TODO(us): revisar que tenga sentido
     Entity in(Entity& container) {
+        check_active(*this);
+        check_active(container);
         if (container.is_operable("in", *this)) {
             switch(this->type) {
                 case LIST:
@@ -745,10 +802,13 @@ class Entity {
     }
 
     Entity not_in(Entity& container) {
+        check_active(*this);
+        check_active(container);
         return !this->in(container);
     }
 
     Entity count() {
+        check_active(*this);
         switch(this->type){
             case TUPLE:
                 return this->vector_count(this->tuple);
@@ -766,6 +826,7 @@ class Entity {
 
     // TODO(us): check operators: +=, -=, =...
     Entity& operator=(const Entity& other) {
+        this->active = true;
         if (this != &other) {
             this->type = other.type;
             this->value = other.value;
@@ -778,6 +839,7 @@ class Entity {
     }
 
     Entity& operator+=(const Entity& other) {
+        this->active = true;
         if (this->is_operable("+", other)) {
             *this = *this + other;
         } else {
@@ -787,6 +849,7 @@ class Entity {
     }
 
     Entity& operator-=(const Entity& other) {
+        this->active = true;
         if (this->is_operable("-", other)) {
             *this = *this - other;
         } else {
@@ -796,6 +859,7 @@ class Entity {
     }
 
     Entity& operator*=(const Entity& other) {
+        this->active = true;
         if (this->is_operable("*", other)) {
             *this = *this * other;
         } else {
@@ -805,6 +869,7 @@ class Entity {
     }
 
     Entity& operator/=(const Entity& other) {
+        this->active = true;
         if (this->is_operable("/", other)) {
             *this = *this / other;
         } else {
@@ -814,6 +879,7 @@ class Entity {
     }
 
     Entity& operator%=(const Entity& other) {
+        this->active = true;
         if (this->is_operable("%", other)) {
             *this = *this % other;
         } else {
@@ -823,6 +889,7 @@ class Entity {
     }
 
     Entity& operator^=(const Entity& other) {
+        this->active = true;
         if (this->is_operable("^", other)) {
             *this = *this ^ other;
         } else {
@@ -832,6 +899,8 @@ class Entity {
     }
     
     Entity& operator[](const Entity& key) {
+        check_active(*this);
+        check_active(key);
         switch(this->type) {
             case LIST:
                 return this->access_vector(this->list, key);
@@ -846,6 +915,7 @@ class Entity {
     }
 
     void append(const Entity& value) {
+        this->active = true;
         switch(this->type) {
             case LIST:
                 this->vector_append(value, this->list);
@@ -867,6 +937,8 @@ class Entity {
     }
 
     void remove(Entity element) {
+        check_active(*this);
+        check_active(element);
         switch (this->type) {
             case LIST:
                 this->vector_remove(element, this->list);
@@ -880,6 +952,8 @@ class Entity {
     }
 
     Entity pop(Entity element) {
+        check_active(*this);
+        check_active(element);
         switch (this->type) {
             case DICT:
                 return this->dict_pop(element);
@@ -889,7 +963,7 @@ class Entity {
     }
 
     Entity vector_count(std::vector<Entity>& vector) {
-        return Entity(INT, std::to_string(vector.size()));
+        return Entity(INT, std::to_string(vector.size()), true);
     }
 
     void vector_append(Entity new_value, std::vector<Entity> vector) {
@@ -915,10 +989,10 @@ class Entity {
     Entity vector_in(Entity value, std::vector<Entity> vector) {
         for (int i = 0; i < vector.size(); ++i) {
             if ((vector[i] == value).is_true()) {
-                return Entity(INT, "1");
+                return Entity(INT, "1", true);
             }
         }
-        return Entity(INT, "0");
+        return Entity(INT, "0", true);
     }
 
     Entity& access_vector(std::vector<Entity>& vector, const Entity& index) {
@@ -941,7 +1015,7 @@ class Entity {
     Entity& access_dict(const Entity& key) {
         auto found_key = this->dict.find(key);
         if (found_key == this->dict.end()) {
-           this->dict[key] = Entity(NONE, "NULL");
+           this->dict[key] = Entity(NONE, "NULL", true);
         }
 
         return this->dict[key];
@@ -954,9 +1028,9 @@ class Entity {
 
         auto found_key = this->dict.find(key);
         if (found_key == this->dict.end()) {
-           return Entity(INT, "0");  // False
+           return Entity(INT, "0", true);  // False
         }
-        return Entity(INT, "1");  // True
+        return Entity(INT, "1", true);  // True
     }
 
     Entity dict_pop(Entity key) {
@@ -966,15 +1040,15 @@ class Entity {
             this->dict.erase(it);
             return value;
         }
-        return Entity(NONE, "NULL");
+        return Entity(NONE, "NULL", true);
     }
     
     Entity dict_count() {
-        return Entity(INT, std::to_string(this->dict.size()));
+        return Entity(INT, std::to_string(this->dict.size()), true);
     }
     
     Entity set_count() {
-        return Entity(INT, std::to_string(this->set.size()));
+        return Entity(INT, std::to_string(this->set.size()), true);
     }
 
     void set_remove(Entity element) {
@@ -988,9 +1062,9 @@ class Entity {
     Entity set_in(Entity value) {
         auto result = this->set.find(value);
         if (result != this->set.end()){
-            return Entity(INT, "1");
+            return Entity(INT, "1", true);
         }
-        return Entity(INT, "0");
+        return Entity(INT, "0", true);
     }
     
     Iterator iter(){
