@@ -311,6 +311,7 @@ class Entity {
         }
     }
 
+
     Entity type() const {
         switch (type) {
             case INT: return Entity(STRING, "int");
@@ -379,6 +380,43 @@ class Entity {
         }
         return false;
     }
+
+    Entity sum(Entity start = Entity(INT, "0")) {
+        if (start.get_type() != INT && start.get_type() != DOUBLE) {
+            throw std::invalid_argument("Start value must be INT or DOUBLE.");
+        }
+
+        Entity result = start;
+
+        switch (this->get_type()) {
+            case LIST:
+                for (const auto& element : this->list) {
+                    result = result + element; 
+                }
+                break;
+            case TUPLE:
+                for (const auto& element : this->tuple) {
+                    result = result + element; 
+                }
+                break;
+            case SET:
+                for (const auto& element : this->set) {
+                    result = result + element; 
+                }
+                break;
+            case DICT:
+                for (const auto& pair : this->dict) {
+                    result = result + pair.first;
+                }
+                break;
+            default:
+                throw std::invalid_argument("Invalid type for sum. Must be LIST, TUPLE, SET, or DICT.");
+        }
+
+        return result;
+    }
+
+
 
     Entity operator+(const Entity& other) const {
         if (this->is_operable("+", other)) {
