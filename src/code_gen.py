@@ -423,6 +423,14 @@ class CodeGenerator:
                 return f"{parameters[0]}.range({parameters[1]}, {parameters[2]})"
             else:
                 raise ValueError("range() expects 1 to 3 arguments.")
+        elif function_name == "iter": # TODO(us): define the variable iterator as a Iterator Instance
+            if len(parameters) != 1:
+                raise ValueError("iter() expects exactly one argument.")
+            return f"{parameters[0]}.iter()"
+        elif function_name == "next":
+            if len(parameters) != 1:
+                raise ValueError("next() expects exactly one argument.")
+            return f"{parameters[0]}.next()"
         elif function_name in ["int", "float", "str", "bool"]:
             if len(parameters) != 1:
                 raise ValueError(f"{function_name}() expects exactly one argument.")
