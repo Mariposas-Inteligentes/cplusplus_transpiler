@@ -370,16 +370,48 @@ class Entity {
         return Entity(INT, result ? "1" : "0");
     }
 
-
-    bool analyze_int_double(int type) const {
-        if ((this->type == DOUBLE || this->type == INT) && type == DOUBLE){
-            return true;
-        }
-        if (this->type == DOUBLE && (type == DOUBLE || type == INT)){
-            return true;
-        }
-        return false;
+    // TODO(us): check if the way it is called works (I don't know if
+    // start will die before the range is calculated)
+    Entity range() const {
+        Entity start = Entity(INT, "0");
+        Entity range = start.range(*this, Entity(INT, "1"));
+        return range;
     }
+
+    Entity range(Entity stop) const {
+        return this->range(stop, Entity(INT, "1"));
+    }
+
+    Entity range(Entity stop, Entity step) const {
+        Entity start = *this;
+        if (start.get_type() != INT || stop.get_type() != INT || step.get_type() != INT) {
+            throw std::invalid_argument("range() arguments must be integers.");
+        }
+
+        int start_value = std::stoi(start.get_value());
+        int stop_value = std::stoi(stop.get_value());
+        int step_value = std::stoi(step.get_value());
+
+        if (step_value == 0) {
+            throw std::invalid_argument("range() step argument must not be zero.");
+        }
+
+        Entity result(LIST, "");
+        std::vector<Entity> values;
+
+        if (step_value > 0) {
+            for (int i = start_value; i < stop_value; i += step_value) {
+                values.emplace_back(INT, std::to_string(i));
+            }
+        } else {
+            for (int i = start_value; i > stop_value; i += step_value) {
+                values.emplace_back(INT, std::to_string(i));
+            }
+        }
+        result.list = values;
+        return result;
+    }
+
 
     Entity sum(Entity start = Entity(INT, "0")) {
         if (start.get_type() != INT && start.get_type() != DOUBLE) {
@@ -417,6 +449,15 @@ class Entity {
     }
 
 
+    bool analyze_int_double(int type) const {
+        if ((this->type == DOUBLE || this->type == INT) && type == DOUBLE){
+            return true;
+        }
+        if (this->type == DOUBLE && (type == DOUBLE || type == INT)){
+            return true;
+        }
+        return false;
+    }
 
     Entity operator+(const Entity& other) const {
         if (this->is_operable("+", other)) {

@@ -285,6 +285,7 @@ class CodeGenerator:
         return parameters[:-2]
 
     # TODO(us): handle __init__ in classes
+    # TODO(us): handle __main__ 
     def handle_def_function(self, node):
         self.in_function = True
         self.func_code = ""
@@ -394,6 +395,15 @@ class CodeGenerator:
                 return f"{parameters[0]}.sum({parameters[1]})"
             else:
                 raise ValueError("sum() expects at most two arguments: iterable and optional start value.")
+        elif function_name == "range":
+            if len(parameters) == 1:
+                return f"{parameters[0]}.range()"
+            elif len(parameters) == 2:
+                return f"{parameters[0]}.range({parameters[1]})"
+            elif len(parameters) == 3:
+                return f"{parameters[0]}.range({parameters[1]}, {parameters[2]})"
+            else:
+                raise ValueError("range() expects 1 to 3 arguments.")
         elif function_name in ["int", "float", "str", "bool"]:
             if len(parameters) != 1:
                 raise ValueError(f"{function_name}() expects exactly one argument.")
