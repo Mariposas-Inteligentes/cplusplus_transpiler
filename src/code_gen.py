@@ -256,8 +256,27 @@ class CodeGenerator:
             self.generate_code_recv(child)
         self.append_text("c", "}\n")
 
-    def process_for_loop(self, node): # TODO(us): implement when we have call function
-        pass
+    def process_for_loop(self, node):
+        iterator_index = 0
+        iterable_index = 1
+        loop_body_index = -1
+
+        iterator = node.children[iterator_index].value
+        cpp_iterator = f"py_{iterator}"
+
+        if cpp_iterator not in self.func_existing_variables:
+            self.func_existing_variables[cpp_iterator] = True
+            self.append_text("v", f"Entity {cpp_iterator};\n")
+
+        iterable_node = node.children[iterable_index]
+        iterable = self.get_cpp_value(iterable_node)
+
+        # TODO(us): check if this works in c++ for our iterator 
+        self.append_text("c", f"for (auto& {cpp_iterator} : {iterable}.iter()) {{\n")
+        
+        loop_body = node.children[loop_body_index]
+        self.generate_code_recv(loop_body)
+        self.append_text("c", "}\n")
 
     def find_parameters(self, node):
         # TODO(us): pensar si hay referencias
@@ -544,8 +563,7 @@ class CodeGenerator:
             self.append_text("c", cpp_code + ";\n")
 
         elif node.n_type == 'ParameterWithAssignment':
-            # TODO(us): hacer en call function
-            pass
+            pass # handled in call function
 
         elif node.n_type == 'BooleanLiteral':
             pass # Global values
@@ -564,19 +582,19 @@ class CodeGenerator:
             self.process_math_expression(node)
 
         elif node.n_type == 'MathSymbol':
-            pass # Math expression is in charge
+            pass # handled by math expression
 
         elif node.n_type == 'Parenthesis':
-            pass # Math expression is in charge
+            pass # handled by math expression
 
         elif node.n_type == 'MathAssign':
-            pass # Math expression is in charge
+            pass # handled by math expression
 
         elif node.n_type == 'LogicSymbols':
-            pass # Math expression is in charge
+            pass # handled by math expression
 
         elif node.n_type == 'CmpSymbols':
-            pass # Math expression is in charge
+            pass # handled by math expression
 
         if node.n_type == 'List':
             list_elements = node.children
@@ -623,7 +641,7 @@ class CodeGenerator:
             pass
 
         elif node.n_type == 'Inheritance':
-            pass # implemented in class
+            pass # handled by class
 
         elif node.n_type == 'Continue':
             self.append_text("c", "continue; \n")
