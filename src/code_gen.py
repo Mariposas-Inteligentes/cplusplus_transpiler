@@ -263,24 +263,28 @@ class CodeGenerator:
         # TODO(us): pensar si hay referencias
         parameters = ""
         if node.children[0].n_type == "Parameter":
-            parameters = f"Entity {node.children[0].value}"
+            parameters = f"Entity py_{node.children[0].value}"
+            self.func_existing_variables[f"py_{node.children[0].value}"] = True
         elif node.children[0].n_type == "ParameterList":
             # if we have several parameters with no asigned values
             if node.children[0].children[0].n_type == "ParameterList":
                 for child in node.children[0].children[0].children:
-                    parameters += f"Entity {child.value}, "
+                    parameters += f"Entity py_{child.value}, "
+                    self.func_existing_variables[f"py_{child.value}"] = True
 
             # now check if there are any other params, search for children with default value
             for child in node.children[0].children:
                 if child.n_type == "Parameter":
-                    parameters += f"Entity {child.value}, "
+                    parameters += f"Entity py_{child.value}, "
+                    self.func_existing_variables[f"py_{child.value}"] = True
                 elif child.n_type == "ParameterWithDefault":
                     value = self.get_cpp_value(child.children[0])
-                    parameters += f"Entity {child.value} = {value}, "
+                    parameters += f"Entity py_{child.value} = {value}, "
+                    self.func_existing_variables[f"py_{child.value}"] = True
 
         return parameters[:-2]
 
-    # TODO(us): handle __init__
+    # TODO(us): handle __init__ in classes
     def handle_def_function(self, node):
         self.in_function = True
         self.func_code = ""
@@ -368,10 +372,16 @@ class CodeGenerator:
 
     def process_function_call(self, node):
         function_name = node.value
+        parameters = []
         if len(node.children) > 0:
-            parameters = [self.get_cpp_value(param) for param in node.children[0].children]
-        else:
-            parameters = []
+            for param in node.children[0].children:
+                if param.n_type == "ParameterWithAssignment":
+                    # In c++ there is no parameter asignation in c++
+                    # param_name = param.value
+                    param_value = self.get_cpp_value(param.children[0])
+                    parameters.append(f"{param_value}")
+                else:
+                    parameters.append(self.get_cpp_value(param))
 
         if function_name == "type":
             if len(parameters) != 1:
