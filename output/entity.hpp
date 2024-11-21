@@ -289,14 +289,16 @@ class Entity {
                 return !this->value.empty();
                 break;
             case LIST: // TODO(us): check if it's this way
-            case TUPLE:
-                return !this->value.empty();
+                return !this->tuple.empty();
+                    break;
+            case TUPLE: // TODO(us): check if it's this way
+                return !this->tuple.empty();
                 break;
             case SET: // TODO(us): check if it's this way
-                return !this->value.empty();
+                return !this->set.empty();
                 break;
             case DICT: // TODO(us): check if it's this way
-                return !this->value.empty();
+                return !this->dict.empty();
                 break;
             case CLASS: // TODO(us): check if it's this way
                 return true;
@@ -308,6 +310,65 @@ class Entity {
                 throw std::runtime_error("Unsupported type in is_true() evaluation.");
         }
     }
+
+    Entity type() const {
+        switch (type) {
+            case INT: return Entity(STRING, "int");
+            case DOUBLE: return Entity(STRING,"float");
+            case STRING: return Entity(STRING,"str");
+            case LIST: return Entity(STRING,"list");
+            case TUPLE: return Entity(STRING,"tuple");
+            case SET: return Entity(STRING,"set");
+            case DICT: return Entity(STRING,"dict");
+            case CLASS: return Entity(STRING,"class");
+            case NONE: return Entity(STRING,"NoneType");
+            default: return Entity(STRING,"unknown");
+        }
+    }
+
+    Entity cast(int target_type) const {
+        switch (target_type) {
+            case INT: return to_int();
+            case DOUBLE: return to_double();
+            case STRING: return to_string();
+            case BOOL: return to_bool();
+            default:
+                throw std::runtime_error("Unsupported cast target type.");
+        }
+    }
+
+    Entity to_int() const {
+        if (type == INT) {
+            return *this; // Already an INT
+        }
+        if (type == DOUBLE || type == STRING) {
+            return Entity(INT, std::to_string(static_cast<int>(std::stod(value))));
+        }
+        throw std::runtime_error("Cannot cast to INT from this type.");
+    }
+
+    Entity to_double() const {
+        if (type == DOUBLE) {
+            return *this; // Already a DOUBLE
+        }
+        if (type == INT || type == STRING) {
+            return Entity(DOUBLE, std::to_string(std::stod(value)));
+        }
+        throw std::runtime_error("Cannot cast to DOUBLE from this type.");
+    }
+
+    Entity to_string() const {
+        if (type == STRING) {
+            return *this; // Already a STRING
+        }
+        return Entity(STRING, get_value()); 
+    }
+
+    Entity to_bool() const {
+        bool result = this->is_true(); 
+        return Entity(INT, result ? "1" : "0");
+    }
+
 
     bool analyze_int_double(int type) const {
         if ((this->type == DOUBLE || this->type == INT) && type == DOUBLE){
@@ -856,7 +917,7 @@ class Entity {
     Iterator iter(){
         return Iterator(this);
     }
-    // TODO(us): +, -... of all the data structures
+    // TODO(us): +, -... of all the data structures (check if they are okay)
 };
 
 

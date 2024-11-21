@@ -7,5 +7,6 @@ enum type_values{
     TUPLE,
     SET,
     DICT,
-    CLASS
+    CLASS,
+    BOOL
 };
