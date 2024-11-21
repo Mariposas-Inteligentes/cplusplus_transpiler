@@ -33,6 +33,10 @@ class Iterator{
     std::unordered_map<Entity, Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator dict_end;
 
   public:
+    Iterator() {
+        this->type = INT;
+        this->object = NULL;
+    }
     Iterator(Entity* object) {
         this->type = object->get_type();
         this->object = object;
