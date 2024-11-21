@@ -249,11 +249,6 @@ class CodeGenerator:
         if not any(child.n_type == 'ExceptRule' for child in node.children):
             self.append_text("c", "}\n") # TODO(us): revisar si quitamos try sin catch
 
-    def process_function_call(self, node):
-        # __init__
-        # castings, range, sum
-        pass
-
     def process_while_loop(self, node):
         condition = self.get_cpp_value(node.children[0])
         self.append_text("c", f"while (({condition}).is_true()) {{\n")
@@ -371,6 +366,39 @@ class CodeGenerator:
         self.classes += self.class_single
         self.in_class = False
 
+    def process_function_call(self, node):
+        function_name = node.value
+        if len(node.children) > 0:
+            parameters = [self.get_cpp_value(param) for param in node.children[0].children]
+        else:
+            parameters = []
+
+        if function_name == "type":
+            if len(parameters) != 1:
+                raise ValueError("type() expects exactly one argument.")
+            return f"{parameters[0]}.type()"
+        elif function_name == "sum":
+            if len(parameters) == 1:
+                return f"{parameters[0]}.sum()"
+            elif len(parameters) == 2:
+                return f"{parameters[0]}.sum({parameters[1]})"
+            else:
+                raise ValueError("sum() expects at most two arguments: iterable and optional start value.")
+        elif function_name in ["int", "float", "str", "bool"]:
+            if len(parameters) != 1:
+                raise ValueError(f"{function_name}() expects exactly one argument.")
+            target_type = {
+                "int": "INT",
+                "float": "DOUBLE",
+                "str": "STRING",
+                "bool": "BOOL"
+            }[function_name]
+            return f"{parameters[0]}.cast({target_type})"
+        else:
+            cpp_function_name = f"py_{function_name}"
+            param_list = ", ".join(parameters)
+            return f"{cpp_function_name}({param_list})"
+
 
 
     def get_cpp_value(self, value_node):
@@ -411,6 +439,8 @@ class CodeGenerator:
             return self.handle_data_structure([], 'list')
         elif value_node.n_type == 'EmptyDictionary':
             return self.handle_data_structure({}, 'dict')
+        elif value_node.n_type == 'CallFunction':
+            return self.process_function_call(value_node)
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
     
@@ -490,8 +520,8 @@ class CodeGenerator:
             self.handle_return(node)
 
         elif node.n_type == 'CallFunction':
-            # TODO(us): hacer
-            self.process_function_call(node)
+            cpp_code = self.process_function_call(node)
+            self.append_text("c", cpp_code + ";\n")
 
         elif node.n_type == 'ParameterWithAssignment':
             # TODO(us): hacer en call function
