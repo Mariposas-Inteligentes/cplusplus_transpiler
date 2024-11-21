@@ -144,13 +144,9 @@ class CodeGenerator:
             self.append_text("g", f"Entity {var_type}_{index}({var_type.upper()}, \"{stripped_value}\");\n")
         return f"{var_type}_{index}"
     
-    def process_variable_assignment(self, node, iterator = False):
+    def process_variable_assignment(self, node):
         variable_name = node.children[0].value
-        if not iterator:
-            cpp_variable_name = f"py_{variable_name}"
-        else:
-            cpp_variable_name = f"iter_py_{variable_name}"
-
+        cpp_variable_name = f"py_{variable_name}"
 
         operator = node.children[1].value # operator
         right_node = node.children[2]  # asignee
@@ -158,23 +154,14 @@ class CodeGenerator:
         value = self.get_cpp_value(right_node)
 
         if not self.in_function:
-            if iterator:
-                existing_variables = self.main_existing_iterators
-            else:     
-                existing_variables = self.main_existing_variables
+            existing_variables = self.main_existing_variables
         else:
-            if iterator:
-                existing_variables = self.func_existing_iterators
-            else:
-                existing_variables = self.func_existing_variables
+            existing_variables = self.func_existing_variables
 
         if cpp_variable_name not in existing_variables:
             # Define the variable for the first time
             # define variable at the beginning of document
-            if iterator:
-                self.append_text("v", f"Iterator {cpp_variable_name};\n")
-            else:
-                self.append_text("v", f"Entity {cpp_variable_name} = Entity(INT, \"0\");\n")
+            self.append_text("v", f"Entity {cpp_variable_name} = Entity(INT, \"0\");\n")
             # use in the variable
             self.append_text("c", f"{cpp_variable_name} {operator} {value};\n")
             existing_variables[cpp_variable_name] = True
