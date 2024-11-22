@@ -2,7 +2,7 @@
 #define ENTITY
 
 #include "common.hpp"
-#include "iterator.hpp" // TODO(us): remove circular dependency
+// #include "iterator.hpp" // TODO(us): remove circular dependency
 
 #include <cmath>
 #include <iostream>
@@ -14,14 +14,13 @@
 #include <algorithm>
 
 // TODO(us): Pass some public methods to private
-class Iterator;
 class Entity {
   public:
+    // friend class Iterator;
     friend std::ostream& operator<<(std::ostream& os, Entity entity) {
         os << entity.get_value();
         return os;
     }
-    friend class Iterator;
 
     struct HashFunction {
         std::size_t operator()(const Entity& entity) const {
@@ -37,6 +36,85 @@ class Entity {
         }
     };
 
+    // class Iterator{
+    //     friend class Entity;
+    //     private:
+    //         int ite_type;
+    //         Entity* object;
+    //         std::vector<Entity>::iterator list_iter;
+    //         std::vector<Entity>::iterator list_end;
+    //         std::vector<Entity>::iterator tuple_iter;
+    //         std::vector<Entity>::iterator tuple_end;
+    //         std::unordered_set<Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator set_iter;
+    //         std::unordered_set<Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator set_end;
+    //         std::unordered_map<Entity, Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator dict_iter;
+    //         std::unordered_map<Entity, Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator dict_end;
+
+    //     public:
+            // Iterator() {
+            //     this->ite_type = INT;
+            //     this->object = NULL;
+            // }
+            // Iterator(Entity* object) {
+            //     this->ite_type = object->get_type();
+            //     this->object = object;
+            //     this->initialize_iterator();
+            // }
+
+            // void initialize_iterator() {
+            //     switch (this->ite_type) {
+            //         case LIST:
+            //             this->list_iter = this->object->list.begin();
+            //             this->list_end = this->object->list.end();
+            //             break;
+            //         case TUPLE:
+            //             this->tuple_iter = this->object->tuple.begin();
+            //             this->tuple_end = this->object->tuple.end();
+            //             break;
+            //         case SET:
+            //             this->set_iter = this->object->set.begin();
+            //             this->set_end = this->object->set.end();
+            //             break;
+            //         case DICT:
+            //             this->dict_iter = this->object->dict.begin();
+            //             this->dict_end = this->object->dict.end();
+            //             break;
+            //         default:
+            //             throw std::runtime_error("Unsupported type for iterator");
+            //     }
+            // }
+
+        //     Entity next() {
+        //     switch(this->ite_type) {
+        //         case LIST:
+        //             return *this->list_iter++;
+        //         case TUPLE:
+        //             return *this->tuple_iter++;
+        //         case SET:
+        //             return *this->set_iter++;
+        //         case DICT:
+        //             return this->dict_iter++->first;
+        //         default:
+        //             throw std::runtime_error("Unsupported type for iterator");  
+        //         }
+        //     }
+
+        //     bool has_next() const {
+        //         switch (this->ite_type) {
+        //             case LIST:
+        //                 return this->list_iter != this->list_end;
+        //             case TUPLE:
+        //                 return this->tuple_iter != this->tuple_end;
+        //             case SET:
+        //                 return this->set_iter != this->set_end;
+        //             case DICT:
+        //                 return this->dict_iter != this->dict_end;
+        //             default:
+        //                 throw std::runtime_error("Unsupported type for iterator");
+        //         }
+        //     }
+        // };
+
   private:
     int type;
     std::string value;
@@ -45,6 +123,7 @@ class Entity {
     std::vector<Entity> tuple;
     std::unordered_map<Entity, Entity, Entity::HashFunction, Entity::EqualsComparator> dict;
     std::unordered_set<Entity, Entity::HashFunction, Entity::EqualsComparator> set;
+    // Entity::Iterator iterator;
 
     bool check_string(const Entity& other, std::string operator_type)const {
         if (operator_type == "+" && other.type == STRING) {
@@ -138,11 +217,24 @@ class Entity {
     }
 
   public:
-    Entity(int type, std::string value) {
+    Entity() {
+        this->type = NONE;
+        this->value = "";
+        this->append_tuple = true;
+    }
+
+    Entity(int type, std::string value ) {
         this->type = type;
         this->value = value;
         this->append_tuple = true;
     }
+
+    // Entity(int type, Entity::Iterator ite) {
+    //     this->type = type;
+    //     this->value = "";
+    //     this->append_tuple = true;
+    //     this->iterator = ite;
+    // }
 
     bool equals(const Entity& other) const {
         return this->type == other.type && this->value == other.value;
@@ -218,10 +310,10 @@ class Entity {
                 return serialize_list();
             case TUPLE:
                 return serialize_tuple();
-            case SET:
-                return serialize_set();
-            case DICT:
-                return serialize_dict();
+            // case SET:
+            //     return serialize_set();
+            // case DICT:
+                // return serialize_dict();
             default:
                 throw std::runtime_error("Unsupported type in get_value() retrieval.");
         }
@@ -252,29 +344,29 @@ class Entity {
         return result;
     }
 
-    std::string serialize_set() const {
-        std::string result = "{";
-        for (auto it = set.begin(); it != set.end(); ++it) {
-            result += it->get_value();
-            if (std::next(it) != set.end()) {
-                result += ", ";
-            }
-        }
-        result += "}";
-        return result;
-    }
+    // std::string serialize_set() const {
+    //     std::string result = "{";
+    //     for (auto it = set.begin(); it != set.end(); ++it) {
+    //         result += it->get_value();
+    //         if (std::next(it) != set.end()) {
+    //             result += ", ";
+    //         }
+    //     }
+    //     result += "}";
+    //     return result;
+    // }
 
-    std::string serialize_dict() const {
-        std::string result = "{";
-        for (auto it = dict.begin(); it != dict.end(); ++it) {
-            result += it->first.get_value() + ": " + it->second.get_value();
-            if (std::next(it) != dict.end()) {
-                result += ", ";
-            }
-        }
-        result += "}";
-        return result;
-    }
+    // std::string serialize_dict() const {
+    //     std::string result = "{";
+    //     for (auto it = dict.begin(); it != dict.end(); ++it) {
+    //         result += it->first.get_value() + ": " + it->second.get_value();
+    //         if (std::next(it) != dict.end()) {
+    //             result += ", ";
+    //         }
+    //     }
+    //     result += "}";
+    //     return result;
+    // }
 
 
     bool is_true() const {
@@ -295,10 +387,10 @@ class Entity {
                 return !this->tuple.empty();
                 break;
             case SET: // TODO(us): check if it's this way
-                return !this->set.empty();
+                // return !this->set.empty();
                 break;
             case DICT: // TODO(us): check if it's this way
-                return !this->dict.empty();
+                // return !this->dict.empty();
                 break;
             case CLASS: // TODO(us): check if it's this way
                 return true;
@@ -312,7 +404,7 @@ class Entity {
     }
 
 
-    Entity type() const {
+    Entity type_py() const {
         switch (type) {
             case INT: return Entity(STRING, "int");
             case DOUBLE: return Entity(STRING,"float");
@@ -431,16 +523,16 @@ class Entity {
                     result = result + element; 
                 }
                 break;
-            case SET:
-                for (const auto& element : this->set) {
-                    result = result + element; 
-                }
-                break;
-            case DICT:
-                for (const auto& pair : this->dict) {
-                    result = result + pair.first;
-                }
-                break;
+            // case SET:
+            //     for (const auto& element : this->set) {
+            //         result = result + element; 
+            //     }
+            //     break;
+            // case DICT:
+            //     for (const auto& pair : this->dict) {
+            //         result = result + pair.first;
+            //     }
+            //     break;
             default:
                 throw std::invalid_argument("Invalid type for sum. Must be LIST, TUPLE, SET, or DICT.");
         }
@@ -484,12 +576,12 @@ class Entity {
                 result.tuple.insert(result.tuple.end(), other.tuple.begin(), other.tuple.end());
                 return result;
             }
-            if (this->type == SET && other.type == SET) {
-                Entity result(SET, "");
-                result.set = this->set;
-                result.set.insert(other.set.begin(), other.set.end());
-                return result;
-            }
+            // if (this->type == SET && other.type == SET) {
+            //     Entity result(SET, "");
+            //     result.set = this->set;
+            //     result.set.insert(other.set.begin(), other.set.end());
+            //     return result;
+            // }
         }
         throw std::invalid_argument("Invalid operaton for the given types with +.");
     }
@@ -515,14 +607,14 @@ class Entity {
                 }
                 return result;
             }
-            if (this->type == SET && other.type == SET) {
-                Entity result(SET, "");
-                result.set = this->set;
-                for (const auto& elem : other.set) {
-                    result.set.erase(elem);
-                }
-                return result;
-            }
+            // if (this->type == SET && other.type == SET) {
+            //     Entity result(SET, "");
+            //     result.set = this->set;
+            //     for (const auto& elem : other.set) {
+            //         result.set.erase(elem);
+            //     }
+            //     return result;
+            // }
         }
         throw std::invalid_argument("Invlid operation for the given types with -.");
     }
@@ -733,10 +825,10 @@ class Entity {
                     return this->vector_in(container, this->list);
                 case TUPLE:
                     return this->vector_in(container, this->tuple);
-                case DICT:
-                    return this->dict_in(container);
-                case SET:
-                    return this->set_in(container);
+                // case DICT:
+                //     return this->dict_in(container);
+                // case SET:
+                //     return this->set_in(container);
                 default:
                     throw std::invalid_argument("Invalid operation for 'in' with the given types.");
             }
@@ -754,10 +846,10 @@ class Entity {
                 return this->vector_count(this->tuple);
             case LIST:
                 return this->vector_count(this->list);
-            case SET:
-                return this->set_count();
-            case DICT:
-                return this->dict_count();
+            // case SET:
+            //     return this->set_count();
+            // case DICT:
+            //     return this->dict_count();
             default:
                 throw std::invalid_argument("Invalid operation for 'in' with the given types.");
 
@@ -771,8 +863,8 @@ class Entity {
             this->value = other.value;
             this->list = other.list;
             this->tuple = other.tuple;
-            this->set = other.set;
-            this->dict = other.dict;
+            // this->set = other.set;
+            // this->dict = other.dict;
         }
         return *this;
     }
@@ -831,62 +923,62 @@ class Entity {
         return *this;
     }
     
-    Entity& operator[](const Entity& key) {
-        switch(this->type) {
-            case LIST:
-                return this->access_vector(this->list, key);
-            case TUPLE:
-                // TODO(us): Confirm that we do check this
-                return this->access_vector(this->tuple, key);
-            case DICT:
-                return this->access_dict(key);
-            default:
-                throw std::invalid_argument("Operator [] invalid type");
-        }
-    }
+    // Entity& operator[](const Entity& key) {
+    //     switch(this->type) {
+    //         case LIST:
+    //             return this->access_vector(this->list, key);
+    //         case TUPLE:
+    //             // TODO(us): Confirm that we do check this
+    //             return this->access_vector(this->tuple, key);
+    //         case DICT:
+    //             return this->access_dict(key);
+    //         default:
+    //             throw std::invalid_argument("Operator [] invalid type");
+    //     }
+    // }
 
-    void append(const Entity& value) {
-        switch(this->type) {
-            case LIST:
-                this->vector_append(value, this->list);
-                break;
-            case TUPLE:
-                if (this->append_tuple == true) {
-                    this->vector_append(value, this->tuple);
-                }
-                else {
-                    throw std::invalid_argument("The tuple does not support item assignment");
-                }
-                break;
-            case SET:
-                this->set_append(value);
-                break;
-            default:
-                throw std::invalid_argument("Operator \'append\' invalid type");
-        }
-    }
+    // void append(const Entity& value) {
+    //     switch(this->type) {
+    //         case LIST:
+    //             this->vector_append(value, this->list);
+    //             break;
+    //         case TUPLE:
+    //             if (this->append_tuple == true) {
+    //                 this->vector_append(value, this->tuple);
+    //             }
+    //             else {
+    //                 throw std::invalid_argument("The tuple does not support item assignment");
+    //             }
+    //             break;
+    //         case SET:
+    //             this->set_append(value);
+    //             break;
+    //         default:
+    //             throw std::invalid_argument("Operator \'append\' invalid type");
+    //     }
+    // }
 
-    void remove(Entity element) {
-        switch (this->type) {
-            case LIST:
-                this->vector_remove(element, this->list);
-                break;
-            case SET:
-                this->set_remove(element);
-            default:
-                throw std::invalid_argument("Operator \'remove\' for invalid type");
+    // void remove(Entity element) {
+    //     switch (this->type) {
+    //         case LIST:
+    //             this->vector_remove(element, this->list);
+    //             break;
+    //         case SET:
+    //             this->set_remove(element);
+    //         default:
+    //             throw std::invalid_argument("Operator \'remove\' for invalid type");
 
-        }
-    }
+    //     }
+    // }
 
-    Entity pop(Entity element) {
-        switch (this->type) {
-            case DICT:
-                return this->dict_pop(element);
-            default:
-                throw std::invalid_argument("Operator \'pop\' for invalid type");                
-        }
-    }
+    // Entity pop(Entity element) {
+    //     switch (this->type) {
+    //         case DICT:
+    //             return this->dict_pop(element);
+    //         default:
+    //             throw std::invalid_argument("Operator \'pop\' for invalid type");                
+    //     }
+    // }
 
     Entity vector_count(std::vector<Entity>& vector) {
         return Entity(INT, std::to_string(vector.size()));
@@ -937,90 +1029,79 @@ class Entity {
         return vector[index_value];
     }
 
+    // TODO(us): función keys del diccionario
+
     // TODO(us): poner en documentación que si accede algo ilegal, se crea uno
-    Entity& access_dict(const Entity& key) {
-        auto found_key = this->dict.find(key);
-        if (found_key == this->dict.end()) {
-           this->dict[key] = Entity(NONE, "NULL");
-        }
+    // Entity& access_dict(const Entity& key) {
+    //     auto found_key = this->dict.find(key);
+    //     if (found_key == this->dict.end()) {
+    //        this->dict[key] = Entity(NONE, "NULL");
+    //     }
 
-        return this->dict[key];
-    }
+    //     return this->dict[key];
+    // }
 
-    Entity dict_in(Entity key) {
-        if (this->type != DICT) {
-            throw std::invalid_argument("Invalid operation \'in\' for non dictionary");
-        }
+    // Entity dict_in(Entity key) {
+    //     if (this->type != DICT) {
+    //         throw std::invalid_argument("Invalid operation \'in\' for non dictionary");
+    //     }
 
-        auto found_key = this->dict.find(key);
-        if (found_key == this->dict.end()) {
-           return Entity(INT, "0");  // False
-        }
-        return Entity(INT, "1");  // True
-    }
+    //     auto found_key = this->dict.find(key);
+    //     if (found_key == this->dict.end()) {
+    //        return Entity(INT, "0");  // False
+    //     }
+    //     return Entity(INT, "1");  // True
+    // }
 
-    Entity dict_pop(Entity key) {
-        auto it = this->dict.find(key);
-        if (it != this->dict.end()) {
-            Entity value = it->second;
-            this->dict.erase(it);
-            return value;
-        }
-        return Entity(NONE, "NULL");
-    }
+    // Entity dict_pop(Entity key) {
+    //     auto it = this->dict.find(key);
+    //     if (it != this->dict.end()) {
+    //         Entity value = it->second;
+    //         this->dict.erase(it);
+    //         return value;
+    //     }
+    //     return Entity(NONE, "NULL");
+    // }
     
-    Entity dict_count() {
-        return Entity(INT, std::to_string(this->dict.size()));
-    }
+    // Entity dict_count() {
+    //     return Entity(INT, std::to_string(this->dict.size()));
+    // }
     
-    Entity set_count() {
-        return Entity(INT, std::to_string(this->set.size()));
-    }
+    // Entity set_count() {
+    //     return Entity(INT, std::to_string(this->set.size()));
+    // }
 
-    void set_remove(Entity element) {
-        this->set.erase(element);
-    }
+    // void set_remove(Entity element) {
+    //     this->set.erase(element);
+    // }
 
-    void set_append(Entity value) {
-        this->set.insert(value);
-    }
+    // void set_append(Entity value) {
+    //     this->set.insert(value);
+    // }
 
-    Entity set_in(Entity value) {
-        auto result = this->set.find(value);
-        if (result != this->set.end()){
-            return Entity(INT, "1");
-        }
-        return Entity(INT, "0");
-    }
+    // Entity set_in(Entity value) {
+    //     auto result = this->set.find(value);
+    //     if (result != this->set.end()){
+    //         return Entity(INT, "1");
+    //     }
+    //     return Entity(INT, "0");
+    // }
     
-    Iterator iter(){
-        return Iterator(this);
-    }
+    // Entity iter(){
+    //     return Entity(ITERATOR, Entity::Iterator(this));
+    // }
 
-    Iterator begin() {
-        return Iterator(this);
-    }
+    // Entity begin() {
+    //     return Entity(ITERATOR, Entity::Iterator(this));
+    // }
 
-    Iterator end() {
-        Iterator it(this);
-        switch (this->type) {
-            case LIST:
-                it.list_iter = this->list.end();
-                break;
-            case TUPLE:
-                it.tuple_iter = this->tuple.end();
-                break;
-            case SET:
-                it.set_iter = this->set.end();
-                break;
-            case DICT:
-                it.dict_iter = this->dict.end();
-                break;
-            default:
-                throw std::runtime_error("Unsupported type for iterator");
-        }
-        return it;
-    }
+    // void next(){
+    //     this->iterator.next();
+    // }
+
+    // bool is_end() {
+    //     return !(this->iterator.has_next());
+    // }
 
     // TODO(us): +, -... of all the data structures (check if they are okay)
 };

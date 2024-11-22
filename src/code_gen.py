@@ -23,9 +23,6 @@ class CodeGenerator:
         self.main_existing_variables = {}
         self.func_existing_variables = {}
         self.class_existing_attributes = {}
-        self.main_existing_iterators = {}
-        self.func_existing_iterators = {}
-        self.class_existing_attributes_iterators = {}
     
     def generate_code(self):
         # Get code ready
@@ -274,10 +271,12 @@ class CodeGenerator:
         iterable = self.get_cpp_value(iterable_node)
 
         # TODO(us): check if this works in c++ for our iterator 
-        self.append_text("c", f"for (auto& {cpp_iterator} : {iterable}.iter()) {{\n")
+        self.append_text("c", f"{cpp_iterator} = {iterable}.iter();\n")
+        self.append_text("c", f"while (!{cpp_iterator}.is_end()) {{\n")
         
         loop_body = node.children[loop_body_index]
         self.generate_code_recv(loop_body)
+        self.append_text("c", f"{cpp_iterator}.next()\n")
         self.append_text("c", "}\n")
 
     def find_parameters(self, node):
@@ -408,7 +407,7 @@ class CodeGenerator:
         if function_name == "type":
             if len(parameters) != 1:
                 raise ValueError("type() expects exactly one argument.")
-            return f"{parameters[0]}.type()"
+            return f"{parameters[0]}.type_py()"
         elif function_name == "sum":
             if len(parameters) == 1:
                 return f"{parameters[0]}.sum()"
@@ -433,6 +432,22 @@ class CodeGenerator:
             if len(parameters) != 1:
                 raise ValueError("next() expects exactly one argument.")
             return f"{parameters[0]}.next()"
+        elif function_name == "append": # TODO(us): implement element.method
+            if len(parameters) != 1:
+                raise ValueError("append() expects exactly one argument.")
+            return f".append({parameters[0]})"
+        elif function_name == "remove": # TODO(us): implement element.method
+            if len(parameters) != 1:
+                raise ValueError("remove() expects exactly one argument.")
+            return f".remove({parameters[0]})"
+        elif function_name == "pop": # TODO(us): implement element.method
+            if len(parameters) != 1:
+                raise ValueError("pop() expects exactly one argument.")
+            return f".pop({parameters[0]})"
+        elif function_name == "count": # TODO(us): implement element.method
+            if len(parameters) != 0:
+                raise ValueError("count() does not need arguments.")
+            return f".count({parameters[0]})"
         elif function_name in ["int", "float", "str", "bool"]:
             if len(parameters) != 1:
                 raise ValueError(f"{function_name}() expects exactly one argument.")

@@ -1,50 +1,45 @@
 #include "entity.hpp"
 
-
-
 #include <cmath>
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include <unordered_map>
-#include <unordered_set>
+// #include <unordered_map>
+// #include <unordered_set>
 #include <vector>
 #include <algorithm>
 
 #ifndef ENTITY_ITERATOR
 #define ENTITY_ITERATOR
 
-class Entity;
-
+class Iterator;
 class Iterator{
-  public:
-    friend class Entity;
-  
+  friend class Entity;
   private:
+    int ite_type;
     Entity* object;
-    int type;
     std::vector<Entity>::iterator list_iter;
     std::vector<Entity>::iterator list_end;
     std::vector<Entity>::iterator tuple_iter;
     std::vector<Entity>::iterator tuple_end;
-    std::unordered_set<Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator set_iter;
-    std::unordered_set<Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator set_end;
+    // std::unordered_set<Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator set_iter;
+    // std::unordered_set<Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator set_end;
     std::unordered_map<Entity, Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator dict_iter;
     std::unordered_map<Entity, Entity, Entity::HashFunction, Entity::EqualsComparator>::iterator dict_end;
 
   public:
     Iterator() {
-        this->type = INT;
+        this->ite_type = INT;
         this->object = NULL;
     }
     Iterator(Entity* object) {
-        this->type = object->get_type();
+        this->ite_type = object->get_type();
         this->object = object;
         this->initialize_iterator();
     }
 
     void initialize_iterator() {
-        switch (this->type) {
+        switch (this->ite_type) {
             case LIST:
                 this->list_iter = this->object->list.begin();
                 this->list_end = this->object->list.end();
@@ -67,7 +62,7 @@ class Iterator{
     }
 
     Entity next() {
-      switch(this->type) {
+      switch(this->ite_type) {
         case LIST:
             return *this->list_iter++;
         case TUPLE:
@@ -82,7 +77,7 @@ class Iterator{
     }
 
     bool has_next() const {
-        switch (this->type) {
+        switch (this->ite_type) {
             case LIST:
                 return this->list_iter != this->list_end;
             case TUPLE:

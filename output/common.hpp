@@ -8,5 +8,6 @@ enum type_values{
     SET,
     DICT,
     CLASS,
+    ITERATOR,
     BOOL
 };
