@@ -23,6 +23,7 @@ class CodeGenerator:
         self.main_existing_variables = {}
         self.func_existing_variables = {}
         self.class_existing_attributes = {}
+        self.data_structure_count = 0
     
     def generate_code(self):
         # Get code ready
@@ -334,36 +335,20 @@ class CodeGenerator:
 
     # TODO(us): revisar lo de si está true no (para poder agregarle a tupla)
     def handle_data_structure(self, elements, var_type):
-        if self.in_function:
-            vector = self.func_existing_variables
-        else:
-            vector = self.main_existing_variables
 
-        if var_type == "list" or var_type == "tuple":
-            serialized_value = [self.get_cpp_value(el) for el in elements]
-        elif var_type == "set":
-            serialized_value = {self.get_cpp_value(el) for el in elements}
+        index = self.data_structure_count
+        self.data_structure_count += 1
+
+        self.append_text("v", f"Entity {var_type}_{index}({var_type.upper()}, \"\");\n")
+        if var_type in ["list", "tuple", "set"]:
+            for el in elements:
+                cpp_element = self.get_cpp_value(el)
+                self.append_text("c", f"{var_type}_{index}.append({cpp_element});\n")
         elif var_type == "dict":
-            serialized_value = {self.get_cpp_value(k): self.get_cpp_value(v) for k, v in elements.items()}
-        else:
-            raise ValueError(f"Unsupported data structure type: {var_type}")
-
-        if serialized_value in vector:
-            index = vector.index(serialized_value)
-        else:
-            index = len(vector)
-            vector.append(serialized_value)
-
-            self.append_text("v", f"Entity {var_type}_{index}({var_type.upper()}, \"\");\n")
-            if var_type in ["list", "tuple", "set"]:
-                for el in elements:
-                    cpp_element = self.get_cpp_value(el)
-                    self.append_text("c", f"{var_type}_{index}.append({cpp_element});\n")
-            elif var_type == "dict":
-                for key, value in elements.items():
-                    cpp_key = self.get_cpp_value(key)
-                    cpp_value = self.get_cpp_value(value)
-                    self.append_text("c", f"{var_type}_{index}[{cpp_key}] = {cpp_value};\n")
+            for key, value in elements.items():
+                cpp_key = self.get_cpp_value(key)
+                cpp_value = self.get_cpp_value(value)
+                self.append_text("c", f"{var_type}_{index}[{cpp_key}] = {cpp_value};\n")
 
         return f"{var_type}_{index}"
 
