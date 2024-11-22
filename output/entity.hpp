@@ -701,8 +701,8 @@ class Entity {
 
     // Comparison operator_types
     Entity operator==(const Entity& other) const {
-        if(this->type == INT || this->type == DOUBLE || this->type == STRING) {
-            bool result = this->value == other.value;
+        if((this->type == INT || this->type == DOUBLE) && (other.type == INT || other.type == DOUBLE)) {
+            bool result = (std::stod(this->value) == std::stod(other.value));
             if (result) {
                 return Entity(INT, "1");
             } else { 
@@ -710,7 +710,15 @@ class Entity {
             }
         } else if (this->type != other.type) {
             return Entity(INT, "0");
-        } else if (this->type == LIST) {
+        } else if (this->type == STRING) {
+            bool result = this->value == other.value;
+            if (result) {
+                return Entity(INT, "1");
+            } else { 
+                return Entity(INT, "0");
+            }
+        }
+        else if (this->type == LIST) {
             bool result = this->list == other.list;
             if (result) {
                 return Entity(INT, "1");
@@ -744,31 +752,28 @@ class Entity {
                 return Entity(INT, "1");
             } else { 
                 return Entity(INT, "0");
-         }
+            }
         }
-        
+        return Entity(INT, "0");  
     }
 
     Entity operator!=(const Entity& other) const {
-        if (this->type == other.type) {
-            bool result = this->value != other.value;
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
+        Entity result = (*this == other);
+        if (result.value == "1") {
+            result.value = "0";
+        } else { // result.value == 0
+            result.value = "1";
         }
-        throw std::invalid_argument("Invalid operation for the given types with !=.");
+        return result;
     }
 
     Entity operator<(const Entity& other) const {
-        if (this->type != other.type || this->) {
+        if (this->type != other.type || this->type == DICT) {
             throw std::invalid_argument("Invalid operation for the given types with <.");    
         }
 
-        bool result = false;
         if (this->type == INT || this->type == DOUBLE) {
-            result =  std::stod(this->value) < std::stod(other.value);
+            bool result =  std::stod(this->value) < std::stod(other.value);
             if (result) {
                 return Entity(INT, "1");
             } else { 
@@ -789,61 +794,50 @@ class Entity {
             return Entity(INT, "1");
         }
 
-        if (this->type =)
+        // TODO(us): verify is this is correct for python:
+        if (this->type == LIST) {
+            return Entity(INT, std::to_string((int)(this->list < other.list)));
+        }
+
+        if (this->type == TUPLE) {
+            return Entity(INT, std::to_string((int)(this->tuple < other.tuple)));
+        }
+
+        if (this->type == SET) {
+            return Entity(INT, std::to_string((int)(this->set < other.set)));
+        }
     }
 
     Entity operator>(const Entity& other) const {
-        if (this->type != other.type) {
-            throw std::invalid_argument("Invalid operation for the given types with >.");    
-        }
-
-        bool result = false;
-        if (this->type == INT || this->type == DOUBLE) {
-        
-           result = std::stod(this->value) > std::stod(other.value);
-           if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
-        }
-
-        if (this->type == STRING) {
-            // TODO(us): check this
-            int i, j = 0;
-            while (i < this->value.length() && j < other.value.length()) {
-                if (this->value[i] < other.value[j]) {
-                    return Entity(INT, "0");
-                }
-                ++i;
-                ++j;
-            }
+        bool result1 = (*this == other).is_true();
+        bool result2 = (*this < other).is_true();
+        bool result = (result1 || result2);
+        if (result) {
+           return Entity(INT, "0");
+        } else {
             return Entity(INT, "1");
         }
+        
     }
 
     Entity operator<=(const Entity& other) const {
-        if (this->type == other.type) {
-           bool result = std::stod(this->value) <= std::stod(other.value);
-           if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
+        bool result1 = (*this == other).is_true();
+        bool result2 = (*this < other).is_true();
+        bool result = (result1 || result2);
+        if (result) {
+           return Entity(INT, "1");
+        } else {
+            return Entity(INT, "0");
         }
-        throw std::invalid_argument("Invalid operation for the given types with <=.");
     }
 
     Entity operator>=(const Entity& other) const {
-        if (this->type == other.type) {
-            bool result = std::stod(this->value) >= std::stod(other.value);
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
+        bool less_than = (*this < other).is_true();
+        if (!less_than) {
+           return Entity(INT, "1");
+        } else {
+            return Entity(INT, "0");
         }
-        throw std::invalid_argument("Inalid operation for he given types with >=.");
     }
 
     Entity operator!() const {
