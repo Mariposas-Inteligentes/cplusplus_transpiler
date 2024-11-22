@@ -268,7 +268,7 @@ class CodeGenerator:
 
         if cpp_iterator not in self.func_existing_variables:
             self.func_existing_variables[cpp_iterator] = True
-            self.append_text("v", f"Entity {cpp_iterator};\n")
+            self.append_text("v", f"Entity {cpp_iterator} = Entity(INT, \"0\");\n")
 
         iterable_node = node.children[iterable_index]
         iterable = self.get_cpp_value(iterable_node)
