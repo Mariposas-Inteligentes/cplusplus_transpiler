@@ -2,7 +2,6 @@
 #define ENTITY
 
 #include "common.hpp"
-// #include "iterator.hpp" // TODO(us): remove circular dependency
 
 #include <cmath>
 #include <iostream>
@@ -16,7 +15,6 @@
 // TODO(us): Pass some public methods to private
 class Entity {
   public:
-    // friend class Iterator;
     friend std::ostream& operator<<(std::ostream& os, Entity entity) {
         os << entity.get_value();
         return os;
@@ -717,37 +715,30 @@ class Entity {
             } else { 
                 return Entity(INT, "0");
             }
-        }
-        else if (this->type == LIST) {
-            bool result = this->list == other.list;
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
         } else if (this->type == LIST) {
-            bool result = this->list == other.list;
+            bool result = this->list == other.list;  // TODO(us): hacer propio
+            // bool result = this->compare_lists(this->list, other.list);
             if (result) {
                 return Entity(INT, "1");
             } else { 
                 return Entity(INT, "0");
             }
         }  else if (this->type == SET) {
-            bool result = this->set == other.set;
+            bool result = this->set == other.set;  // TODO(us): hacer propio
             if (result) {
                 return Entity(INT, "1");
             } else { 
                 return Entity(INT, "0");
             }
         } else if (this->type == DICT) {
-            bool result = this->dict == other.dict;
+            bool result = this->dict == other.dict;  // TODO(us): hacer propio
             if (result) {
                 return Entity(INT, "1");
             } else { 
                 return Entity(INT, "0");
             }
         } else if (this->type == TUPLE) {
-            bool result = this->tuple == other.tuple;
+            bool result = this->tuple == other.tuple;  // TODO(us): hacer propio
             if (result) {
                 return Entity(INT, "1");
             } else { 
@@ -772,12 +763,14 @@ class Entity {
             throw std::invalid_argument("Invalid operation for the given types with <.");    
         }
 
+        Entity less_than;
+
         if (this->type == INT || this->type == DOUBLE) {
             bool result =  std::stod(this->value) < std::stod(other.value);
             if (result) {
-                return Entity(INT, "1");
+                less_than = Entity(INT, "1");
             } else { 
-                return Entity(INT, "0");
+                less_than = Entity(INT, "0");
             }
         }
 
@@ -786,26 +779,28 @@ class Entity {
             int i, j = 0;
             while (i < this->value.length() && j < other.value.length()) {
                 if (this->value[i] > other.value[j]) {
-                    return Entity(INT, "0");
+                    less_than = Entity(INT, "0");
                 }
                 ++i;
                 ++j;
             }
-            return Entity(INT, "1");
+            less_than = Entity(INT, "1");
         }
 
         // TODO(us): verify is this is correct for python:
         if (this->type == LIST) {
-            return Entity(INT, std::to_string((int)(this->list < other.list)));
+            less_than = Entity(INT, std::to_string((int)(this->list < other.list)));
         }
 
         if (this->type == TUPLE) {
-            return Entity(INT, std::to_string((int)(this->tuple < other.tuple)));
+            less_than = Entity(INT, std::to_string((int)(this->tuple < other.tuple)));
         }
 
         if (this->type == SET) {
-            return Entity(INT, std::to_string((int)(this->set < other.set)));
+            less_than = Entity(INT, std::to_string((int)(this->set < other.set)));
         }
+
+        return less_than;
     }
 
     Entity operator>(const Entity& other) const {

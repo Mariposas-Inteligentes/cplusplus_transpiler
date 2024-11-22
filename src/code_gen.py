@@ -276,7 +276,7 @@ class CodeGenerator:
         
         loop_body = node.children[loop_body_index]
         self.generate_code_recv(loop_body)
-        self.append_text("c", f"{cpp_iterator}.next()\n")
+        self.append_text("c", f"{cpp_iterator}.next();\n")
         self.append_text("c", "}\n")
 
     def find_parameters(self, node):
@@ -334,7 +334,10 @@ class CodeGenerator:
 
     # TODO(us): revisar lo de si está true no (para poder agregarle a tupla)
     def handle_data_structure(self, elements, var_type):
-        vector = self.global_vector
+        if self.in_function:
+            vector = self.func_existing_variables
+        else:
+            vector = self.main_existing_variables
 
         if var_type == "list" or var_type == "tuple":
             serialized_value = [self.get_cpp_value(el) for el in elements]
@@ -351,7 +354,7 @@ class CodeGenerator:
             index = len(vector)
             vector.append(serialized_value)
 
-            self.append_text("g", f"Entity {var_type}_{index}({var_type.upper()}, \"\");\n")
+            self.append_text("v", f"Entity {var_type}_{index}({var_type.upper()}, \"\");\n")
             if var_type in ["list", "tuple", "set"]:
                 for el in elements:
                     cpp_element = self.get_cpp_value(el)
