@@ -458,6 +458,14 @@ class CodeGenerator:
         value2 = self.get_cpp_value(node.children[2])
         return f"{variable}.slice({value1}, {value2})" 
 
+    def handle_access_variable(self, node):
+        variable = self.get_cpp_value(node.children[0])
+        value = self.get_cpp_value(node.children[1])
+        return f"{variable}[{value}]"
+
+    def process_attribute_method(self, node):
+        pass
+
     def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
             return self.handle_literal(value_node.value, 'int')
@@ -504,6 +512,10 @@ class CodeGenerator:
             return self.handle_before_slice(value_node)
         elif value_node.n_type == "AccessVarSlice":
             return self.handle_access_slice(value_node)
+        elif value_node.n_type == "AccessVariable":
+            return self.handle_access_variable(value_node)
+        elif value_node.n_type == "AttributeMethod":
+            return self.process_attribute_method(value_node)
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
     
@@ -594,8 +606,7 @@ class CodeGenerator:
             pass # Global values
 
         elif node.n_type == 'AccessVariable':
-            # TODO(us): hacer
-            # Self -> needs to be function attribute
+            self.handle_access_variable(node)
             pass
 
         elif node.n_type == 'AfterVarSlice':
@@ -656,7 +667,7 @@ class CodeGenerator:
             self.process_variable_assignment(node)
 
         elif node.n_type == 'AttributeMethod':
-            # TODO(us): hacer
+            self.process_attribute_method(node)
             pass
 
         elif node.n_type == 'ClassDefinition':
