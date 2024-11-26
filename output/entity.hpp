@@ -915,6 +915,8 @@ class Entity {
                 return this->set_count();
             case DICT:
                 return this->dict_count();
+            case STRING:
+                return Entity(INT, std::to_string(this->value.size()));
             default:
                 throw std::invalid_argument("Invalid operation for 'in' with the given types.");
 
@@ -1000,6 +1002,50 @@ class Entity {
             default:
                 throw std::invalid_argument("Operator [] invalid type");
         }
+    }
+
+    Entity slice(Entity key_1, Entity key_2) {
+        if ((key_1.type != INT && key_1.type != NONE)|| (key_2.type != INT && key_2.type != NONE)) {
+            throw std::invalid_argument("Invalid operation slice with the given arguments.");
+        }
+        if (this->type != LIST && this->type != STRING) {
+            throw std::invalid_argument("Invalid operation slice with the given types");
+
+        }
+
+        // Check for none or negatives
+        if (key_1.type == NONE) {
+            key_1 = Entity(INT, "0");
+        }
+
+        if (key_2.type == NONE) {
+            key_2 = Entity(INT, this->count().value);
+        }
+
+        if(std::stoi(key_1.value) < 0) {
+            key_1 = Entity(INT, this->count().value) - key_1;
+        } 
+        
+        if(std::stoi(key_2.value) < 0) {
+            key_2 = Entity(INT, this->count().value) - key_2;
+        }
+        int start = std::stoi(key_1.value);
+        int finish = std::stoi(key_2.value);
+
+        Entity result = Entity(this->type, "");
+        switch(this->type) {
+            case LIST:
+                for (int i = start; i < finish; ++i){
+                    result.value += this->value[i];
+                }
+                break;
+            case STRING:
+                for (int i = start; i < finish; ++i) {
+                    result.list.push_back(this->list[i]);
+                }
+                break;
+        }
+        return result;
     }
 
     void append(const Entity& value) {

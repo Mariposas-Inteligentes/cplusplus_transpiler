@@ -437,6 +437,7 @@ def p_variable(p):
                 | variable period_operator
                 | variable OPEN_BRACKET access_content CLOSED_BRACKET 
                 | variable OPEN_BRACKET access_content COLON access_content CLOSED_BRACKET
+                | variable OPEN_BRACKET COLON access_content CLOSED_BRACKET
                 | variable OPEN_BRACKET access_content COLON CLOSED_BRACKET'''
     
     if len(p) == 2:
@@ -446,9 +447,12 @@ def p_variable(p):
     elif len(p) == 5:
         p[0] = Node(n_type="AccessVariable", children=[p[1], p[3]])
     elif len(p) == 6:
-        p[0] = Node(n_type="AccessVarList", children=[p[1], p[3]])
+        if p[3] == ':':
+            p[0] = Node(n_type="AfterVarSlice", children=[p[1], p[4]])
+        else:
+            p[0] = Node(n_type="BeforeVarSlice", children=[p[1], p[3]])
     elif len(p) == 7:
-        p[0] = Node(n_type="AccessVarList", children=[p[1], p[3], p[5]])
+        p[0] = Node(n_type="AccessVarSlice", children=[p[1], p[3], p[5]])
     
 
 def p_math_expression(p):

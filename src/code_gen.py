@@ -34,14 +34,14 @@ class CodeGenerator:
         self.code = "int python_root() {\n" + self.code
 
         self.code = self.functions + self.code
-        self.code = "// Functions\n" + self.code
+        self.code = "\n// Functions\n" + self.code
         self.code = self.classes + self.code
-        self.code = "// Classes\n" + self.code
+        self.code = "\n// Classes\n" + self.code
         self.code = "Entity bool_true(INT, \"1\");\n" + self.code
         self.code = "Entity bool_false(INT, \"0\");\n" + self.code
         self.code = "Entity none(NONE, \"NULL\");\n" + self.code
         self.code = self.globals + self.code
-        self.code = "// Global variables\n" + self.code
+        self.code = "\n// Global variables\n" + self.code
         
         self.code = "#include \"entity.hpp\"\n" + self.code
         self.code = "#include <string>\n" + self.code
@@ -576,7 +576,7 @@ class CodeGenerator:
             # Self -> needs to be function attribute
             pass
 
-        elif node.n_type == 'AccessVarList':
+        elif node.n_type == 'AccessVarSlice':
             # TODO(us): hacer
             # Self -> needs to be function attribute
             pass
@@ -600,28 +600,19 @@ class CodeGenerator:
             pass # handled by math expression
 
         if node.n_type == 'List':
-            list_elements = node.children
-            self.handle_data_structure(list_elements, "list")
+           pass # handled in variables
 
         elif node.n_type == 'Tuple':
-            tuple_elements = node.children
-            self.handle_data_structure(tuple_elements, "tuple")
+            pass # handled in variables
 
         elif node.n_type == 'Set':
-            set_elements = node.children
-            self.handle_data_structure(set_elements, "set")
+            pass # handled in variables
 
         elif node.n_type == 'Dictionary':
-            dict_elements = {}
-            for i in range(0, len(node.children), 2):
-                key = node.children[i]
-                value = node.children[i + 1]
-                dict_elements[key] = value
-            self.handle_data_structure(dict_elements, "dict")
+            pass # handled in variables
 
         elif node.n_type in ['EmptyList', 'EmptyDictionary']:
-            empty_type = 'list' if node.n_type == 'EmptyList' else 'dict'
-            self.handle_data_structure([], empty_type)
+            pass # handled in variables
 
         elif node.n_type == 'Print':
             self.process_print(node)
