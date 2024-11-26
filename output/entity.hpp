@@ -221,10 +221,11 @@ class Entity {
             } else {
                 result = (first[i] < second[i]);
             }
-            if (result.value == "1") {
-                if (!equality) return Entity(INT, "1"); // First is smaller so it is not smaller
-            } else {
-                if (equality) return Entity(INT, "0"); 
+            if (result.value == "1" && !equality) {
+                return Entity(INT, "1"); // First is smaller so it is not smaller
+            } else if (equality && result.value == "0") {
+                return Entity(INT, "0");
+            } else if (!equality && !((first[i] == second[i]).is_true())) {
                 return Entity(INT, "0");
             }
         }

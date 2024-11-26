@@ -33,38 +33,27 @@ class CodeGenerator:
         # function for all normal code
         self.code = "int python_root() {\n" + self.code
 
-        # Always define true and false
-        self.globals += "Entity bool_true(INT, \"1\");\n"
-        self.globals += "Entity bool_false(INT, \"0\");\n"
-        self.globals += "Entity none(NONE, \"NULL\");\n"
-
-        # Append necessary includes
-        self.code = "#include \"functions.hpp\"\n" + self.code
-        self.code = "#include \"classes.hpp\"\n" + self.code
+        self.code = self.functions + self.code
+        self.code = "// Functions\n" + self.code
+        self.code = self.classes + self.code
+        self.code = "// Classes\n" + self.code
+        self.code = "Entity bool_true(INT, \"1\");\n" + self.code
+        self.code = "Entity bool_false(INT, \"0\");\n" + self.code
+        self.code = "Entity none(NONE, \"NULL\");\n" + self.code
+        self.code = self.globals + self.code
+        self.code = "// Global variables\n" + self.code
+        
         self.code = "#include \"entity.hpp\"\n" + self.code
         self.code = "#include <string>\n" + self.code
         self.code = "#include <iostream>\n" + self.code
         self.code = "#include <stdexcept>\n" + self.code
+        
         self.code += "return 0;\n}\n"
         self.code += "int main() {\npython_root();\n}"
-        self.globals = "#include \"entity.hpp\"\n\n" + self.globals
-        self.functions = "#include \"globals.hpp\"\n\n" + self.functions
-        
-        self.classes = "#include \"entity.hpp\"\n\n" + self.classes
-        self.classes = "#include \"globals.hpp\"\n" + self.classes
-        self.classes = "#include <string>\n" + self.classes
-        self.classes = "#include <iostream>\n" + self.classes
-        self.classes = "#include <stdexcept>\n" + self.classes
-
 
         self.code = self.indent_code(self.code)
-        self.functions = self.indent_code(self.functions)
-        self.classes = self.indent_code(self.classes)
 
         self.write_file("../output/main.cpp", self.code)
-        self.write_file("../output/functions.hpp", self.functions)
-        self.write_file("../output/globals.hpp", self.globals)
-        self.write_file("../output/classes.hpp", self.classes)
 
 
     def write_file(self, path, content):
@@ -286,6 +275,7 @@ class CodeGenerator:
         if node.children[0].n_type == "Parameter":
             parameters = f"Entity py_{node.children[0].value}"
             self.func_existing_variables[f"py_{node.children[0].value}"] = True
+            return parameters
         elif node.children[0].n_type == "ParameterList":
             # if we have several parameters with no asigned values
             if node.children[0].children[0].n_type == "ParameterList":
@@ -672,12 +662,12 @@ class CodeGenerator:
         for line in code.splitlines():
             stripped_line = line.strip()
             
-            if stripped_line.endswith("}"):
+            if stripped_line.endswith("}") or stripped_line.endswith("};"):
                 indent_count -= 1
             
             new_code += "\n" + "\t" * indent_count + line
             
-            if stripped_line.endswith("{"):
+            if stripped_line.endswith("{") or ("public:" in stripped_line) or ("private:" in stripped_line) or ("protected:" in stripped_line):
                 indent_count += 1
 
         return new_code.lstrip("\n")
