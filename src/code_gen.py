@@ -442,6 +442,21 @@ class CodeGenerator:
             return f"{cpp_function_name}({param_list})"
 
 
+    def handle_after_slice(self, node):
+        variable = self.get_cpp_value(node.children[0])
+        value = self.get_cpp_value(node.children[1])
+        return f"{variable}.slice(none, {value})"
+
+    def handle_before_slice(self, node):
+        variable = self.get_cpp_value(node.children[0])
+        value = self.get_cpp_value(node.children[1])
+        return  f"{variable}.slice({value}, none)"  
+
+    def handle_access_slice(self, node):
+        variable = self.get_cpp_value(node.children[0])
+        value1 = self.get_cpp_value(node.children[1])
+        value2 = self.get_cpp_value(node.children[2])
+        return f"{variable}.slice({value1}, {value2})" 
 
     def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
@@ -483,11 +498,18 @@ class CodeGenerator:
             return self.handle_data_structure({}, 'dict')
         elif value_node.n_type == 'CallFunction':
             return self.process_function_call(value_node)
+        elif value_node.n_type == "AfterVarSlice":
+            return self.handle_after_slice(value_node)
+        elif value_node.n_type == "BeforeVarSlice":
+            return self.handle_before_slice(value_node)
+        elif value_node.n_type == "AccessVarSlice":
+            return self.handle_access_slice(value_node)
         else:
             raise ValueError(f"Unsupported value node type: {value_node.n_type}")
     
 
     def process_node(self, node):
+        # TODO(us): change in
         if node.n_type == 'Start':
             pass # Just used as a start point
 
@@ -576,9 +598,16 @@ class CodeGenerator:
             # Self -> needs to be function attribute
             pass
 
+        elif node.n_type == 'AfterVarSlice':
+            self.handle_after_slice(node)
+            pass
+
+        elif node.n_type == 'BeforeVarSlice':
+            self.handle_before_slice(node)
+            pass
+        
         elif node.n_type == 'AccessVarSlice':
-            # TODO(us): hacer
-            # Self -> needs to be function attribute
+            self.handle_access_slice(node)
             pass
 
         elif node.n_type == 'MathExpression':
