@@ -66,7 +66,7 @@ class CodeGenerator:
             f.write(content)
 
     def generate_code_recv(self, node):
-        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule', 'ClassDefinition']:
+        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule', 'ClassDefinition', 'VariableAssignment', 'CallFunction']:
             self.process_node(node)
         else:
             self.process_node(node)
