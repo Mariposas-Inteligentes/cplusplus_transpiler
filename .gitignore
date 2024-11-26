@@ -6,6 +6,7 @@ output/functions.hpp
 output/globals.hpp
 output/classes.hpp
 output/*.out
+output/*.exe
 *.gch
 
 # Testing

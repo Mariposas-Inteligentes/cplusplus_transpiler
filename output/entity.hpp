@@ -212,6 +212,60 @@ class Entity {
         return false;
     }
 
+     Entity compare_vectors(const std::vector<Entity>& first, const std::vector<Entity>& second, bool equality) const {
+        size_t min_size = std::min(first.size(), second.size());
+        for (size_t i = 0; i < min_size; ++i) {
+            Entity result = Entity(INT, "0"); 
+            if (equality) {
+                result = (first[i] == second[i]);
+            } else {
+                result = (first[i] < second[i]);
+            }
+            if (result.value == "1") {
+                if (!equality) return Entity(INT, "1"); // First is smaller so it is not smaller
+            } else {
+                if (equality) return Entity(INT, "0"); 
+                return Entity(INT, "0");
+            }
+        }
+        if (equality) {
+            return Entity(INT, (first.size() == second.size()) ? "1" : "0");
+        }
+        return Entity(INT, (first.size() < second.size()) ? "1" : "0");
+    }
+
+    Entity compare_sets(const std::set<Entity, Comparator>& first, const std::set<Entity, Comparator>& second, bool equality) const {
+        if (equality) {
+            if (first.size() != second.size()) return Entity(INT, "0");
+            auto it1 = first.begin(), it2 = second.begin();
+            while (it1 != first.end() && it2 != second.end()) {
+                if (!(*it1 == *it2).value.empty() && (*it1 == *it2).value != "1") return Entity(INT, "0");
+                ++it1;
+                ++it2;
+            }
+            return Entity(INT, "1");
+        } else {
+            return Entity(INT, std::lexicographical_compare(first.begin(), first.end(), second.begin(), second.end(), Comparator()) ? "1" : "0");
+        }
+    }
+
+    Entity compare_maps(const std::map<Entity, Entity, Comparator>& first, const std::map<Entity, Entity, Comparator>& second, bool equality) const {
+        if (equality) {
+            if (first.size() != second.size()) return Entity(INT, "0");
+            auto it1 = first.begin(), it2 = second.begin();
+            while (it1 != first.end() && it2 != second.end()) {
+                if (!((it1->first == it2->first).value.empty() && (it1->first == it2->first).value == "1")) return Entity(INT, "0");
+                if (!((it1->second == it2->second).value.empty() && (it1->second == it2->second).value == "1")) return Entity(INT, "0");
+                ++it1;
+                ++it2;
+            }
+            return Entity(INT, "1");
+        } else {
+            return Entity(INT, std::lexicographical_compare(first.begin(), first.end(), second.begin(), second.end(), Comparator()) ? "1" : "0");
+        }
+    }
+
+
   public:
     Entity() {
         this->type = NONE;
@@ -697,7 +751,10 @@ class Entity {
         return Entity(INT, (this->is_true() || other.is_true()) ? "1" : "0");
     }
 
-    // Comparison operator_types
+       
+
+
+
     Entity operator==(const Entity& other) const {
         if((this->type == INT || this->type == DOUBLE) && (other.type == INT || other.type == DOUBLE)) {
             bool result = (std::stod(this->value) == std::stod(other.value));
@@ -716,34 +773,13 @@ class Entity {
                 return Entity(INT, "0");
             }
         } else if (this->type == LIST) {
-            bool result = this->list == other.list;  // TODO(us): hacer propio
-            // bool result = this->compare_lists(this->list, other.list);
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
-        }  else if (this->type == SET) {
-            bool result = this->set == other.set;  // TODO(us): hacer propio
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
+             return compare_vectors(this->list, other.list, true);
+        } else if (this->type == SET) {
+            return compare_sets(this->set, other.set, true);
         } else if (this->type == DICT) {
-            bool result = this->dict == other.dict;  // TODO(us): hacer propio
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
+             return compare_maps(this->dict, other.dict, true);
         } else if (this->type == TUPLE) {
-            bool result = this->tuple == other.tuple;  // TODO(us): hacer propio
-            if (result) {
-                return Entity(INT, "1");
-            } else { 
-                return Entity(INT, "0");
-            }
+            return compare_vectors(this->tuple, other.tuple, true);
         }
         return Entity(INT, "0");  
     }
@@ -789,15 +825,19 @@ class Entity {
 
         // TODO(us): verify is this is correct for python:
         if (this->type == LIST) {
-            less_than = Entity(INT, std::to_string((int)(this->list < other.list)));
+            less_than = compare_vectors(this->list, other.list, false);
         }
 
         if (this->type == TUPLE) {
-            less_than = Entity(INT, std::to_string((int)(this->tuple < other.tuple)));
+            less_than = compare_vectors(this->tuple, other.tuple, false);
         }
 
         if (this->type == SET) {
-            less_than = Entity(INT, std::to_string((int)(this->set < other.set)));
+            less_than = compare_sets(this->set, other.set, false);
+        }
+
+        if (this->type == DICT) {
+            less_than = compare_maps(this->dict, other.dict, false);
         }
 
         return less_than;
