@@ -662,9 +662,12 @@ class CodeGenerator:
         for line in code.splitlines():
             stripped_line = line.strip()
             
-            if stripped_line.endswith("}") or stripped_line.endswith("};"):
+            if stripped_line.endswith("}"):
                 indent_count -= 1
             
+            if stripped_line.endswith("};"):
+                indent_count -= 2
+
             new_code += "\n" + "\t" * indent_count + line
             
             if stripped_line.endswith("{") or ("public:" in stripped_line) or ("private:" in stripped_line) or ("protected:" in stripped_line):
