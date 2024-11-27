@@ -66,7 +66,7 @@ class CodeGenerator:
             f.write(content)
 
     def generate_code_recv(self, node):
-        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule', 'ClassDefinition', 'VariableAssignment', 'CallFunction']:
+        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule', 'ClassDefinition', 'VariableAssignment', 'CallFunction', 'AttributeMethod']:
             self.process_node(node)
         else:
             self.process_node(node)
@@ -410,19 +410,19 @@ class CodeGenerator:
             if len(parameters) != 1:
                 raise ValueError("next() expects exactly one argument.")
             return f"{parameters[0]}.next()"
-        elif function_name == "append": # TODO(us): implement element.method
+        elif function_name == "append":
             if len(parameters) != 1:
                 raise ValueError("append() expects exactly one argument.")
             return f".append({parameters[0]})"
-        elif function_name == "remove": # TODO(us): implement element.method
+        elif function_name == "remove":
             if len(parameters) != 1:
                 raise ValueError("remove() expects exactly one argument.")
             return f".remove({parameters[0]})"
-        elif function_name == "pop": # TODO(us): implement element.method
+        elif function_name == "pop":
             if len(parameters) != 1:
                 raise ValueError("pop() expects exactly one argument.")
             return f".pop({parameters[0]})"
-        elif function_name == "count": # TODO(us): implement element.method
+        elif function_name == "count":
             if len(parameters) != 0:
                 raise ValueError("count() does not need arguments.")
             return f".count({parameters[0]})"
@@ -464,7 +464,9 @@ class CodeGenerator:
         return f"{variable}[{value}]"
 
     def process_attribute_method(self, node):
-        pass
+        variable = self.get_cpp_value(node.children[0])
+        value = self.get_cpp_value(node.children[1])
+        return f"{variable}{value}"
 
     def get_cpp_value(self, value_node):
         if value_node.n_type == 'IntegerLiteral':
@@ -667,7 +669,8 @@ class CodeGenerator:
             self.process_variable_assignment(node)
 
         elif node.n_type == 'AttributeMethod':
-            self.process_attribute_method(node)
+            value = self.process_attribute_method(node)
+            self.append_text("c", f"{value}\n")
             pass
 
         elif node.n_type == 'ClassDefinition':
