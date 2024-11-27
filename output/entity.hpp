@@ -667,7 +667,19 @@ class Entity {
                 return result;
             }
         }
-        throw std::invalid_argument("Invlid operation for the given types with -.");
+        throw std::invalid_argument("Invalid operation for the given types with -.");
+    }
+
+    Entity operator-() const {
+        if (this->type == INT) {
+            double result = -1 * std::stoi(this->value);
+            return Entity(DOUBLE, std::to_string(result));
+        }
+        if (this->type == DOUBLE) {
+            double result = -1.0 * std::stod(this->value);
+            return Entity(DOUBLE, std::to_string(result));
+        }
+        throw std::invalid_argument("Invalid operation for the given types with -.");
     }
 
     Entity operator*(const Entity& other) const {
@@ -751,10 +763,6 @@ class Entity {
     Entity operator||(const Entity& other) const {
         return Entity(INT, (this->is_true() || other.is_true()) ? "1" : "0");
     }
-
-       
-
-
 
     Entity operator==(const Entity& other) const {
         if((this->type == INT || this->type == DOUBLE) && (other.type == INT || other.type == DOUBLE)) {
