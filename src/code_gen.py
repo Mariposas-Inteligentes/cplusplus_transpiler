@@ -670,7 +670,7 @@ class CodeGenerator:
 
         elif node.n_type == 'AttributeMethod':
             value = self.process_attribute_method(node)
-            self.append_text("c", f"{value}\n")
+            self.append_text("c", f"{value};\n")
             pass
 
         elif node.n_type == 'ClassDefinition':
