@@ -15,6 +15,7 @@ src/testing_parser.py
 src/parser.out
 src/parsetab.py
 src/pruebas.cpp
+good_tests/
 
 
 .vscode/

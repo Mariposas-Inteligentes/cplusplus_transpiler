@@ -994,6 +994,8 @@ class Entity {
         switch(this->type) {
             case LIST:
                 return this->access_vector(this->list, key);
+            case STRING:
+                return this->access_string(this->value, key);
             case TUPLE:
                 // TODO(us): Confirm that we do check this
                 return this->access_vector(this->tuple, key);
@@ -1140,6 +1142,23 @@ class Entity {
         return vector[index_value];
     }
 
+    Entity& access_string(std::string& value, const Entity& index) {
+        if (index.type != INT){
+            throw std::invalid_argument("Operator [] invalid index type");
+        }
+        int index_value = std::stoi(index.value);
+        if (index_value < -1 * value.size() || index_value >= value.size()){
+            throw std::invalid_argument("Operator [] invalid index type");
+        }
+        if (index_value < 0) {
+            index_value = value.size() + index_value;
+        }
+        std::string result = "";
+        result += value[index_value];
+        this->list.push_back(Entity(STRING, result));
+        return this->list[this->list.size()-1];
+    }
+
     // TODO(us): función keys del diccionario
 
     // TODO(us): poner en documentación que si accede algo ilegal, se crea uno
@@ -1207,6 +1226,7 @@ class Entity {
     }
 
     void next(){
+        // TODO(nostros): It must return an antity with the thing
         this->iterator.next();
     }
 

@@ -66,7 +66,21 @@ class CodeGenerator:
             f.write(content)
 
     def generate_code_recv(self, node):
-        if node.n_type in ['IfRule', 'ElifRule', 'ElseRule', 'DefFunction', 'WhileLoop', 'ForLoop', 'TryRule', 'ExceptRule', 'ClassDefinition', 'VariableAssignment', 'CallFunction', 'AttributeMethod']:
+        if node.n_type in ['IfRule'
+                           , 'ElifRule'
+                           , 'ElseRule'
+                           , 'DefFunction'
+                           , 'WhileLoop'
+                           , 'ForLoop'
+                           , 'TryRule'
+                           , 'ExceptRule'
+                           , 'ClassDefinition'
+                           , 'VariableAssignment'
+                           , 'ReturnStatement'
+                           , 'CallFunction'
+                           , 'Print'
+                           , 'PrintDataStructs'
+                           , 'AttributeMethod']:
             self.process_node(node)
         else:
             self.process_node(node)
@@ -158,6 +172,16 @@ class CodeGenerator:
 
     def process_math_expression(self, node):
         components = [] # to store each operand
+        if node.children[0].n_type == 'MathSymbol':
+            if node.children[0].value == '-':
+                node.children[0] = Node(n_type = "Parenthesis")
+                node.children[0].children.append(Node(n_type = "IntegerLiteral", value = -1))
+                node.children[0].children.append(Node(n_type = 'MathSymbol', value = '*'))
+                node.children[0].children.append(node.children[1])
+                node.children.remove(node.children[1])
+
+            elif node.children[0].value == '+':
+                node.children.remove(node.children[0])
 
         for child in node.children:
             if child.n_type == 'MathSymbol': # child is an operator

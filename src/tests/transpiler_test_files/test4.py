@@ -8,6 +8,6 @@ def slices_ex():
 def string_ex():
     print("profe"[2:4])
     print("profe"[2:4] + "profe"[0:2] + "profe"[-1])
-  
+
 print(slices_ex())
 string_ex()

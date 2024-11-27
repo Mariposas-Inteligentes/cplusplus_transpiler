@@ -438,7 +438,14 @@ def p_variable(p):
                 | variable OPEN_BRACKET access_content CLOSED_BRACKET 
                 | variable OPEN_BRACKET access_content COLON access_content CLOSED_BRACKET
                 | variable OPEN_BRACKET COLON access_content CLOSED_BRACKET
-                | variable OPEN_BRACKET access_content COLON CLOSED_BRACKET'''
+                | variable OPEN_BRACKET access_content COLON CLOSED_BRACKET
+                | STRING OPEN_BRACKET access_content CLOSED_BRACKET 
+                | STRING OPEN_BRACKET access_content COLON access_content CLOSED_BRACKET
+                | STRING OPEN_BRACKET COLON access_content CLOSED_BRACKET
+                | STRING OPEN_BRACKET access_content COLON CLOSED_BRACKET'''
+    if len(p) > 3:
+        if isinstance(p[1], str) and (p[1][0] == "\"" or p[1][0] == "\'"):
+            p[1] =  Node(n_type = "StringLiteral", value = p[1])
     
     if len(p) == 2:
         p[0] = Node(n_type="VarName", value=p[1])
@@ -467,6 +474,8 @@ def p_math_expression(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
+        if p[1] == "not":
+            p[1] = "!"
         p[1] = Node(n_type="MathSymbol", value=p[1])
         if isinstance(p[2], Node) and p[2].n_type == 'MathExpression':
             p[2].children = [p[1]] + p[2].children
@@ -574,6 +583,12 @@ def p_logic_symbols(p):
                     | AND
                     | IN'''
     
+    if p[1] == "or":
+        p[1] = "||"
+    elif p[1] == 'and':
+        p[1] = "and"
+    # TODO(us): figure in out
+
     p[0] = Node(n_type="LogicSymbols", value=p[1])
 
 def p_cmp_symbols(p):
@@ -854,7 +869,7 @@ def p_for_rule(p):
 
 def p_for_rule_content(p):
     '''for_rule_content : call_function
-                        | VAR_FUNC_NAME
+                        | variable
                         | list
                         | tuple
                         | dictionary

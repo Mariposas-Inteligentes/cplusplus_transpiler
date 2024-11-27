@@ -1,4 +1,3 @@
-   
 def default_ex(a='hola'):
     return (a)
 
