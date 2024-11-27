@@ -81,18 +81,18 @@ class Entity {
             }
 
             Entity next() {
-            switch(this->ite_type) {
-                case LIST:
-                    return *this->list_iter++;
-                case TUPLE:
-                    return *this->tuple_iter++;
-                case SET:
-                    return *this->set_iter++;
-                case DICT:
-                    return this->dict_iter++->first;
-                default:
-                    throw std::runtime_error("Unsupported type for iterator");  
-                }
+                switch(this->ite_type) {
+                    case LIST:
+                        return *this->list_iter++;
+                    case TUPLE:
+                        return *this->tuple_iter++;
+                    case SET:
+                        return *this->set_iter++;
+                    case DICT:
+                        return this->dict_iter++->first;
+                    default:
+                        throw std::runtime_error("Unsupported type for iterator");  
+                    }
             }
 
             bool has_next() const {
@@ -1205,6 +1205,17 @@ class Entity {
         return Entity(INT, std::to_string(this->dict.size()));
     }
     
+    Entity keys() {
+        if (this->type != DICT) {
+            throw std::invalid_argument("Cannot call keys() to non dictionary");
+        }
+        Entity result = Entity(LIST, "");
+        for(auto it = this->dict.begin(); it != this->dict.end(); ++it) {
+            result.list.push_back(it->first);
+        }
+        return result;
+    }
+    
     Entity set_count() {
         return Entity(INT, std::to_string(this->set.size()));
     }
@@ -1233,9 +1244,8 @@ class Entity {
         return Entity(ITERATOR, Entity::Iterator(this));
     }
 
-    void next(){
-        // TODO(nostros): It must return an antity with the thing
-        this->iterator.next();
+    Entity next(){
+        return this->iterator.next();
     }
 
     bool is_end() {

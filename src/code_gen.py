@@ -432,13 +432,17 @@ class CodeGenerator:
             if len(parameters) != 1:
                 raise ValueError("remove() expects exactly one argument.")
             return f".remove({parameters[0]})"
+        elif function_name == "keys":
+            if len(parameters) != 0:
+                raise ValueError("keys() does not expects arguments.")
+            return f".keys()"
         elif function_name == "pop":
-            if len(parameters) != 1:
-                raise ValueError("pop() expects exactly one argument.")
+            if len(parameters) != 0:
+                raise ValueError("pop() does not expects arguments.")
             return f".pop({parameters[0]})"
         elif function_name == "count":
             if len(parameters) != 0:
-                raise ValueError("count() does not need arguments.")
+                raise ValueError("count() does not expects arguments.")
             return f".count({parameters[0]})"
         elif function_name in ["int", "float", "str", "bool"]:
             if len(parameters) != 1:
