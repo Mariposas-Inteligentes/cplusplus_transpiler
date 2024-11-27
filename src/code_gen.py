@@ -172,15 +172,24 @@ class CodeGenerator:
 
     def process_math_expression(self, node):
         components = [] # to store each operand
-
-        for child in node.children:
-            if child.n_type == 'MathSymbol': # child is an operator
-                components.append(child.value)
-            elif child.n_type == 'Parenthesis': # child is an operator
-                inner_expression = self.get_cpp_value(child.children[0]) 
+        
+        i_child = 0
+        while i_child in range(0, len(node.children)):
+            if node.children[i_child].n_type == 'MathSymbol': # child is an operator
+                components.append(node.children[i_child].value)
+            elif node.children[i_child].n_type == 'Parenthesis': # child is an operator
+                inner_expression = self.get_cpp_value(node.children[i_child].children[0]) 
                 components.append(f"({inner_expression})")
             else: # Normal operand
-                components.append(self.get_cpp_value(child))
+                if i_child+2 < len(node.children): # not the last one
+                    if node.children[i_child+1].n_type == 'MathSymbol' and node.children[i_child+1].value == 'in':
+                        components.append(f"{self.get_cpp_value(node.children[i_child+2])}.in({self.get_cpp_value(node.children[i_child])})")
+                        i_child += 2 # processed the value, in and next one
+                    else:
+                        components.append(self.get_cpp_value(node.children[i_child]))
+                else:
+                    components.append(self.get_cpp_value(node.children[i_child]))
+            i_child += 1
 
         # Join everything
         return " ".join(components)

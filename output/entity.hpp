@@ -903,7 +903,7 @@ class Entity {
                 case SET:
                     return this->set_in(container);
                 default:
-                    throw std::invalid_argument("Invalid operation for 'in' with the given types.");
+                    throw std::invalid_argument("Invalid operation 'in' with the given types.");
             }
         }
         throw std::invalid_argument("Invalid operation for 'in' with the given types.");
