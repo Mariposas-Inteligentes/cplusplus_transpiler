@@ -57,6 +57,19 @@ class Entity {
                 this->initialize_iterator();
             }
 
+            void operator= (const Iterator& other) {
+                this->ite_type = other.ite_type;
+                this->object = other.object;
+                this->list_iter = other.list_iter;
+                this->list_end = other.list_end;
+                this->tuple_iter = other.tuple_iter;
+                this->tuple_end = other.tuple_end;
+                this->set_iter = other.set_iter;
+                this->set_end = other.set_end;
+                this->dict_iter = other.dict_iter;
+                this->dict_end = other.dict_end;
+            }
+
             void initialize_iterator() {
                 switch (this->ite_type) {
                     case LIST:
@@ -76,7 +89,7 @@ class Entity {
                         this->dict_end = this->object->dict.end();
                         break;
                     default:
-                        throw std::runtime_error("Unsupported type for iterator");
+                        throw std::runtime_error("Unsupported type for iterator initialization");
                 }
             }
 
@@ -91,7 +104,7 @@ class Entity {
                     case DICT:
                         return this->dict_iter++->first;
                     default:
-                        throw std::runtime_error("Unsupported type for iterator");  
+                        throw std::runtime_error("Unsupported type for iterator next");  
                     }
             }
 
@@ -106,7 +119,7 @@ class Entity {
                     case DICT:
                         return this->dict_iter != this->dict_end;
                     default:
-                        throw std::runtime_error("Unsupported type for iterator");
+                        throw std::runtime_error("Unsupported type for iterator has_next");
                 }
             }
         };
@@ -661,7 +674,7 @@ class Entity {
     Entity operator-() const {
         if (this->type == INT) {
             double result = -1 * std::stoi(this->value);
-            return Entity(DOUBLE, std::to_string(result));
+            return Entity(INT, std::to_string(result));
         }
         if (this->type == DOUBLE) {
             double result = -1.0 * std::stod(this->value);
@@ -925,6 +938,7 @@ class Entity {
             this->tuple = other.tuple;
             this->set = other.set;
             this->dict = other.dict;
+            this->iterator = other.iterator;
         }
         return *this;
     }
@@ -1000,12 +1014,11 @@ class Entity {
     }
 
     Entity slice(Entity key_1, Entity key_2) {
-        if ((key_1.type != INT && key_1.type != NONE)|| (key_2.type != INT && key_2.type != NONE)) {
+        if ((key_1.type != INT && key_1.type != NONE) || (key_2.type != INT && key_2.type != NONE)) {
             throw std::invalid_argument("Invalid operation slice with the given arguments.");
         }
         if (this->type != LIST && this->type != STRING) {
             throw std::invalid_argument("Invalid operation slice with the given types");
-
         }
 
         // Check for none or negatives
@@ -1018,23 +1031,23 @@ class Entity {
         }
 
         if(std::stoi(key_1.value) < 0) {
-            key_1 = Entity(INT, this->count().value) - key_1;
+            key_1 = Entity(INT, this->count().value) + key_1;
         } 
         
         if(std::stoi(key_2.value) < 0) {
-            key_2 = Entity(INT, this->count().value) - key_2;
+            key_2 = Entity(INT, this->count().value) + key_2;
         }
         int start = std::stoi(key_1.value);
         int finish = std::stoi(key_2.value);
-
+        
         Entity result = Entity(this->type, "");
         switch(this->type) {
-            case LIST:
+            case STRING:
                 for (int i = start; i < finish; ++i){
                     result.value += this->value[i];
                 }
                 break;
-            case STRING:
+            case LIST:
                 for (int i = start; i < finish; ++i) {
                     result.list.push_back(this->list[i]);
                 }
@@ -1115,18 +1128,19 @@ class Entity {
     }
 
     Entity& access_vector(std::vector<Entity>& vector, const Entity& index) {
-        if (index.type != INT){
+        if (index.type != INT || ){
             throw std::invalid_argument("Operator [] invalid index type");
         }
 
         int index_value = std::stoi(index.value);
-        if (index_value < -1 * vector.size() || index_value >= vector.size()){
+        int inverse_size = -1 * vector.size();
+        int size = vector.size();
+        if (index_value < inverse_size || index_value >= size){
             throw std::invalid_argument("Operator [] invalid index type");
         }
         if (index_value < 0) {
-            index_value = vector.size() + index_value;
+            index_value = size + index_value;
         }
-        
         return vector[index_value];
     }
 
@@ -1135,11 +1149,13 @@ class Entity {
             throw std::invalid_argument("Operator [] invalid index type");
         }
         int index_value = std::stoi(index.value);
-        if (index_value < -1 * value.size() || index_value >= value.size()){
+        int size =  value.size(); 
+        int inverse_size = -1 * size;
+        if (index_value < inverse_size || index_value >= size){
             throw std::invalid_argument("Operator [] invalid index type");
         }
         if (index_value < 0) {
-            index_value = value.size() + index_value;
+            index_value = size + index_value;
         }
         std::string result = "";
         result += value[index_value];
