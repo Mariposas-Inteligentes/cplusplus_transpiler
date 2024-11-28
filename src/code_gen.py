@@ -40,6 +40,7 @@ class CodeGenerator:
         self.code = "Entity bool_true(INT, \"1\");\n" + self.code
         self.code = "Entity bool_false(INT, \"0\");\n" + self.code
         self.code = "Entity none(NONE, \"NULL\");\n" + self.code
+        self.code = "Entity py___name__(STRING, \"__main__\");\n" + self.code
         self.code = self.globals + self.code
         self.code = "\n// Global variables\n" + self.code
         
@@ -49,7 +50,7 @@ class CodeGenerator:
         self.code = "#include <stdexcept>\n" + self.code
         
         self.code += "return 0;\n}\n"
-        self.code += "int main() {\npython_root();\n}"
+        self.code += "int main() {\nreturn python_root();\n}"
 
         self.code = self.indent_code(self.code)
 
