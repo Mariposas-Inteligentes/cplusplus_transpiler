@@ -181,8 +181,9 @@ class CodeGenerator:
                 inner_expression = self.get_cpp_value(node.children[i_child].children[0]) 
                 components.append(f"({inner_expression})")
             elif node.children[i_child].n_type == 'InExpression':
-                # TODO
-                pass
+                in_value = self.get_cpp_value(node.children[i_child].children[0]) 
+                ds_value = self.get_cpp_value(node.children[i_child].children[1]) 
+                components.append(f"{ds_value}.in({in_value})")
             else: # Normal operand
                 # TODO(us): quitar:
                 # if i_child+2 < len(node.children): # not the last one

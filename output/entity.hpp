@@ -891,7 +891,7 @@ class Entity {
     // Membership operator_types
 
     // TODO(us): revisar que tenga sentido
-    Entity in(Entity& container) {
+    Entity in(Entity container) {
         if (container.is_operable("in", *this)) {
             switch(this->type) {
                 case LIST:
