@@ -21,14 +21,14 @@ class Entity {
     }
 
     struct Comparator {
-        bool operator()(Entity a, Entity b) const {
-            if (a.type == b.type) {
-                if (a.type == DICT) {
-                    return a.dict < b.dict;
-                }
-                return (a < b).is_true();
+        bool operator()(const Entity& a, const Entity& b) const {
+            if (a.type != b.type) {
+                return a.type < b.type;
             }
-            return a.type < b.type;
+            return a.value < b.value;
+        }
+        bool operator()(const std::pair<const Entity, Entity>& a, const std::pair<const Entity, Entity>& b) const {
+            return (*this)(a.first, b.first);
         }
     };
 
@@ -212,7 +212,8 @@ class Entity {
         return false;
     }
 
-     Entity compare_vectors(const std::vector<Entity>& first, const std::vector<Entity>& second, bool equality) const {
+  public:
+    Entity compare_vectors(const std::vector<Entity>& first, const std::vector<Entity>& second, bool equality) const {
         size_t min_size = std::min(first.size(), second.size());
         for (size_t i = 0; i < min_size; ++i) {
             Entity result = Entity(INT, "0"); 
@@ -266,8 +267,7 @@ class Entity {
         }
     }
 
-
-  public:
+    
     Entity() {
         this->type = NONE;
         this->value = "";
