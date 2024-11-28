@@ -114,7 +114,6 @@ class Entity {
   private:
     int type;
     std::string value;
-    bool append_tuple;
     std::vector<Entity> list;
     std::vector<Entity> tuple;
     std::map<Entity, Entity, Comparator> dict;
@@ -271,19 +270,16 @@ class Entity {
     Entity() {
         this->type = NONE;
         this->value = "";
-        this->append_tuple = true;
     }
 
     Entity(int type, std::string value ) {
         this->type = type;
         this->value = value;
-        this->append_tuple = true;
     }
 
     Entity(int type, Entity::Iterator ite) {
         this->type = type;
         this->value = "";
-        this->append_tuple = true;
         this->iterator = ite;
     }
 
@@ -340,14 +336,6 @@ class Entity {
     
     int get_type(){
         return type;
-    }
-
-    void set_append_tuple(bool value){
-        this->append_tuple = value;
-    }
-    
-    bool get_append_tuple(){
-        return this->append_tuple;
     }
     
     std::string get_value() const {
@@ -623,7 +611,7 @@ class Entity {
             }
             if (this->type == TUPLE && other.type == TUPLE) {
                 Entity result(TUPLE, "");
-                result.tuple = this->tuple;
+                result = *this;
                 result.tuple.insert(result.tuple.end(), other.tuple.begin(), other.tuple.end());
                 return result;
             }
@@ -634,7 +622,7 @@ class Entity {
                 return result;
             }
         }
-        throw std::invalid_argument("Invalid operaton for the given types with +.");
+        throw std::invalid_argument("Invalid operation for the given types with +.");
     }
 
     Entity operator-(const Entity& other) const {
@@ -892,21 +880,18 @@ class Entity {
 
     // TODO(us): revisar que tenga sentido
     Entity in(Entity container) {
-        if (container.is_operable("in", *this)) {
-            switch(this->type) {
-                case LIST:
-                    return this->vector_in(container, this->list);
-                case TUPLE:
-                    return this->vector_in(container, this->tuple);
-                case DICT:
-                    return this->dict_in(container);
-                case SET:
-                    return this->set_in(container);
-                default:
-                    throw std::invalid_argument("Invalid operation 'in' with the given types.");
-            }
+        switch(this->type) {
+            case LIST:
+                return this->vector_in(container, this->list);
+            case TUPLE:
+                return this->vector_in(container, this->tuple);
+            case DICT:
+                return this->dict_in(container);
+            case SET:
+                return this->set_in(container);
+            default:
+                throw std::invalid_argument("Invalid operation 'in' with the given types.");
         }
-        throw std::invalid_argument("Invalid operation for 'in' with the given types.");
     }
 
     Entity not_in(Entity& container) {
@@ -1064,12 +1049,7 @@ class Entity {
                 this->vector_append(value, this->list);
                 break;
             case TUPLE:
-                if (this->append_tuple == true) {
-                    this->vector_append(value, this->tuple);
-                }
-                else {
-                    throw std::invalid_argument("The tuple does not support item assignment");
-                }
+                this->vector_append(value, this->tuple);
                 break;
             case SET:
                 this->set_append(value);
@@ -1105,14 +1085,14 @@ class Entity {
         return Entity(INT, std::to_string(vector.size()));
     }
 
-    void vector_append(Entity new_value, std::vector<Entity> vector) {
-        if (this->type != LIST) {
+    void vector_append(Entity new_value, std::vector<Entity>& vector) {
+        if (this->type != LIST && this->type != TUPLE) {
             throw std::invalid_argument("Invalid operation list append for variable.");
         } 
         vector.push_back(new_value);   
     }
 
-    void vector_remove(Entity value, std::vector<Entity> vector) {
+    void vector_remove(Entity value, std::vector<Entity>& vector) {
         if (this->type != LIST) {
             throw std::invalid_argument("Invalid operation list remove for variable.");
         }
@@ -1125,7 +1105,7 @@ class Entity {
         }
     }
 
-    Entity vector_in(Entity value, std::vector<Entity> vector) {
+    Entity vector_in(Entity value, std::vector<Entity>& vector) {
         for (int i = 0; i < vector.size(); ++i) {
             if ((vector[i] == value).is_true()) {
                 return Entity(INT, "1");
