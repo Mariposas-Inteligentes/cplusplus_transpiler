@@ -362,12 +362,13 @@ def p_values(p):
 def p_math_values(p):
     '''math_values : INT
                     | FLOAT
-                    | bool_values '''
+                    | bool_values
+                    | data_structures '''
     if isinstance(p[1], int):
         p[0] = Node(n_type="IntegerLiteral", value=p[1])
     elif isinstance(p[1], float):
         p[0] = Node(n_type="FloatLiteral", value=p[1])
-    else: # Bool values
+    else: # bool or data structure
         p[0] = p[1]
 
 def p_bool_values(p):
@@ -522,6 +523,10 @@ def p_math_expression_1(p):
             left_operand.children.append(operator_node)
             left_operand.children.append(right_operand)
             p[0] = left_operand
+        elif operator_node.value == 'in':
+            operator_node.n_type = "InExpression"
+            operator_node.children = [left_operand, right_operand]
+            p[0] = Node(n_type="MathExpression", children=[operator_node])
         else:
             p[0] = Node(n_type="MathExpression", children=[left_operand, operator_node, right_operand])
 
