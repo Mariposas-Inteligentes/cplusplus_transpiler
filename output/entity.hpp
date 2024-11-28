@@ -112,21 +112,27 @@ class Entity {
                 }
             }
 
-            Entity& actual_value() const{
-                switch(this->ite_type) {
+            Entity& actual_value() const {
+                switch (this->ite_type) {
                     case LIST:
-                        return *this->list_iter;
+                        if (this->list_iter == this->list_end) {
+                            throw std::runtime_error("Iterator out of bounds for LIST.");
+                        }
+                        return const_cast<Entity&>(*this->list_iter);
                     case TUPLE:
-                        return *this->tuple_iter;
+                        if (this->tuple_iter == this->tuple_end) {
+                            throw std::runtime_error("Iterator out of bounds for TUPLE.");
+                        }
+                        return const_cast<Entity&>(*this->tuple_iter);
                     case SET:
-                        *this->aux = *this->set_iter;
-                        return *this->aux;
+                        return const_cast<Entity&>(*this->set_iter);
                     case DICT:
                         return this->object->dict[this->dict_iter->first];
                     default:
-                        throw std::runtime_error("Unsupported type for iterator extracting value");  
+                        throw std::runtime_error("Unsupported type for iterator extracting value");
                 }
             }
+
 
             bool has_next() const {
                 switch (this->ite_type) {
@@ -1023,9 +1029,7 @@ class Entity {
         Entity now_key = key;
         if (key.type == ITERATOR) {
             now_key = key.iterator.actual_value();
-            std::cout << "Iterator changed" << std::endl;
         }
-        std::cout  << "Iterator va a acceder: "<< now_key << std::endl;
  
         switch(this->type) {
             case LIST:
@@ -1036,9 +1040,6 @@ class Entity {
                 // TODO(us): Confirm that we do check this
                 return this->access_vector(this->tuple, now_key);
             case DICT:
-
-                std::cout << "estoy en dict" << std::endl;
-
                 return this->access_dict(now_key);
             default:
                 throw std::invalid_argument("Operator [] invalid type");

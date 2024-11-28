@@ -273,16 +273,22 @@ class CodeGenerator:
 
         iterator = node.children[iterator_index].value
         cpp_iterator = f"py_{iterator}"
+        cpp_iterator_value = f"val_py_{iterator}"
 
         if cpp_iterator not in self.func_existing_variables:
             self.func_existing_variables[cpp_iterator] = True
             self.append_text("v", f"Entity {cpp_iterator} = Entity(INT, \"0\");\n")
 
+        if cpp_iterator_value not in self.func_existing_variables:
+                self.func_existing_variables[cpp_iterator_value] = True
+                self.append_text("v", f"Entity {cpp_iterator_value} = Entity(INT, \"0\");\n")
+
         iterable_node = node.children[iterable_index]
         iterable = self.get_cpp_value(iterable_node)
 
         # TODO(us): check if this works in c++ for our iterator 
-        self.append_text("c", f"{cpp_iterator} = {iterable}.iter();\n")
+        self.append_text("c", f"{cpp_iterator_value} = {iterable};\n")
+        self.append_text("c", f"{cpp_iterator} = {cpp_iterator_value}.iter();\n")
         self.append_text("c", f"while (!{cpp_iterator}.is_end()) {{\n")
         
         loop_body = node.children[loop_body_index]
