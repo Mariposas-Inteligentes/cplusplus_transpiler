@@ -519,14 +519,19 @@ def p_math_expression_1(p):
         operator_node = p[2]
         right_operand = p[3]
 
-        if isinstance(left_operand, Node) and left_operand.n_type == "MathExpression":
+        if operator_node.value == "in":
+            operator_node.n_type = "InExpression"
+
+        if operator_node.value == 'in':
+            operator_node.n_type = "InExpression"
+            left_operand = Node(n_type = "Parenthesis", children = [left_operand])
+            right_operand = Node(n_type = "Parenthesis", children = [right_operand])
+            operator_node.children = [left_operand, right_operand]
+            p[0] = Node(n_type="MathExpression", children=[operator_node])
+        elif isinstance(left_operand, Node) and left_operand.n_type == "MathExpression":
             left_operand.children.append(operator_node)
             left_operand.children.append(right_operand)
             p[0] = left_operand
-        elif operator_node.value == 'in':
-            operator_node.n_type = "InExpression"
-            operator_node.children = [left_operand, right_operand]
-            p[0] = Node(n_type="MathExpression", children=[operator_node])
         else:
             p[0] = Node(n_type="MathExpression", children=[left_operand, operator_node, right_operand])
 

@@ -180,15 +180,19 @@ class CodeGenerator:
             elif node.children[i_child].n_type == 'Parenthesis': # child is an operator
                 inner_expression = self.get_cpp_value(node.children[i_child].children[0]) 
                 components.append(f"({inner_expression})")
+            elif node.children[i_child].n_type == 'InExpression':
+                # TODO
+                pass
             else: # Normal operand
-                if i_child+2 < len(node.children): # not the last one
-                    if node.children[i_child+1].n_type == 'MathSymbol' and node.children[i_child+1].value == 'in':
-                        components.append(f"{self.get_cpp_value(node.children[i_child+2])}.in({self.get_cpp_value(node.children[i_child])})")
-                        i_child += 2 # processed the value, in and next one
-                    else:
-                        components.append(self.get_cpp_value(node.children[i_child]))
-                else:
-                    components.append(self.get_cpp_value(node.children[i_child]))
+                # TODO(us): quitar:
+                # if i_child+2 < len(node.children): # not the last one
+                #     if node.children[i_child+1].n_type == 'MathSymbol' and node.children[i_child+1].value == 'in':
+                #         components.append(f"{self.get_cpp_value(node.children[i_child+2])}.in({self.get_cpp_value(node.children[i_child])})")
+                #         i_child += 2 # processed the value, in and next one
+                #     else:
+                #         components.append(self.get_cpp_value(node.children[i_child]))
+                # else:
+                components.append(self.get_cpp_value(node.children[i_child]))
             i_child += 1
 
         # Join everything
