@@ -127,7 +127,7 @@ class Entity {
                     case SET:
                         return const_cast<Entity&>(*this->set_iter);
                     case DICT:
-                        return this->object->dict[this->dict_iter->first];
+                        return const_cast<Entity&>(this->dict_iter->first);
                     default:
                         throw std::runtime_error("Unsupported type for iterator extracting value");
                 }

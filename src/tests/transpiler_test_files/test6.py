@@ -1,4 +1,4 @@
-l = [1, 2, 3, 4, 5]
+l = [1, 2, "holas", 4, 5]
 
 print("List")
 for i in l:
@@ -18,7 +18,7 @@ for i in d:
 
 print("Dict values")
 for i in d.keys():
-  print(i)
+  print(d[i])
 
 t = (1, 2, 3, "angie", {1:2, 5: "holi"}, { 1, 2, 3}, {})
 print("Tuple")
