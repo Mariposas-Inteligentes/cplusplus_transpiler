@@ -37,6 +37,7 @@ class Entity {
         private:
             int ite_type;
             Entity* object;
+            Entity* aux;
             std::vector<Entity>::iterator list_iter;
             std::vector<Entity>::iterator list_end;
             std::vector<Entity>::iterator tuple_iter;
@@ -94,6 +95,7 @@ class Entity {
             }
 
             Entity next() {
+                Entity value = Entity(INT, "0"); 
                 switch(this->ite_type) {
                     case LIST:
                         return *this->list_iter++;
@@ -102,10 +104,28 @@ class Entity {
                     case SET:
                         return *this->set_iter++;
                     case DICT:
-                        return this->dict_iter++->first;
+                        value = this->dict_iter->first;
+                        this->dict_iter++;
+                        return value;
                     default:
                         throw std::runtime_error("Unsupported type for iterator next");  
-                    }
+                }
+            }
+
+            Entity& actual_value() const{
+                switch(this->ite_type) {
+                    case LIST:
+                        return *this->list_iter;
+                    case TUPLE:
+                        return *this->tuple_iter;
+                    case SET:
+                        *this->aux = *this->set_iter;
+                        return *this->aux;
+                    case DICT:
+                        return this->object->dict[this->dict_iter->first];
+                    default:
+                        throw std::runtime_error("Unsupported type for iterator extracting value");  
+                }
             }
 
             bool has_next() const {
@@ -366,6 +386,8 @@ class Entity {
                 return serialize_set();
             case DICT:
                 return serialize_dict();
+            case ITERATOR:
+                return this->iterator.actual_value().get_value();
             default:
                 throw std::runtime_error("Unsupported type in get_value() retrieval.");
         }
@@ -998,16 +1020,26 @@ class Entity {
     }
     
     Entity& operator[](const Entity& key) {
+        Entity now_key = key;
+        if (key.type == ITERATOR) {
+            now_key = key.iterator.actual_value();
+            std::cout << "Iterator changed" << std::endl;
+        }
+        std::cout  << "Iterator va a acceder: "<< now_key << std::endl;
+ 
         switch(this->type) {
             case LIST:
-                return this->access_vector(this->list, key);
+                return this->access_vector(this->list, now_key);
             case STRING:
-                return this->access_string(this->value, key);
+                return this->access_string(this->value, now_key);
             case TUPLE:
                 // TODO(us): Confirm that we do check this
-                return this->access_vector(this->tuple, key);
+                return this->access_vector(this->tuple, now_key);
             case DICT:
-                return this->access_dict(key);
+
+                std::cout << "estoy en dict" << std::endl;
+
+                return this->access_dict(now_key);
             default:
                 throw std::invalid_argument("Operator [] invalid type");
         }
@@ -1128,7 +1160,7 @@ class Entity {
     }
 
     Entity& access_vector(std::vector<Entity>& vector, const Entity& index) {
-        if (index.type != INT || ){
+        if (index.type != INT){
             throw std::invalid_argument("Operator [] invalid index type");
         }
 
