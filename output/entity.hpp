@@ -334,8 +334,6 @@ class Entity {
     Types:
         int, double, string, tuple, set, dict, class
     */
-   // TODO(us): implementar is operable para las diferentes comparaciones
-   // o cambiar losoperadores
     bool is_operable(std::string operator_type, const Entity& other)const {
         bool is_operable;
         
@@ -918,8 +916,6 @@ class Entity {
     }
 
     // Membership operator_types
-
-    // TODO(us): revisar que tenga sentido
     Entity in(Entity container) {
         switch(this->type) {
             case LIST:
@@ -1037,7 +1033,6 @@ class Entity {
             case STRING:
                 return this->access_string(this->value, now_key);
             case TUPLE:
-                // TODO(us): Confirm that we do check this
                 return this->access_vector(this->tuple, now_key);
             case DICT:
                 return this->access_dict(now_key);
@@ -1196,8 +1191,6 @@ class Entity {
         return this->list[this->list.size()-1];
     }
 
-    // TODO(us): función keys del diccionario
-
     // TODO(us): poner en documentación que si accede algo ilegal, se crea uno
     Entity& access_dict(const Entity& key) {
         auto found_key = this->dict.find(key);
@@ -1280,8 +1273,6 @@ class Entity {
     bool is_end() {
         return !(this->iterator.has_next());
     }
-
-    // TODO(us): +, -... of all the data structures (check if they are okay)
 };
 
 

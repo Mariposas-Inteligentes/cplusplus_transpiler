@@ -286,7 +286,6 @@ class CodeGenerator:
         iterable_node = node.children[iterable_index]
         iterable = self.get_cpp_value(iterable_node)
 
-        # TODO(us): check if this works in c++ for our iterator 
         self.append_text("c", f"{cpp_iterator_value} = {iterable};\n")
         self.append_text("c", f"{cpp_iterator} = {cpp_iterator_value}.iter();\n")
         self.append_text("c", f"while (!{cpp_iterator}.is_end()) {{\n")
@@ -323,7 +322,6 @@ class CodeGenerator:
         return parameters[:-2]
 
     # TODO(us): handle __init__ in classes
-    # TODO(us): handle __main__ 
     def handle_def_function(self, node):
         self.in_function = True
         self.func_code = ""
@@ -350,9 +348,7 @@ class CodeGenerator:
             value = self.get_cpp_value(node.children[0])
             self.append_text("c", f"return {value};\n")
 
-    # TODO(us): revisar lo de si está true no (para poder agregarle a tupla)
     def handle_data_structure(self, elements, var_type):
-
         index = self.data_structure_count
         self.data_structure_count += 1
 
@@ -386,7 +382,6 @@ class CodeGenerator:
         self.generate_code_recv(node.children[-1])
 
         # TODO(us): append attributes
-        # TODO(us): ifndef?
         if inheritance is not None:
             self.append_text("cs", f"class {class_name} : public {inheritance}{{\npublic: \n", True)
         else: 
@@ -429,7 +424,7 @@ class CodeGenerator:
                 return f"{parameters[0]}.range({parameters[1]}, {parameters[2]})"
             else:
                 raise ValueError("range() expects 1 to 3 arguments.")
-        elif function_name == "iter": # TODO(us): define the variable iterator as a Iterator Instance
+        elif function_name == "iter":
             if len(parameters) != 1:
                 raise ValueError("iter() expects exactly one argument.")
             return f"{parameters[0]}.iter()"
@@ -554,7 +549,6 @@ class CodeGenerator:
     
 
     def process_node(self, node):
-        # TODO(us): change in
         if node.n_type == 'Start':
             pass # Just used as a start point
 
@@ -568,8 +562,7 @@ class CodeGenerator:
             pass # just pass the statement
 
         elif node.n_type == 'VarName':
-            # TODO(us): hacer
-            pass
+            pass # handled in function
 
         elif node.n_type == 'WhileLoop':
             self.process_while_loop(node)
@@ -694,7 +687,7 @@ class CodeGenerator:
             self.append_text("c", "std::cout << std::endl;")
 
         elif node.n_type == 'PrintDataStructs':
-            self.process_print(node) # TODO(us): revisar
+            self.process_print(node)
 
         elif node.n_type == 'VariableAssignment':
             self.process_variable_assignment(node)
@@ -719,7 +712,6 @@ class CodeGenerator:
             self.append_text("c", "break; \n")
             pass
     
-    # TODO(us): propperly indent classes
     def indent_code(self, code):
         indent_count = 0
         new_code = ""
