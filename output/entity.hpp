@@ -490,7 +490,7 @@ class Entity {
             case LIST: return Entity(STRING,"list");
             case TUPLE: return Entity(STRING,"tuple");
             case SET: return Entity(STRING,"set");
-            case DICT: return Entity(STRING,"dict");
+            case DICT: return Entity(STRING,"dict"); 
             case CLASS: return Entity(STRING,"class");
             case NONE: return Entity(STRING,"NoneType");
             default: return Entity(STRING,"unknown");
@@ -791,7 +791,7 @@ class Entity {
         return Entity(INT, (this->is_true() || other.is_true()) ? "1" : "0");
     }
 
-    Entity operator==(const Entity& other) const {
+    Entity operator==(const Entity other) const {
         if((this->type == INT || this->type == DOUBLE) && (other.type == INT || other.type == DOUBLE)) {
             bool result = (std::stod(this->value) == std::stod(other.value));
             if (result) {
@@ -820,7 +820,7 @@ class Entity {
         return Entity(INT, "0");  
     }
 
-    Entity operator!=(const Entity& other) const {
+    Entity operator!=(const Entity other) const {
         Entity result = (*this == other);
         if (result.value == "1") {
             result.value = "0";
@@ -830,7 +830,7 @@ class Entity {
         return result;
     }
 
-    Entity operator<(const Entity& other) const {
+    Entity operator<(const Entity other) const {
         if (this->type != other.type || this->type == DICT) {
             throw std::invalid_argument("Invalid operation for the given types with <.");    
         }
@@ -879,7 +879,7 @@ class Entity {
         return less_than;
     }
 
-    Entity operator>(const Entity& other) const {
+    Entity operator>(const Entity other) const {
         bool result1 = (*this == other).is_true();
         bool result2 = (*this < other).is_true();
         bool result = (result1 || result2);
@@ -891,7 +891,7 @@ class Entity {
         
     }
 
-    Entity operator<=(const Entity& other) const {
+    Entity operator<=(const Entity other) const {
         bool result1 = (*this == other).is_true();
         bool result2 = (*this < other).is_true();
         bool result = (result1 || result2);
@@ -902,7 +902,7 @@ class Entity {
         }
     }
 
-    Entity operator>=(const Entity& other) const {
+    Entity operator>=(const Entity other) const {
         bool less_than = (*this < other).is_true();
         if (!less_than) {
            return Entity(INT, "1");
@@ -931,7 +931,7 @@ class Entity {
         }
     }
 
-    Entity not_in(Entity& container) {
+    Entity not_in(Entity container) {
         return !this->in(container);
     }
 
@@ -954,7 +954,7 @@ class Entity {
     }
 
     // TODO(us): check operators: +=, -=, =...
-    Entity& operator=(const Entity& other) {
+    Entity& operator=(const Entity other) {
         if (this != &other) {
             this->type = other.type;
             this->value = other.value;
@@ -967,7 +967,7 @@ class Entity {
         return *this;
     }
 
-    Entity& operator+=(const Entity& other) {
+    Entity& operator+=(const Entity other) {
         if (this->is_operable("+", other)) {
             *this = *this + other;
         } else {
@@ -976,7 +976,7 @@ class Entity {
         return *this;
     }
 
-    Entity& operator-=(const Entity& other) {
+    Entity& operator-=(const Entity other) {
         if (this->is_operable("-", other)) {
             *this = *this - other;
         } else {
@@ -985,7 +985,7 @@ class Entity {
         return *this;
     }
 
-    Entity& operator*=(const Entity& other) {
+    Entity& operator*=(const Entity other) {
         if (this->is_operable("*", other)) {
             *this = *this * other;
         } else {
@@ -994,7 +994,7 @@ class Entity {
         return *this;
     }
 
-    Entity& operator/=(const Entity& other) {
+    Entity& operator/=(const Entity other) {
         if (this->is_operable("/", other)) {
             *this = *this / other;
         } else {
@@ -1003,7 +1003,7 @@ class Entity {
         return *this;
     }
 
-    Entity& operator%=(const Entity& other) {
+    Entity& operator%=(const Entity other) {
         if (this->is_operable("%", other)) {
             *this = *this % other;
         } else {
@@ -1012,7 +1012,7 @@ class Entity {
         return *this;
     }
 
-    Entity& operator^=(const Entity& other) {
+    Entity& operator^=(const Entity other) {
         if (this->is_operable("^", other)) {
             *this = *this ^ other;
         } else {
@@ -1021,7 +1021,7 @@ class Entity {
         return *this;
     }
     
-    Entity& operator[](const Entity& key) {
+    Entity& operator[](const Entity key) {
         Entity now_key = key;
         if (key.type == ITERATOR) {
             now_key = key.iterator.actual_value();
@@ -1084,7 +1084,7 @@ class Entity {
         return result;
     }
 
-    void append(const Entity& value) {
+    void append(const Entity value) {
         switch(this->type) {
             case LIST:
                 this->vector_append(value, this->list);

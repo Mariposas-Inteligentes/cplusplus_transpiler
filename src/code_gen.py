@@ -37,6 +37,17 @@ class CodeGenerator:
         self.code = "\n// Functions\n" + self.code
         self.code = self.classes + self.code
         self.code = "\n// Classes\n" + self.code
+        self.code = "Entity py_int(STRING, \"int\");\n" + self.code
+        self.code = "Entity py_float(STRING, \"float\");\n" + self.code
+        self.code = "Entity py_str(STRING, \"str\");\n" + self.code
+        self.code = "Entity py_list(STRING, \"list\");\n" + self.code
+        self.code = "Entity py_tuple(STRING, \"tuple\");\n" + self.code
+        self.code = "Entity py_set(STRING, \"set\");\n" + self.code
+        self.code = "Entity py_dict(STRING, \"dict\");\n" + self.code
+        self.code = "Entity py_class(STRING, \"class\");\n" + self.code
+        self.code = "Entity py_NoneType(STRING, \"NoneType\");\n" + self.code
+        self.code = "Entity py_bool(STRING, \"int\");\n" + self.code
+        
         self.code = "Entity bool_true(INT, \"1\");\n" + self.code
         self.code = "Entity bool_false(INT, \"0\");\n" + self.code
         self.code = "Entity none(NONE, \"NULL\");\n" + self.code
@@ -197,9 +208,9 @@ class CodeGenerator:
         for child in node.children:
             if child.n_type == 'MathExpression':
                 expression = self.process_math_expression(child)
-                code_to_add += f" << {expression}"
+                code_to_add += f" << ({expression})"
             else: 
-               code_to_add += f" << {self.get_cpp_value(child)}"
+               code_to_add += f" << ({self.get_cpp_value(child)})"
         code_to_add += " << std::endl;\n"
         self.append_text("c", code_to_add)
 
@@ -238,13 +249,14 @@ class CodeGenerator:
     def process_except(self, node):
         exception_type = "std::exception"
         exception_var = "e"  
-
+        start = 0
         if node.children and node.children[0].n_type == 'VarName':
             exception_var = node.children[0].value
+            start = 1
 
         self.append_text("c", f"catch ({exception_type}& {exception_var}) {{\n")
 
-        for child in node.children[1:]:  
+        for child in node.children[start:]:  
             self.generate_code_recv(child)
         self.append_text("c", "}\n")  
 
@@ -256,8 +268,7 @@ class CodeGenerator:
                 self.process_except(child)
             else:
                 self.generate_code_recv(child)
-        if not any(child.n_type == 'ExceptRule' for child in node.children):
-            self.append_text("c", "}\n") # TODO(us): revisar si quitamos try sin catch
+            
 
     def process_while_loop(self, node):
         condition = self.get_cpp_value(node.children[0])
