@@ -458,19 +458,19 @@ class Entity {
             case STRING: 
                 return !this->value.empty();
                 break;
-            case LIST: // TODO(us): check if it's this way
-                return !this->tuple.empty();
+            case LIST:
+                return !this->list.empty();
                     break;
-            case TUPLE: // TODO(us): check if it's this way
+            case TUPLE:
                 return !this->tuple.empty();
                 break;
-            case SET: // TODO(us): check if it's this way
+            case SET:
                 return !this->set.empty();
                 break;
-            case DICT: // TODO(us): check if it's this way
+            case DICT:
                 return !this->dict.empty();
                 break;
-            case CLASS: // TODO(us): check if it's this way
+            case CLASS:
                 return true;
                 break;
              case NONE:
@@ -540,8 +540,6 @@ class Entity {
         return Entity(INT, result ? "1" : "0");
     }
 
-    // TODO(us): check if the way it is called works (I don't know if
-    // start will die before the range is calculated)
     Entity range() const {
         Entity start = Entity(INT, "0");
         Entity range = start.range(*this, Entity(INT, "1"));
