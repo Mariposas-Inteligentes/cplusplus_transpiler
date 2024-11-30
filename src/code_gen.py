@@ -141,12 +141,24 @@ class CodeGenerator:
                 self.class_attributes = to_append + self.class_attributes
             elif t_type == "cs":
                 self.class_single = to_append + self.class_single
+    
+    def find_element(self, vector, value):
+        found = False
+        index = -1
+        count = 0
+        for val in vector:
+            if val == value:
+                if type(val) == type(value):
+                    index = count
+                    found = True
+                    break
+            count += 1
+        return found, index
 
     def handle_literal(self, value, var_type):
         vector = self.global_vector
-        if value in vector:
-            index = vector.index(value)
-        else:
+        found, index = self.find_element(vector, value)
+        if not found:
             index = len(vector)
             vector.append(value)
             if var_type == "string" and len(value) > 1:  # Remove " and ' to avoid problems
