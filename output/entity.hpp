@@ -710,6 +710,19 @@ class Entity {
         throw std::invalid_argument("Invalid operation for the given types with -.");
     }
 
+    Entity multiply_list_tuple_int(const Entity object, const Entity number) const {
+        Entity result(object.type, "");
+        int times = std::stoi(number.value);
+        for (int i = 0; i < times; ++i) {
+            if (object.type == LIST) {
+                result.list.insert(result.list.end(), object.list.begin(), object.list.end());
+            } else if (object.type == TUPLE) {
+                result.tuple.insert(result.tuple.end(), object.tuple.begin(), object.tuple.end());
+            }
+        }
+        return result;
+    }
+
     Entity operator*(const Entity& other) const {
         if (this->is_operable("*", other)) {
             if (this->analyze_int_double(other.type)) {
@@ -737,19 +750,10 @@ class Entity {
                 return Entity(STRING, result);
             }
             if ((this->type == LIST || this->type == TUPLE) && other.type == INT) {
-                Entity result(this->type, "");
-                int times = std::stoi(other.value);
-                if (times < 0) {
-                    throw std::invalid_argument("Invalid operation: cannot repeat a list/tuple negative times.");
-                }
-                for (int i = 0; i < times; ++i) {
-                    if (this->type == LIST) {
-                        result.list.insert(result.list.end(), this->list.begin(), this->list.end());
-                    } else if (this->type == TUPLE) {
-                        result.tuple.insert(result.tuple.end(), this->tuple.begin(), this->tuple.end());
-                    }
-                }
-                return result;
+                return this->multiply_list_tuple_int(*this, other);
+            }
+            if ((other.type == LIST || other.type == TUPLE) && this->type == INT) {
+                return this->multiply_list_tuple_int(other, *this);
             }
         }
         throw std::invalid_argument("Invalid operation for the given types with *.");

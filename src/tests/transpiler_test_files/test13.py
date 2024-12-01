@@ -40,7 +40,16 @@ y = 5*5-1+1
 y *= 5
 print(y)
 
-prueba = 'string' * 5
-print(prueba)
-prueba = 5 * 'string'
-print(prueba)
+x = 'string'
+x *= 5
+print(x)
+
+x = 5
+x *= 'luis es humilde\n'
+print(x)
+
+a = [1,2,3] * 2
+print(a)
+
+a = 2 * [1,2,3]
+print(a)
