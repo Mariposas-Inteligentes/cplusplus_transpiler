@@ -189,6 +189,9 @@ class Entity {
         if (operator_type == "*" && other.type == TUPLE) {
             return true;
         }
+        if (operator_type == "*" && other.type == STRING) {
+            return true;
+        }
         return false;
     }
 
@@ -722,6 +725,14 @@ class Entity {
                 int times = std::stoi(other.value);
                 for (int i = 0; i < times; ++i) {
                     result += this->value;
+                }
+                return Entity(STRING, result);
+            }
+            if (this->type == INT && other.type == STRING) {
+                std::string result;
+                int times = std::stoi(this->value);
+                for (int i = 0; i < times; ++i) {
+                    result += other.value;
                 }
                 return Entity(STRING, result);
             }
