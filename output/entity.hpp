@@ -697,7 +697,7 @@ class Entity {
 
     Entity operator-() const {
         if (this->type == INT) {
-            double result = -1 * std::stoi(this->value);
+            int result = -1 * std::stoi(this->value);
             return Entity(INT, std::to_string(result));
         }
         if (this->type == DOUBLE) {
