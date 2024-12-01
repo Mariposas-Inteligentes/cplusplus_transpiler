@@ -740,17 +740,11 @@ class Entity {
     }
 
     Entity operator/(const Entity& other) const {
-        if (this->is_operable("/", other)) {
-            if (this->type == INT && other.type == INT) {
-                int result = std::stoi(this->value) / std::stoi(other.value);
-                return Entity(this->type, std::to_string(result));
-            }
-            if (this->analyze_int_double(other.type)) {
-                double result = std::stod(this->value) / std::stod(other.value);
-                return Entity(DOUBLE, std::to_string(result));
-            }
+        if (!this->is_operable("/", other)) {
+            throw std::invalid_argument("Invalid operation for the given types with /.");
         }
-       throw std::invalid_argument("Invalid operation for the given types with /.");
+        double result = std::stod(this->value) / std::stod(other.value);
+        return Entity(DOUBLE, std::to_string(result));
     }
 
     Entity operator%(const Entity& other) const {

@@ -68,3 +68,7 @@ print(b)
 b = 35
 b /= 2.0
 print(b)
+
+b = 5
+b /= 5
+print(b)
