@@ -202,9 +202,6 @@ class Entity {
         if (operator_type == "*" && other.type == INT) {
             return true;
         }
-        if (operator_type == "-" && other.type == LIST) {
-            return true;
-        }
         if (operator_type == "in") {
             return true;
         }
@@ -231,7 +228,7 @@ class Entity {
     }
 
     bool check_set(const Entity& other, std::string operator_type)const {
-        if ((operator_type == "-" || operator_type == "+") && other.type == SET) {
+        if (operator_type == "-" && other.type == SET) {
             return true;
         }
         if (operator_type == "in") {
@@ -655,12 +652,6 @@ class Entity {
                 result.tuple.insert(result.tuple.end(), other.tuple.begin(), other.tuple.end());
                 return result;
             }
-            if (this->type == SET && other.type == SET) {
-                Entity result(SET, "");
-                result.set = this->set;
-                result.set.insert(other.set.begin(), other.set.end());
-                return result;
-            }
         }
         throw std::invalid_argument("Invalid operation for the given types with +.");
     }
@@ -674,17 +665,6 @@ class Entity {
             if (this->type == INT && other.type == INT ) {
                 int result = std::stoi(this->value) - std::stoi(other.value);
                 return Entity(this->type, std::to_string(result));
-            }
-            if (this->type == LIST && other.type == LIST) {
-                Entity result(LIST, "");
-                result.list = this->list;
-                for (const auto& elem : other.list) {
-                    result.list.erase(
-                        std::remove_if(result.list.begin(), result.list.end(),
-                                    [&](const Entity& e) { return (e == elem).is_true(); }),
-                        result.list.end());
-                }
-                return result;
             }
             if (this->type == SET && other.type == SET) {
                 Entity result(SET, "");
