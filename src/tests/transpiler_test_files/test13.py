@@ -40,16 +40,31 @@ y = 5*5-1+1
 y *= 5
 print(y)
 
+b = 15+25
+b *= 2.0+9.0
+print(b)
+
 x = 'string'
 x *= 5
 print(x)
 
 x = 5
-x *= 'luis es humilde\n'
+x *= ' luis es humilde '
 print(x)
 
-a = [1,2,3] * 2
+a = [1,2,3]
+a *= 2
 print(a)
 
-a = 2 * [1,2,3]
+a = 0
+a *= [15,30,45]
 print(a)
+
+# /=_____________
+b = 15.0
+b /= 10.0
+print(b)
+
+b = 35
+b /= 2.0
+print(b)
