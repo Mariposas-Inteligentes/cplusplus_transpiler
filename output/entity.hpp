@@ -860,16 +860,13 @@ class Entity {
         }
 
         if (this->type == STRING) {
-            // TODO(us): check this
-            int i, j = 0;
-            while (i < this->value.length() && j < other.value.length()) {
-                if (this->value[i] > other.value[j]) {
-                    less_than = Entity(INT, "0");
-                }
-                ++i;
-                ++j;
+            std::string first = this->value;
+            std::string second = other.value;
+            if (first.compare(second) < 0) {
+                less_than = Entity(INT, "1");
+            } else {
+                less_than = Entity(INT, "0");
             }
-            less_than = Entity(INT, "1");
         }
 
         // TODO(us): verify is this is correct for python:
