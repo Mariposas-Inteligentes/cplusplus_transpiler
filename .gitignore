@@ -1,7 +1,27 @@
+# Compiled executables
+src/a.out
+output/main.cpp
+output/output.cpp
+output/functions.hpp
+output/globals.hpp
+output/classes.hpp
+output/*.out
+output/*.exe
+*.gch
+
+# Testing
 src/test_parser.py
 src/testing_parser.py
 src/parser.out
 src/parsetab.py
+src/pruebas.cpp
+good_tests/
+
+
+.vscode/
+
+# Visualization
+src/tree
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

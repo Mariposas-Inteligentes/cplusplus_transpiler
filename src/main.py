@@ -1,7 +1,6 @@
 from transpiler import Transpiler
 import sys
 
-
 def main():
     debug = False
 
