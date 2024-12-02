@@ -29,6 +29,16 @@ Where `(file_name)` corresponds to an obligatory parameter and a file with the f
 
 And `[debug]` corresponds to an optional parameter, if set to the string `"debug"` it will print out PLY's debbuging mecanisms.
 
+The generated code will be in `output/main.cpp`.
+
+To compile the generated code, run the following command in the `output` directory:
+
+    g++ -o transpiled_code main.cpp
+
+Then, to execute it, run the following command in the `output` directory:
+
+    ./transpiled_code
+
 ### **Execution example**
 
 An execution example can be done with the file [test_valid_case.py](src/tests/transpiler_test_files/test_principal_cases.py)
