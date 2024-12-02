@@ -1,4 +1,4 @@
-# **C++ Transpiler**
+# **Python to C++ Transpiler**
 
 Transpiler from a Python subset of instructions to C++ implemented using the PLY library.
 
@@ -19,28 +19,28 @@ pip install -r requirements.txt
 To use the transpiler itself, you can execute the following command from the `src` directory:
 
 ``` bash
-python main.py <file_name> <debug>
+python main.py (file_name) [debug]
 ```
 
-Where `<file_name>` corresponds to an obligatory parameter and a file with the following characteristics:
+Where `(file_name)` corresponds to an obligatory parameter and a file with the following characteristics:
 
 1. The file must have a `.py` extension.
 2. The file must exist.
 
-And `<debug>` corresponds to an optional parameter, if set to the string `"debug"` it will print out PLY's debbuging mecanisms.
+And `[debug]` corresponds to an optional parameter, if set to the string `"debug"` it will print out PLY's debbuging mecanisms.
 
 ### **Execution example**
 
-An execution example can be done with the file [test_valid_case.py](src/tests/parser_test_files/test_valid_case.py)
+An execution example can be done with the file [test_valid_case.py](src/tests/transpiler_test_files/test_principal_cases.py)
 
 ``` bash
-python main.py tests/parser_test_files/test_valid_case.py
+python main.py tests/transpiler_test_files/test_principal_cases.py
 ```
 
 To run it in debug mode you can do so the following way:
 
 ``` bash
-python main.py tests/parser_test_files/test_valid_case.py debug
+python main.py tests/transpiler_test_files/test_principal_cases.py debug
 ```
 
 ## **Unit tests**
