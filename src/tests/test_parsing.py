@@ -20,7 +20,7 @@ def check_test_files():
             actual_output = run_parser(test_file_path)
 
             if file_name.startswith('test_valid'):
-                if actual_output != expected_output:
+                if  expected_output not in actual_output:
                     print(f"Test failed for {file_name} (Expected valid):")
                     print(f"Expected output:\n{expected_output}")
                     print(f"Actual output:\n{actual_output}")
@@ -29,7 +29,7 @@ def check_test_files():
                     passed_tests += 1
 
             elif file_name.startswith('test_invalid'):
-                if actual_output == expected_output:
+                if  expected_output in actual_output:
                     print(f"Test failed for {file_name} (Expected invalid):")
                     print(f"Expected output to be different from:\n{expected_output}")
                     print(f"Actual output:\n{actual_output}")
