@@ -343,7 +343,6 @@ class CodeGenerator:
 
         return parameters[:-2]
 
-    # TODO(us): handle __init__ in classes
     def handle_def_function(self, node):
         self.in_function = True
         self.func_code = ""
@@ -387,7 +386,6 @@ class CodeGenerator:
 
         return f"{var_type}_{index}"
 
-    # TODO(us): Cada vez que vemos un self. eso tiene que ser un atributo
     def handle_class_definition(self, node):
         self.in_class = True
         self.class_attributes = ""
@@ -403,7 +401,6 @@ class CodeGenerator:
         # generate children
         self.generate_code_recv(node.children[-1])
 
-        # TODO(us): append attributes
         if inheritance is not None:
             self.append_text("cs", f"class {class_name} : public {inheritance}{{\npublic: \n", True)
         else: 

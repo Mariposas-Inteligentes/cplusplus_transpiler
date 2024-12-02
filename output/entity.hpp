@@ -842,7 +842,6 @@ class Entity {
             }
         }
 
-        // TODO(us): verify is this is correct for python:
         if (this->type == LIST) {
             less_than = compare_vectors(this->list, other.list, false);
         }
@@ -1220,6 +1219,10 @@ class Entity {
     }
 
     void set_append(Entity value) {
+        if (value.type == DICT) {
+            throw std::invalid_argument("Unhasheable type dict");
+        }
+
         this->set.insert(value);
     }
 
