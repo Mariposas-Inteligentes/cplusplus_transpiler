@@ -12,7 +12,6 @@
 #include <vector>
 #include <algorithm>
 
-// TODO(us): Pass some public methods to private
 class Entity {
   public:
     friend std::ostream& operator<<(std::ostream& os, Entity entity) {
@@ -25,7 +24,7 @@ class Entity {
             if (a.type != b.type) {
                 return a.type < b.type;
             }
-            return a.value < b.value;
+            return a.get_value() < b.get_value();
         }
         bool operator()(const std::pair<const Entity, Entity>& a, const std::pair<const Entity, Entity>& b) const {
             return (*this)(a.first, b.first);
@@ -818,7 +817,7 @@ class Entity {
     }
 
     Entity operator<(const Entity other) const {
-        if (this->type != other.type || this->type == DICT) {
+        if (this->type != other.type || this->type == DICT || this->type == SET) {
             throw std::invalid_argument("Invalid operation for the given types with <.");    
         }
 
@@ -850,14 +849,6 @@ class Entity {
 
         if (this->type == TUPLE) {
             less_than = compare_vectors(this->tuple, other.tuple, false);
-        }
-
-        if (this->type == SET) {
-            less_than = compare_sets(this->set, other.set, false);
-        }
-
-        if (this->type == DICT) {
-            less_than = compare_maps(this->dict, other.dict, false);
         }
 
         return less_than;
@@ -937,7 +928,6 @@ class Entity {
         }
     }
 
-    // TODO(us): check operators: +=, -=, =...
     Entity& operator=(const Entity other) {
         if (this != &other) {
             this->type = other.type;
@@ -1175,7 +1165,6 @@ class Entity {
         return this->list[this->list.size()-1];
     }
 
-    // TODO(us): poner en documentación que si accede algo ilegal, se crea uno
     Entity& access_dict(const Entity& key) {
         auto found_key = this->dict.find(key);
         if (found_key == this->dict.end()) {

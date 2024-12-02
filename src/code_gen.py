@@ -319,7 +319,6 @@ class CodeGenerator:
         self.append_text("c", "}\n")
 
     def find_parameters(self, node):
-        # TODO(us): pensar si hay referencias
         parameters = ""
         if node.children[0].n_type == "Parameter":
             parameters = f"Entity py_{node.children[0].value}"
