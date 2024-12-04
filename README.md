@@ -27,7 +27,7 @@ Where `(file_name)` corresponds to an obligatory parameter and a file with the f
 1. The file must have a `.py` extension.
 2. The file must exist.
 
-And `[debug]` corresponds to an optional parameter, if set to the string `"debug"` it will print out PLY's debbuging mecanisms and the generated AST (Abstract Syntax Tree).
+And `[debug]` corresponds to an optional parameter, if set to the string `"debug"` it will print out PLY's debugging mecanisms and the generated AST (Abstract Syntax Tree).
 
 The generated code will be in `output/main.cpp`.
 
