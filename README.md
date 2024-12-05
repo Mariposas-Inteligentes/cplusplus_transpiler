@@ -27,7 +27,7 @@ Where `(file_name)` corresponds to an obligatory parameter and a file with the f
 1. The file must have a `.py` extension.
 2. The file must exist.
 
-And `[debug]` corresponds to an optional parameter, if set to the string `"debug"` it will print out PLY's debbuging mecanisms and the generated AST (Abstract Syntax Tree).
+And `[debug]` corresponds to an optional parameter, if set to the string `"debug"` it will print out PLY's debugging mecanisms and the generated AST (Abstract Syntax Tree).
 
 The generated code will be in `output/main.cpp`.
 
@@ -83,8 +83,12 @@ To execute the unit tests for the parser, pytest is not required.
 Therefore, inside the `src` directory the following command must be executed.
 
 ``` bash
-python ./tests/test_parsing.py
+python ./tests/test_parsing.py [is_python3]
 ```
+
+Where current options for <is_python3> are:
+1. `1` to call the test cases using `python3`
+2. `0` to call the test cases using `python`
 
 This will run all the parsing tests at once, and tell you the total amount of tests passed and failed.
 
