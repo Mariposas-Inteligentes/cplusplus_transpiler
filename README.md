@@ -83,8 +83,12 @@ To execute the unit tests for the parser, pytest is not required.
 Therefore, inside the `src` directory the following command must be executed.
 
 ``` bash
-python ./tests/test_parsing.py
+python ./tests/test_parsing.py [is_python3]
 ```
+
+Where current options for <is_python3> are:
+1. `1` to call the test cases using `python3`
+2. `0` to call the test cases using `python`
 
 This will run all the parsing tests at once, and tell you the total amount of tests passed and failed.
 

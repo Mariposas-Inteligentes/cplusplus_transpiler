@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 test_files_dir = 'tests/parser_test_files'
 test_file_ext = '.py'
@@ -7,7 +8,10 @@ expected_output = """Error count for lexer: 0
 Error count for parsing: 0"""
 
 def run_parser(file_path):
-    result = subprocess.run(['python', 'main.py', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    python_ver = 'python'
+    if (len(sys.argv) == 2 and sys.argv[1] == '1'):
+        python_ver = 'python3'
+    result = subprocess.run([python_ver, 'main.py', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     return result.stdout.strip()
 
 def check_test_files():
